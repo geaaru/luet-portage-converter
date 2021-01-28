@@ -1,0 +1,112 @@
+/*
+Copyright (C) 2020-2021  Daniele Rondina <geaaru@sabayonlinux.org>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+package main
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/Luet-lab/luet-portage-converter/pkg/converter"
+
+	"github.com/spf13/cobra"
+)
+
+const (
+	cliName = `Copyright (c) 2020-2021 - Daniele Rondina
+
+Portage/Overlay converter for Luet specs.`
+
+	version = "0.1.0"
+)
+
+// Build time and commit information. This code is get from: https://github.com/mudler/luet/
+//
+// ⚠️ WARNING: should only be set by "-ldflags".
+var (
+	BuildTime   string
+	BuildCommit string
+)
+
+func Execute() {
+	var rootCmd = &cobra.Command{
+		Use:     "luet-portage-converter --",
+		Short:   cliName,
+		Version: fmt.Sprintf("%s-g%s %s", version, BuildCommit, BuildTime),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			to, _ := cmd.Flags().GetString("to")
+			if to == "" {
+				fmt.Println("Missing --to argument")
+				os.Exit(1)
+			}
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			treePath, _ := cmd.Flags().GetStringArray("tree")
+			reposcanSources, _ := cmd.Flags().GetStringArray("reposcan-files")
+			to, _ := cmd.Flags().GetString("to")
+			rulesFile, _ := cmd.Flags().GetString("rules")
+			override, _ := cmd.Flags().GetBool("override")
+			backend, _ := cmd.Flags().GetString("backend")
+			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
+
+			converter := converter.NewPortageConverter(to, backend)
+			converter.Override = override
+			converter.IgnoreMissingDeps = ignoreMissingDeps
+			err := converter.LoadRules(rulesFile)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+
+			err = converter.LoadTrees(treePath)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+
+			if len(reposcanSources) > 0 {
+				for _, source := range reposcanSources {
+					converter.Specs.AddReposcanSource(source)
+				}
+			}
+
+			err = converter.Generate()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+
+		},
+	}
+
+	rootCmd.Flags().StringArrayP("tree", "t", []string{}, "Path of the tree to use.")
+	rootCmd.Flags().String("to", "", "Targer tree where bump new specs.")
+	rootCmd.Flags().String("rules", "", "Rules file.")
+	rootCmd.Flags().Bool("override", false, "Override existing specs if already present.")
+	rootCmd.Flags().String("backend", "reposcan", "Select backend resolver: qdepends|reposcan.")
+	rootCmd.Flags().StringArray("reposcan-files", []string{}, "Append additional reposcan files. Only for reposcan backend.")
+	rootCmd.Flags().Bool("ignore-missing-deps", false, "Ignore missing deps on resolver.")
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func main() {
+	Execute()
+}
