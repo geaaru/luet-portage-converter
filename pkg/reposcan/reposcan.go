@@ -140,7 +140,7 @@ func (r *RepoScanAtom) GetRuntimeDeps() ([]gentoo.GentooPackage, error) {
 	if len(r.Relations) > 0 {
 		if _, ok := r.RelationsByKind["RDEPEND"]; ok {
 
-			deps, err := r.getDepends("REPEND")
+			deps, err := r.getDepends("RDEPEND")
 			if err != nil {
 				return ans, err
 			}
