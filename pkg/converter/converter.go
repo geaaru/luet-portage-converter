@@ -283,7 +283,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string)
 	var bconflicts []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
 	for _, bconflict := range solution.BuildConflicts {
 
-		fmt.Println(fmt.Sprintf("[%s] Analyzing runtime conflict %s...",
+		fmt.Println(fmt.Sprintf("[%s] Analyzing buildtime conflict %s...",
 			pkg, bconflict.GetPackageName()))
 
 		if pc.IsDep2Skip(&bconflict) {
@@ -331,7 +331,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string)
 		dep.Category = specs.SanitizeCategory(rdep.Category, rdep.Slot)
 
 		// Check if it's present the build dep on the tree
-		p, _ := pc.ReciperRuntime.GetDatabase().FindPackage(dep)
+		p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
 		if p == nil {
 			dep_str := fmt.Sprintf("%s/%s", rdep.Category, rdep.Name)
 			if rdep.Slot != "0" {
@@ -346,12 +346,13 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string)
 			rdeps = pc.AppendIfNotPresent(rdeps, rdep)
 
 		} else {
+			// TODO: handle package list in a better way
 			fmt.Println(fmt.Sprintf("[%s] For runtime dep %s is used package %s",
-				pkg, rdep.GetPackageName(), p.HumanReadableString()))
+				pkg, rdep.GetPackageName(), p[0].HumanReadableString()))
 
 			gp := gentoo.GentooPackage{
-				Name:     p.GetName(),
-				Category: p.GetCategory(),
+				Name:     p[0].GetName(),
+				Category: p[0].GetCategory(),
 				Version:  ">=0",
 				Slot:     "0",
 			}
@@ -421,6 +422,7 @@ func (pc *PortageConverter) Generate() error {
 		resolver := reposcan.NewRepoScanResolver()
 		resolver.JsonSources = pc.Specs.ReposcanSources
 		resolver.SetIgnoreMissingDeps(pc.IgnoreMissingDeps)
+		resolver.SetDepsWithSlot(pc.Specs.ReposcanRequiresWithSlot)
 		err = resolver.LoadJsonFiles()
 		if err != nil {
 			return err

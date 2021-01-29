@@ -103,7 +103,7 @@ var _ = Describe("Reposcan", func() {
 				Category:      "sys-devel",
 				Version:       "10.2.0",
 				VersionSuffix: "-r3",
-				Slot:          "",
+				Slot:          "10",
 				License:       "GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+",
 				Repository:    "gentoo",
 				Condition:     gentoo.PkgCondEqual,
@@ -152,6 +152,32 @@ var _ = Describe("Reposcan", func() {
 			_, err = resolver.Resolve("net-dns/noip-updater:2")
 			Expect(err).Should(Equal(errors.New("No package found matching net-dns/noip-updater:2")))
 
+		})
+
+		It("Load Json file with deps4 (with runtime deps)", func() {
+
+			resolver := NewRepoScanResolver()
+			err := resolver.LoadJson("../../tests/fixtures/reposcan-01.json")
+			Expect(err).Should(BeNil())
+			resolver.SetIgnoreMissingDeps(true)
+			err = resolver.BuildMap()
+			Expect(err).Should(BeNil())
+
+			val, ok := resolver.GetMap()["sys-devel/gcc"]
+			atom := val[0]
+			Expect(ok).Should(Equal(true))
+			Expect(atom.Package).Should(Equal("gcc"))
+			Expect(atom.Category).Should(Equal("sys-devel"))
+			Expect(atom.Kit).Should(Equal("gentoo"))
+			rdeps, err := atom.GetRuntimeDeps()
+			Expect(err).Should(BeNil())
+			Expect(len(rdeps)).Should(Equal(8))
+
+			solution, err := resolver.Resolve("sys-devel/gcc:9.3.0")
+			Expect(err).Should(BeNil())
+			// We have only one runtime deps because atom aren't
+			// available on json file.
+			Expect(len(solution.RuntimeDeps)).Should(Equal(1))
 		})
 	})
 

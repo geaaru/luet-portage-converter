@@ -37,6 +37,7 @@ type RepoScanResolver struct {
 	MapConstraints    map[string]([]gentoo.GentooPackage)
 	Map               map[string]([]RepoScanAtom)
 	IgnoreMissingDeps bool
+	DepsWithSlot      bool
 }
 
 func NewRepoScanResolver() *RepoScanResolver {
@@ -47,11 +48,14 @@ func NewRepoScanResolver() *RepoScanResolver {
 		MapConstraints:    make(map[string][]gentoo.GentooPackage, 0),
 		Map:               make(map[string][]RepoScanAtom, 0),
 		IgnoreMissingDeps: false,
+		DepsWithSlot:      true,
 	}
 }
 
 func (r *RepoScanResolver) SetIgnoreMissingDeps(v bool) { r.IgnoreMissingDeps = v }
 func (r *RepoScanResolver) IsIgnoreMissingDeps() bool   { return r.IgnoreMissingDeps }
+func (r *RepoScanResolver) SetDepsWithSlot(v bool)      { r.DepsWithSlot = v }
+func (r *RepoScanResolver) GetDepsWithSlot() bool       { return r.DepsWithSlot }
 
 func (r *RepoScanResolver) LoadJson(path string) error {
 	fd, err := os.Open(path)
@@ -194,7 +198,7 @@ func (r *RepoScanResolver) Resolve(pkg string) (*specs.PortageSolution, error) {
 		return nil, err
 	}
 
-	rdeps, err = r.elaborateDeps(rdeps)
+	rdeps, err = r.elaborateDeps(last, rdeps)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +209,7 @@ func (r *RepoScanResolver) Resolve(pkg string) (*specs.PortageSolution, error) {
 		return nil, err
 	}
 
-	bdeps, err = r.elaborateDeps(bdeps)
+	bdeps, err = r.elaborateDeps(last, bdeps)
 	if err != nil {
 		return nil, err
 	}
@@ -214,13 +218,16 @@ func (r *RepoScanResolver) Resolve(pkg string) (*specs.PortageSolution, error) {
 	return ans, nil
 }
 
-func (r *RepoScanResolver) elaborateDeps(deps []gentoo.GentooPackage) ([]gentoo.GentooPackage, error) {
+func (r *RepoScanResolver) elaborateDeps(pkg *gentoo.GentooPackage, deps []gentoo.GentooPackage) ([]gentoo.GentooPackage, error) {
 	ans := []gentoo.GentooPackage{}
 
 	for idx, _ := range deps {
 		atom, err := r.GetLastPackage(deps[idx].GetPackageName())
 		if err != nil {
 			if r.IsIgnoreMissingDeps() {
+				fmt.Println(
+					fmt.Sprintf("[%s] Dependency %s not found in map. Ignoring it.",
+						pkg.GetPackageName(), deps[idx].GetPackageName()))
 				continue
 			}
 
@@ -231,9 +238,9 @@ func (r *RepoScanResolver) elaborateDeps(deps []gentoo.GentooPackage) ([]gentoo.
 			return nil, err
 		}
 
-		// TODO: check this
-		// For deps we ignore slot atm
-		gp.Slot = ""
+		if !r.DepsWithSlot {
+			gp.Slot = ""
+		}
 
 		ans = append(ans, *gp)
 	}
@@ -284,7 +291,7 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 			}
 
 			fmt.Println(fmt.Sprintf(
-				"Check %s/%s:%s -> %s/%s:%s@%s: admitted - %v",
+				"[%s/%s:%s] Check %s/%s:%s@%s: admitted - %v",
 				gp.Category, gp.GetPF(), gp.Slot,
 				p.Category, p.GetPF(), p.Slot, p.Repository, valid))
 

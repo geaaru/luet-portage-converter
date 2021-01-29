@@ -40,8 +40,9 @@ type PortageConverterSpecs struct {
 	BuildTmplFile string                     `json:"build_template_file" yaml:"build_template_file"`
 
 	// Reposcan options
-	ReposcanSources     []string                            `json:"reposcan_sources,omitempty" yaml:"reposcan_sources,omitempty"`
-	ReposcanConstraints PortageConverterReposcanConstraints `json:"reposcan_contraints,omitempty" yaml:"reposcan_contraints,omitempty"`
+	ReposcanRequiresWithSlot bool                                `json:"reposcan_requires_slot,omitempty" yaml:"reposcan_requires_slot,omitempty"`
+	ReposcanSources          []string                            `json:"reposcan_sources,omitempty" yaml:"reposcan_sources,omitempty"`
+	ReposcanConstraints      PortageConverterReposcanConstraints `json:"reposcan_contraints,omitempty" yaml:"reposcan_contraints,omitempty"`
 }
 
 type PortageConverterReposcanConstraints struct {

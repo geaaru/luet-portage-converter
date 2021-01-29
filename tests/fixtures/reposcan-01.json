@@ -1,577 +1,810 @@
 {
   "cache_data_version": "1.0.5",
   "atoms": {
-  "net-dns/noip-updater-2.1.9-r1": {
-  "relations": [
-    "sys-devel/gcc",
-    "virtual/pkgconfig"
-  ],
-  "relations_by_kind": {
-    "DEPEND": [
-      "sys-devel/gcc",
-      "virtual/pkgconfig"
-    ]
-  },
-  "category": "net-dns",
-  "revision": "1",
-  "package": "noip-updater",
-  "catpkg": "net-dns/noip-updater",
-  "atom": "net-dns/noip-updater-2.1.9-r1",
-  "eclasses": [
-    [
-      "desktop",
-      "7fd20552ce4cc97e8acb132a499a7dd8"
-    ],
-    [
-      "edos2unix",
-      "33e347e171066657f91f8b0c72ec8773"
-    ],
-    [
-      "epatch",
-      "e8f1ec13660dc2f44b32775765d85e42"
-    ],
-    [
-      "estack",
-      "686eaab303305a908fd57b2fd7617800"
-    ],
-    [
-      "eutils",
-      "2d5b3f4b315094768576b6799e4f926e"
-    ],
-    [
-      "l10n",
-      "8cdd85e169b835d518bc2fd59f780d8e"
-    ],
-    [
-      "ltprune",
-      "4f3f2db5ce3ccbeeacdf3f94954043aa"
-    ],
-    [
-      "multilib",
-      "98584e405e2b0264d37e8f728327fed1"
-    ],
-    [
-      "preserve-libs",
-      "ef207dc62baddfddfd39a164d9797648"
-    ],
-    [
-      "readme.gentoo",
-      "273fa5d1a8ed000a29d79323e2ed0dc1"
-    ],
-    [
-      "systemd",
-      "7e42538b2905b73181816858bbffabee"
-    ],
-    [
-      "toolchain-funcs",
-      "605c126bed8d87e4378d5ff1645330cb"
-    ],
-    [
-      "vcs-clean",
-      "2a0f74a496fa2b1552c4f3398258b7bf"
-    ],
-    [
-      "wrapper",
-      "4251d4c84c25f59094fd557e0063a974"
-    ]
-  ],
-  "kit": "geaaru_overlay",
-  "branch": "master",
-  "metadata": {
-    "HASH_KEY": "net-dns/noip-updater-2.1.9-r1",
-    "DEPEND": "sys-devel/gcc virtual/pkgconfig",
-    "RDEPEND": "",
-    "SLOT": "0",
-    "SRC_URI": "http://www.no-ip.com/client/linux/noip-2.1.9.tar.gz",
-    "RESTRICT": "",
-    "HOMEPAGE": "http://www.no-ip.com",
-    "LICENSE": "GPL-2",
-    "DESCRIPTION": "no-ip.com dynamic DNS updater",
-    "KEYWORDS": "alpha amd64 ~arm ~hppa ia64 ~mips ~ppc ppc64 sparc x86",
-    "INHERITED": "desktop edos2unix estack epatch l10n toolchain-funcs multilib ltprune preserve-libs vcs-clean wrapper eutils readme.gentoo systemd",
-    "IUSE": "",
-    "REQUIRED_USE": "",
-    "PDEPEND": "",
-    "BDEPEND": "",
-    "EAPI": "5",
-    "PROPERTIES": "",
-    "DEFINED_PHASES": "compile config install postinst prepare",
-    "HDEPEND": "",
-    "PYTHON_COMPAT": ""
-  },
-  "md5": "4b5c43a7fa1bab723ae5f2c9191c69be",
-  "metadata_out": "DEFINED_PHASES=compile config install postinst prepare\nDEPEND=sys-devel/gcc virtual/pkgconfig\nDESCRIPTION=no-ip.com dynamic DNS updater\nEAPI=5\nHOMEPAGE=http://www.no-ip.com\nKEYWORDS=alpha amd64 ~arm ~hppa ia64 ~mips ~ppc ppc64 sparc x86\nLICENSE=GPL-2\nSLOT=0\nSRC_URI=http://www.no-ip.com/client/linux/noip-2.1.9.tar.gz\n_eclasses_=desktop\t7fd20552ce4cc97e8acb132a499a7dd8\tedos2unix\t33e347e171066657f91f8b0c72ec8773\tepatch\te8f1ec13660dc2f44b32775765d85e42\testack\t686eaab303305a908fd57b2fd7617800\teutils\t2d5b3f4b315094768576b6799e4f926e\tl10n\t8cdd85e169b835d518bc2fd59f780d8e\tltprune\t4f3f2db5ce3ccbeeacdf3f94954043aa\tmultilib\t98584e405e2b0264d37e8f728327fed1\tpreserve-libs\tef207dc62baddfddfd39a164d9797648\treadme.gentoo\t273fa5d1a8ed000a29d79323e2ed0dc1\tsystemd\t7e42538b2905b73181816858bbffabee\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\tvcs-clean\t2a0f74a496fa2b1552c4f3398258b7bf\twrapper\t4251d4c84c25f59094fd557e0063a974\n_md5_=4b5c43a7fa1bab723ae5f2c9191c69be\n",
-  "manifest_md5": "55e19e3fa81421cbe73e093236958e03",
-  "files": [
-    {
-      "src_uri": [
-        "http://www.no-ip.com/client/linux/noip-2.1.9.tar.gz"
+    "net-dns/noip-updater-2.1.9-r1": {
+      "relations": [
+        "sys-devel/gcc",
+        "virtual/pkgconfig"
       ],
-      "size": "152995",
-      "hashes": {
-        "sha256": "86ad0a6362263a33f59a658d1b1ce428e255556ddad0d062aa0ee4b7f412f98a",
-        "sha512": "3e76d39e22383dc3eceee10f8bdf791fc5ed253c756cd2d345fdd8fb9c9ab3bac6a1a6ca123a26cebbf6e615bb8f236c58d4ecf6254fcaf6b92da17f42f0dd6f",
-        "whirlpool": "4a737490fdf8be0bc6f708c7f73d2025f62a8e7c043e6259ee34738a5ed1b78d34c4243b58f7f61bb7afcf05d9e786b7f80b16bb641be59f5a5a5bd0929adee3"
+      "relations_by_kind": {
+        "DEPEND": [
+          "sys-devel/gcc",
+          "virtual/pkgconfig"
+        ]
       },
-      "name": "noip-2.1.9.tar.gz"
-    }
-  ]
-},
-
-  "sys-devel/gcc-9.3.0-r2": {
-  "relations": [
-    "app-portage/elt-patches",
-    "dev-libs/boehm-gc",
-    "dev-libs/gmp",
-    "dev-libs/isl",
-    "dev-libs/mpc",
-    "dev-libs/mpfr",
-    "dev-util/dejagnu",
-    "dev-util/systemtap",
-    "sys-devel/autogen",
-    "sys-devel/binutils",
-    "sys-devel/bison",
-    "sys-devel/flex",
-    "sys-devel/gcc-config",
-    "sys-devel/gettext",
-    "sys-devel/gnuconfig",
-    "sys-libs/glibc",
-    "sys-libs/zlib",
-    "virtual/libiconv",
-    "virtual/libintl"
-  ],
-  "relations_by_kind": {
-    "DEPEND": [
-      "dev-libs/boehm-gc",
-      "dev-libs/gmp",
-      "dev-libs/isl",
-      "dev-libs/mpc",
-      "dev-libs/mpfr",
-      "dev-util/systemtap",
-      "sys-devel/binutils",
-      "sys-devel/gnuconfig",
-      "sys-libs/glibc",
-      "sys-libs/zlib",
-      "virtual/libiconv",
-      "virtual/libintl"
-    ],
-    "RDEPEND": [
-      "dev-libs/boehm-gc",
-      "dev-libs/gmp",
-      "dev-libs/isl",
-      "dev-libs/mpc",
-      "dev-libs/mpfr",
-      "sys-libs/zlib",
-      "virtual/libiconv",
-      "virtual/libintl"
-    ],
-    "PDEPEND": [
-      "sys-devel/gcc-config",
-      "sys-libs/glibc"
-    ],
-    "BDEPEND": [
-      "app-portage/elt-patches",
-      "dev-util/dejagnu",
-      "sys-devel/autogen",
-      "sys-devel/bison",
-      "sys-devel/flex",
-      "sys-devel/gettext"
-    ]
-  },
-  "category": "sys-devel",
-  "revision": "2",
-  "package": "gcc",
-  "catpkg": "sys-devel/gcc",
-  "atom": "sys-devel/gcc-9.3.0-r2",
-  "eclasses": [
-    [
-      "edos2unix",
-      "33e347e171066657f91f8b0c72ec8773"
-    ],
-    [
-      "eutils",
-      "2d5b3f4b315094768576b6799e4f926e"
-    ],
-    [
-      "flag-o-matic",
-      "09a8beb8e6a8e02dc1e1bd83ac353741"
-    ],
-    [
-      "gnuconfig",
-      "f9125410be4c062f2fcefc8ec59fc223"
-    ],
-    [
-      "l10n",
-      "8cdd85e169b835d518bc2fd59f780d8e"
-    ],
-    [
-      "libtool",
-      "f143db5a74ccd9ca28c1234deffede96"
-    ],
-    [
-      "multilib",
-      "98584e405e2b0264d37e8f728327fed1"
-    ],
-    [
-      "pax-utils",
-      "a41d1fd1c111289ffa04490de6ee79d7"
-    ],
-    [
-      "prefix",
-      "c2993e4c430c1ee24f278983d6189501"
-    ],
-    [
-      "toolchain",
-      "cb10e0ee5d218043f3a738852ca54fb4"
-    ],
-    [
-      "toolchain-funcs",
-      "605c126bed8d87e4378d5ff1645330cb"
-    ],
-    [
-      "wrapper",
-      "4251d4c84c25f59094fd557e0063a974"
-    ]
-  ],
-  "kit": "gentoo",
-  "branch": "master",
-  "metadata": {
-    "HASH_KEY": "sys-devel/gcc-9.3.0-r2",
-    "DEPEND": "elibc_glibc? ( >=sys-libs/glibc-2.13 ) >=sys-devel/binutils-2.20 sys-devel/gnuconfig sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= ) systemtap? ( dev-util/systemtap )",
-    "RDEPEND": "sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= )",
-    "SLOT": "9.3.0",
-    "SRC_URI": "mirror://gnu/gcc/gcc-9.3.0/gcc-9.3.0.tar.xz mirror://gentoo/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~vapier/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~rhill/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~zorry/patches/gcc/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~blueness/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~tamiko/distfiles/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~slyfox/distfiles/gcc-9.3.0-patches-4.tar.bz2",
-    "RESTRICT": "!test? ( test )",
-    "HOMEPAGE": "https://gcc.gnu.org/",
-    "LICENSE": "GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+",
-    "DESCRIPTION": "The GNU Compiler Collection",
-    "KEYWORDS": "~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86",
-    "INHERITED": "edos2unix l10n wrapper eutils toolchain-funcs multilib flag-o-matic gnuconfig libtool pax-utils prefix toolchain",
-    "IUSE": "test vanilla +nls altivec debug +cxx +nptl +fortran doc hardened multilib objc pgo objc-gc libssp objc++ +openmp fixed-point go +sanitize graphite ada +vtv jit +pie +ssp +pch systemtap d lto",
-    "REQUIRED_USE": "",
-    "PDEPEND": "elibc_glibc? ( >=sys-libs/glibc-2.13 ) >=sys-devel/gcc-config-2.3",
-    "BDEPEND": ">=app-portage/elt-patches-20170815 >=sys-devel/bison-1.875 >=sys-devel/flex-2.5.4 nls? ( sys-devel/gettext ) test? ( >=dev-util/dejagnu-1.4.4 >=sys-devel/autogen-5.5.4 )",
-    "EAPI": "7",
-    "PROPERTIES": "",
-    "DEFINED_PHASES": "compile configure install postinst postrm prepare pretend setup test unpack",
-    "HDEPEND": "",
-    "PYTHON_COMPAT": ""
-  },
-  "md5": "17146b20c4c26faa87eba212e4e586b2",
-  "metadata_out": "BDEPEND=>=app-portage/elt-patches-20170815 >=sys-devel/bison-1.875 >=sys-devel/flex-2.5.4 nls? ( sys-devel/gettext ) test? ( >=dev-util/dejagnu-1.4.4 >=sys-devel/autogen-5.5.4 )\nDEFINED_PHASES=compile configure install postinst postrm prepare pretend setup test unpack\nDEPEND=elibc_glibc? ( >=sys-libs/glibc-2.13 ) >=sys-devel/binutils-2.20 sys-devel/gnuconfig sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= ) systemtap? ( dev-util/systemtap )\nDESCRIPTION=The GNU Compiler Collection\nEAPI=7\nHOMEPAGE=https://gcc.gnu.org/\nIUSE=test vanilla +nls altivec debug +cxx +nptl +fortran doc hardened multilib objc pgo objc-gc libssp objc++ +openmp fixed-point go +sanitize graphite ada +vtv jit +pie +ssp +pch systemtap d lto\nKEYWORDS=~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86\nLICENSE=GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+\nPDEPEND=elibc_glibc? ( >=sys-libs/glibc-2.13 ) >=sys-devel/gcc-config-2.3\nRDEPEND=sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= )\nRESTRICT=!test? ( test )\nSLOT=9.3.0\nSRC_URI=mirror://gnu/gcc/gcc-9.3.0/gcc-9.3.0.tar.xz mirror://gentoo/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~vapier/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~rhill/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~zorry/patches/gcc/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~blueness/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~tamiko/distfiles/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~slyfox/distfiles/gcc-9.3.0-patches-4.tar.bz2\n_eclasses_=edos2unix\t33e347e171066657f91f8b0c72ec8773\teutils\t2d5b3f4b315094768576b6799e4f926e\tflag-o-matic\t09a8beb8e6a8e02dc1e1bd83ac353741\tgnuconfig\tf9125410be4c062f2fcefc8ec59fc223\tl10n\t8cdd85e169b835d518bc2fd59f780d8e\tlibtool\tf143db5a74ccd9ca28c1234deffede96\tmultilib\t98584e405e2b0264d37e8f728327fed1\tpax-utils\ta41d1fd1c111289ffa04490de6ee79d7\tprefix\tc2993e4c430c1ee24f278983d6189501\ttoolchain\tcb10e0ee5d218043f3a738852ca54fb4\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\twrapper\t4251d4c84c25f59094fd557e0063a974\n_md5_=17146b20c4c26faa87eba212e4e586b2\n",
-  "manifest_md5": "a6e1ff3e5e1682ef3ea539b0a043c1f7",
-  "files": [
-    {
-      "src_uri": [
-        "mirror://gnu/gcc/gcc-9.3.0/gcc-9.3.0.tar.xz"
+      "category": "net-dns",
+      "revision": "1",
+      "package": "noip-updater",
+      "catpkg": "net-dns/noip-updater",
+      "atom": "net-dns/noip-updater-2.1.9-r1",
+      "eclasses": [
+        [
+          "desktop",
+          "7fd20552ce4cc97e8acb132a499a7dd8"
+        ],
+        [
+          "edos2unix",
+          "33e347e171066657f91f8b0c72ec8773"
+        ],
+        [
+          "epatch",
+          "e8f1ec13660dc2f44b32775765d85e42"
+        ],
+        [
+          "estack",
+          "686eaab303305a908fd57b2fd7617800"
+        ],
+        [
+          "eutils",
+          "2d5b3f4b315094768576b6799e4f926e"
+        ],
+        [
+          "l10n",
+          "8cdd85e169b835d518bc2fd59f780d8e"
+        ],
+        [
+          "ltprune",
+          "4f3f2db5ce3ccbeeacdf3f94954043aa"
+        ],
+        [
+          "multilib",
+          "98584e405e2b0264d37e8f728327fed1"
+        ],
+        [
+          "preserve-libs",
+          "ef207dc62baddfddfd39a164d9797648"
+        ],
+        [
+          "readme.gentoo",
+          "273fa5d1a8ed000a29d79323e2ed0dc1"
+        ],
+        [
+          "systemd",
+          "7e42538b2905b73181816858bbffabee"
+        ],
+        [
+          "toolchain-funcs",
+          "605c126bed8d87e4378d5ff1645330cb"
+        ],
+        [
+          "vcs-clean",
+          "2a0f74a496fa2b1552c4f3398258b7bf"
+        ],
+        [
+          "wrapper",
+          "4251d4c84c25f59094fd557e0063a974"
+        ]
       ],
-      "size": "70533868",
-      "hashes": {
-        "blake2b": "21efb1432aefad5ed9b9b395e88ef2adfda3a8ea6e3e808cd151da6e66df9fed1bafdc8b8ff055d4b2272ac786d8b7ddc4293bb6b51c55c40a261a0eda0e7cb4",
-        "sha512": "4b9e3639eef6e623747a22c37a904b4750c93b6da77cf3958d5047e9b5ebddb7eebe091cc16ca0a227c0ecbd2bf3b984b221130f269a97ee4cc18f9cf6c444de"
+      "kit": "geaaru_overlay",
+      "branch": "master",
+      "metadata": {
+        "HASH_KEY": "net-dns/noip-updater-2.1.9-r1",
+        "DEPEND": "sys-devel/gcc virtual/pkgconfig",
+        "RDEPEND": "",
+        "SLOT": "0",
+        "SRC_URI": "http://www.no-ip.com/client/linux/noip-2.1.9.tar.gz",
+        "RESTRICT": "",
+        "HOMEPAGE": "http://www.no-ip.com",
+        "LICENSE": "GPL-2",
+        "DESCRIPTION": "no-ip.com dynamic DNS updater",
+        "KEYWORDS": "alpha amd64 ~arm ~hppa ia64 ~mips ~ppc ppc64 sparc x86",
+        "INHERITED": "desktop edos2unix estack epatch l10n toolchain-funcs multilib ltprune preserve-libs vcs-clean wrapper eutils readme.gentoo systemd",
+        "IUSE": "",
+        "REQUIRED_USE": "",
+        "PDEPEND": "",
+        "BDEPEND": "",
+        "EAPI": "5",
+        "PROPERTIES": "",
+        "DEFINED_PHASES": "compile config install postinst prepare",
+        "HDEPEND": "",
+        "PYTHON_COMPAT": ""
       },
-      "name": "gcc-9.3.0.tar.xz"
+      "md5": "4b5c43a7fa1bab723ae5f2c9191c69be",
+      "metadata_out": "DEFINED_PHASES=compile config install postinst prepare\nDEPEND=sys-devel/gcc virtual/pkgconfig\nDESCRIPTION=no-ip.com dynamic DNS updater\nEAPI=5\nHOMEPAGE=http://www.no-ip.com\nKEYWORDS=alpha amd64 ~arm ~hppa ia64 ~mips ~ppc ppc64 sparc x86\nLICENSE=GPL-2\nSLOT=0\nSRC_URI=http://www.no-ip.com/client/linux/noip-2.1.9.tar.gz\n_eclasses_=desktop\t7fd20552ce4cc97e8acb132a499a7dd8\tedos2unix\t33e347e171066657f91f8b0c72ec8773\tepatch\te8f1ec13660dc2f44b32775765d85e42\testack\t686eaab303305a908fd57b2fd7617800\teutils\t2d5b3f4b315094768576b6799e4f926e\tl10n\t8cdd85e169b835d518bc2fd59f780d8e\tltprune\t4f3f2db5ce3ccbeeacdf3f94954043aa\tmultilib\t98584e405e2b0264d37e8f728327fed1\tpreserve-libs\tef207dc62baddfddfd39a164d9797648\treadme.gentoo\t273fa5d1a8ed000a29d79323e2ed0dc1\tsystemd\t7e42538b2905b73181816858bbffabee\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\tvcs-clean\t2a0f74a496fa2b1552c4f3398258b7bf\twrapper\t4251d4c84c25f59094fd557e0063a974\n_md5_=4b5c43a7fa1bab723ae5f2c9191c69be\n",
+      "manifest_md5": "55e19e3fa81421cbe73e093236958e03",
+      "files": [
+        {
+          "src_uri": [
+            "http://www.no-ip.com/client/linux/noip-2.1.9.tar.gz"
+          ],
+          "size": "152995",
+          "hashes": {
+            "sha256": "86ad0a6362263a33f59a658d1b1ce428e255556ddad0d062aa0ee4b7f412f98a",
+            "sha512": "3e76d39e22383dc3eceee10f8bdf791fc5ed253c756cd2d345fdd8fb9c9ab3bac6a1a6ca123a26cebbf6e615bb8f236c58d4ecf6254fcaf6b92da17f42f0dd6f",
+            "whirlpool": "4a737490fdf8be0bc6f708c7f73d2025f62a8e7c043e6259ee34738a5ed1b78d34c4243b58f7f61bb7afcf05d9e786b7f80b16bb641be59f5a5a5bd0929adee3"
+          },
+          "name": "noip-2.1.9.tar.gz"
+        }
+      ]
     },
-    {
-      "src_uri": [
-        "mirror://gentoo/gcc-9.3.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~vapier/dist/gcc-9.3.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~rhill/dist/gcc-9.3.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~zorry/patches/gcc/gcc-9.3.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~blueness/dist/gcc-9.3.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~tamiko/distfiles/gcc-9.3.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~slyfox/distfiles/gcc-9.3.0-patches-4.tar.bz2"
-      ],
-      "size": "15474",
-      "hashes": {
-        "blake2b": "b06fdfce4402850bb1c6c211ace4c3a07ad2114ffa48eac58d1624124d5d1bddd6d2b4faa18be3291a340272c022bea26dfcaf17929828ceb6474a5211401389",
-        "sha512": "54904a4a1c4a784f1a707cbdd9f6f498457e4aa550dc6f3d6eff71ed05a75685e23e6b71c2a614b1dea7e506b9f42fb0109ecfde00ef00373275bbc0409cb7e0"
-      },
-      "name": "gcc-9.3.0-patches-4.tar.bz2"
-    }
-  ]
-},
 
-  "sys-devel/gcc-10.2.0-r3": {
-  "relations": [
-    "app-arch/zstd",
-    "app-portage/elt-patches",
-    "dev-libs/boehm-gc",
-    "dev-libs/gmp",
-    "dev-libs/isl",
-    "dev-libs/mpc",
-    "dev-libs/mpfr",
-    "dev-util/dejagnu",
-    "dev-util/systemtap",
-    "sys-devel/autogen",
-    "sys-devel/binutils",
-    "sys-devel/bison",
-    "sys-devel/flex",
-    "sys-devel/gcc-config",
-    "sys-devel/gettext",
-    "sys-devel/gnuconfig",
-    "sys-libs/zlib",
-    "virtual/libiconv",
-    "virtual/libintl"
-  ],
-  "relations_by_kind": {
-    "DEPEND": [
-      "app-arch/zstd",
-      "dev-libs/boehm-gc",
-      "dev-libs/gmp",
-      "dev-libs/isl",
-      "dev-libs/mpc",
-      "dev-libs/mpfr",
-      "dev-util/systemtap",
-      "sys-devel/gnuconfig",
-      "sys-libs/zlib",
-      "virtual/libiconv",
-      "virtual/libintl"
-    ],
-    "RDEPEND": [
-      "dev-libs/boehm-gc",
-      "dev-libs/gmp",
-      "dev-libs/isl",
-      "dev-libs/mpc",
-      "dev-libs/mpfr",
-      "sys-libs/zlib",
-      "virtual/libiconv",
-      "virtual/libintl"
-    ],
-    "PDEPEND": [
-      "sys-devel/gcc-config"
-    ],
-    "BDEPEND": [
-      "app-portage/elt-patches",
-      "dev-util/dejagnu",
-      "sys-devel/autogen",
-      "sys-devel/binutils",
-      "sys-devel/bison",
-      "sys-devel/flex",
-      "sys-devel/gettext"
-    ]
-  },
-  "category": "sys-devel",
-  "revision": "3",
-  "package": "gcc",
-  "catpkg": "sys-devel/gcc",
-  "atom": "sys-devel/gcc-10.2.0-r3",
-  "eclasses": [
-    [
-      "edos2unix",
-      "33e347e171066657f91f8b0c72ec8773"
-    ],
-    [
-      "eutils",
-      "2d5b3f4b315094768576b6799e4f926e"
-    ],
-    [
-      "flag-o-matic",
-      "09a8beb8e6a8e02dc1e1bd83ac353741"
-    ],
-    [
-      "gnuconfig",
-      "f9125410be4c062f2fcefc8ec59fc223"
-    ],
-    [
-      "l10n",
-      "8cdd85e169b835d518bc2fd59f780d8e"
-    ],
-    [
-      "libtool",
-      "f143db5a74ccd9ca28c1234deffede96"
-    ],
-    [
-      "multilib",
-      "98584e405e2b0264d37e8f728327fed1"
-    ],
-    [
-      "pax-utils",
-      "a41d1fd1c111289ffa04490de6ee79d7"
-    ],
-    [
-      "prefix",
-      "c2993e4c430c1ee24f278983d6189501"
-    ],
-    [
-      "toolchain",
-      "cb10e0ee5d218043f3a738852ca54fb4"
-    ],
-    [
-      "toolchain-funcs",
-      "605c126bed8d87e4378d5ff1645330cb"
-    ],
-    [
-      "wrapper",
-      "4251d4c84c25f59094fd557e0063a974"
-    ]
-  ],
-  "kit": "gentoo",
-  "branch": "master",
-  "metadata": {
-    "HASH_KEY": "sys-devel/gcc-10.2.0-r3",
-    "DEPEND": "sys-devel/gnuconfig sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= ) systemtap? ( dev-util/systemtap ) zstd? ( app-arch/zstd )",
-    "RDEPEND": "sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= )",
-    "SLOT": "10",
-    "SRC_URI": "mirror://gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz mirror://gentoo/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~vapier/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~rhill/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~zorry/patches/gcc/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~blueness/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~tamiko/distfiles/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~slyfox/distfiles/gcc-10.2.0-patches-4.tar.bz2",
-    "RESTRICT": "!test? ( test )",
-    "HOMEPAGE": "https://gcc.gnu.org/",
-    "LICENSE": "GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+",
-    "DESCRIPTION": "The GNU Compiler Collection",
-    "KEYWORDS": "~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86",
-    "INHERITED": "edos2unix l10n wrapper eutils toolchain-funcs multilib flag-o-matic gnuconfig libtool pax-utils prefix toolchain",
-    "IUSE": "test vanilla +nls debug +cxx +nptl +fortran doc hardened multilib objc pgo objc-gc libssp objc++ +openmp fixed-point go +sanitize graphite ada +vtv jit +pie +ssp +pch systemtap d lto zstd",
-    "REQUIRED_USE": "",
-    "PDEPEND": ">=sys-devel/gcc-config-2.3",
-    "BDEPEND": "sys-devel/binutils >=app-portage/elt-patches-20170815 >=sys-devel/bison-1.875 >=sys-devel/flex-2.5.4 nls? ( sys-devel/gettext ) test? ( >=dev-util/dejagnu-1.4.4 >=sys-devel/autogen-5.5.4 )",
-    "EAPI": "7",
-    "PROPERTIES": "",
-    "DEFINED_PHASES": "compile configure install postinst postrm prepare pretend setup test unpack",
-    "HDEPEND": "",
-    "PYTHON_COMPAT": ""
-  },
-  "md5": "a8f016ca8ac9452cd4ce9d34e21a53cc",
-  "metadata_out": "BDEPEND=sys-devel/binutils >=app-portage/elt-patches-20170815 >=sys-devel/bison-1.875 >=sys-devel/flex-2.5.4 nls? ( sys-devel/gettext ) test? ( >=dev-util/dejagnu-1.4.4 >=sys-devel/autogen-5.5.4 )\nDEFINED_PHASES=compile configure install postinst postrm prepare pretend setup test unpack\nDEPEND=sys-devel/gnuconfig sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= ) systemtap? ( dev-util/systemtap ) zstd? ( app-arch/zstd )\nDESCRIPTION=The GNU Compiler Collection\nEAPI=7\nHOMEPAGE=https://gcc.gnu.org/\nIUSE=test vanilla +nls debug +cxx +nptl +fortran doc hardened multilib objc pgo objc-gc libssp objc++ +openmp fixed-point go +sanitize graphite ada +vtv jit +pie +ssp +pch systemtap d lto zstd\nKEYWORDS=~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86\nLICENSE=GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+\nPDEPEND=>=sys-devel/gcc-config-2.3\nRDEPEND=sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= )\nRESTRICT=!test? ( test )\nSLOT=10\nSRC_URI=mirror://gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz mirror://gentoo/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~vapier/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~rhill/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~zorry/patches/gcc/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~blueness/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~tamiko/distfiles/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~slyfox/distfiles/gcc-10.2.0-patches-4.tar.bz2\n_eclasses_=edos2unix\t33e347e171066657f91f8b0c72ec8773\teutils\t2d5b3f4b315094768576b6799e4f926e\tflag-o-matic\t09a8beb8e6a8e02dc1e1bd83ac353741\tgnuconfig\tf9125410be4c062f2fcefc8ec59fc223\tl10n\t8cdd85e169b835d518bc2fd59f780d8e\tlibtool\tf143db5a74ccd9ca28c1234deffede96\tmultilib\t98584e405e2b0264d37e8f728327fed1\tpax-utils\ta41d1fd1c111289ffa04490de6ee79d7\tprefix\tc2993e4c430c1ee24f278983d6189501\ttoolchain\tcb10e0ee5d218043f3a738852ca54fb4\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\twrapper\t4251d4c84c25f59094fd557e0063a974\n_md5_=a8f016ca8ac9452cd4ce9d34e21a53cc\n",
-  "manifest_md5": "a6e1ff3e5e1682ef3ea539b0a043c1f7",
-  "files": [
-    {
-      "src_uri": [
-        "mirror://gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz"
+    "sys-devel/gcc-9.3.0-r2": {
+      "relations": [
+        "app-portage/elt-patches",
+        "dev-libs/boehm-gc",
+        "dev-libs/gmp",
+        "dev-libs/isl",
+        "dev-libs/mpc",
+        "dev-libs/mpfr",
+        "dev-util/dejagnu",
+        "dev-util/systemtap",
+        "sys-devel/autogen",
+        "sys-devel/binutils",
+        "sys-devel/bison",
+        "sys-devel/flex",
+        "sys-devel/gcc-config",
+        "sys-devel/gettext",
+        "sys-devel/gnuconfig",
+        "sys-libs/glibc",
+        "sys-libs/zlib",
+        "virtual/libiconv",
+        "virtual/libintl"
       ],
-      "size": "75004144",
-      "hashes": {
-        "blake2b": "1d79397330354e61439283cac96a109bf78ffc726265442e6d3ec131f107589ab7349d6612836edd8c8512f7bcc1d901a65a0d5d925d28a5bf3ef5cc3f9787ee",
-        "sha512": "42ae38928bd2e8183af445da34220964eb690b675b1892bbeb7cd5bb62be499011ec9a93397dba5e2fb681afadfc6f2767d03b9035b44ba9be807187ae6dc65e"
+      "relations_by_kind": {
+        "DEPEND": [
+          "dev-libs/boehm-gc",
+          "dev-libs/gmp",
+          "dev-libs/isl",
+          "dev-libs/mpc",
+          "dev-libs/mpfr",
+          "dev-util/systemtap",
+          "sys-devel/binutils",
+          "sys-devel/gnuconfig",
+          "sys-libs/glibc",
+          "sys-libs/zlib",
+          "virtual/libiconv",
+          "virtual/libintl"
+        ],
+        "RDEPEND": [
+          "dev-libs/boehm-gc",
+          "dev-libs/gmp",
+          "dev-libs/isl",
+          "dev-libs/mpc",
+          "dev-libs/mpfr",
+          "sys-libs/zlib",
+          "virtual/libiconv",
+          "virtual/libintl"
+        ],
+        "PDEPEND": [
+          "sys-devel/gcc-config",
+          "sys-libs/glibc"
+        ],
+        "BDEPEND": [
+          "app-portage/elt-patches",
+          "dev-util/dejagnu",
+          "sys-devel/autogen",
+          "sys-devel/bison",
+          "sys-devel/flex",
+          "sys-devel/gettext"
+        ]
       },
-      "name": "gcc-10.2.0.tar.xz"
+      "category": "sys-devel",
+      "revision": "2",
+      "package": "gcc",
+      "catpkg": "sys-devel/gcc",
+      "atom": "sys-devel/gcc-9.3.0-r2",
+      "eclasses": [
+        [
+          "edos2unix",
+          "33e347e171066657f91f8b0c72ec8773"
+        ],
+        [
+          "eutils",
+          "2d5b3f4b315094768576b6799e4f926e"
+        ],
+        [
+          "flag-o-matic",
+          "09a8beb8e6a8e02dc1e1bd83ac353741"
+        ],
+        [
+          "gnuconfig",
+          "f9125410be4c062f2fcefc8ec59fc223"
+        ],
+        [
+          "l10n",
+          "8cdd85e169b835d518bc2fd59f780d8e"
+        ],
+        [
+          "libtool",
+          "f143db5a74ccd9ca28c1234deffede96"
+        ],
+        [
+          "multilib",
+          "98584e405e2b0264d37e8f728327fed1"
+        ],
+        [
+          "pax-utils",
+          "a41d1fd1c111289ffa04490de6ee79d7"
+        ],
+        [
+          "prefix",
+          "c2993e4c430c1ee24f278983d6189501"
+        ],
+        [
+          "toolchain",
+          "cb10e0ee5d218043f3a738852ca54fb4"
+        ],
+        [
+          "toolchain-funcs",
+          "605c126bed8d87e4378d5ff1645330cb"
+        ],
+        [
+          "wrapper",
+          "4251d4c84c25f59094fd557e0063a974"
+        ]
+      ],
+      "kit": "gentoo",
+      "branch": "master",
+      "metadata": {
+        "HASH_KEY": "sys-devel/gcc-9.3.0-r2",
+        "DEPEND": "elibc_glibc? ( >=sys-libs/glibc-2.13 ) >=sys-devel/binutils-2.20 sys-devel/gnuconfig sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= ) systemtap? ( dev-util/systemtap )",
+        "RDEPEND": "sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= )",
+        "SLOT": "9.3.0",
+        "SRC_URI": "mirror://gnu/gcc/gcc-9.3.0/gcc-9.3.0.tar.xz mirror://gentoo/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~vapier/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~rhill/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~zorry/patches/gcc/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~blueness/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~tamiko/distfiles/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~slyfox/distfiles/gcc-9.3.0-patches-4.tar.bz2",
+        "RESTRICT": "!test? ( test )",
+        "HOMEPAGE": "https://gcc.gnu.org/",
+        "LICENSE": "GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+",
+        "DESCRIPTION": "The GNU Compiler Collection",
+        "KEYWORDS": "~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86",
+        "INHERITED": "edos2unix l10n wrapper eutils toolchain-funcs multilib flag-o-matic gnuconfig libtool pax-utils prefix toolchain",
+        "IUSE": "test vanilla +nls altivec debug +cxx +nptl +fortran doc hardened multilib objc pgo objc-gc libssp objc++ +openmp fixed-point go +sanitize graphite ada +vtv jit +pie +ssp +pch systemtap d lto",
+        "REQUIRED_USE": "",
+        "PDEPEND": "elibc_glibc? ( >=sys-libs/glibc-2.13 ) >=sys-devel/gcc-config-2.3",
+        "BDEPEND": ">=app-portage/elt-patches-20170815 >=sys-devel/bison-1.875 >=sys-devel/flex-2.5.4 nls? ( sys-devel/gettext ) test? ( >=dev-util/dejagnu-1.4.4 >=sys-devel/autogen-5.5.4 )",
+        "EAPI": "7",
+        "PROPERTIES": "",
+        "DEFINED_PHASES": "compile configure install postinst postrm prepare pretend setup test unpack",
+        "HDEPEND": "",
+        "PYTHON_COMPAT": ""
+      },
+      "md5": "17146b20c4c26faa87eba212e4e586b2",
+      "metadata_out": "BDEPEND=>=app-portage/elt-patches-20170815 >=sys-devel/bison-1.875 >=sys-devel/flex-2.5.4 nls? ( sys-devel/gettext ) test? ( >=dev-util/dejagnu-1.4.4 >=sys-devel/autogen-5.5.4 )\nDEFINED_PHASES=compile configure install postinst postrm prepare pretend setup test unpack\nDEPEND=elibc_glibc? ( >=sys-libs/glibc-2.13 ) >=sys-devel/binutils-2.20 sys-devel/gnuconfig sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= ) systemtap? ( dev-util/systemtap )\nDESCRIPTION=The GNU Compiler Collection\nEAPI=7\nHOMEPAGE=https://gcc.gnu.org/\nIUSE=test vanilla +nls altivec debug +cxx +nptl +fortran doc hardened multilib objc pgo objc-gc libssp objc++ +openmp fixed-point go +sanitize graphite ada +vtv jit +pie +ssp +pch systemtap d lto\nKEYWORDS=~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86\nLICENSE=GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+\nPDEPEND=elibc_glibc? ( >=sys-libs/glibc-2.13 ) >=sys-devel/gcc-config-2.3\nRDEPEND=sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= )\nRESTRICT=!test? ( test )\nSLOT=9.3.0\nSRC_URI=mirror://gnu/gcc/gcc-9.3.0/gcc-9.3.0.tar.xz mirror://gentoo/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~vapier/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~rhill/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~zorry/patches/gcc/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~blueness/dist/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~tamiko/distfiles/gcc-9.3.0-patches-4.tar.bz2 https://dev.gentoo.org/~slyfox/distfiles/gcc-9.3.0-patches-4.tar.bz2\n_eclasses_=edos2unix\t33e347e171066657f91f8b0c72ec8773\teutils\t2d5b3f4b315094768576b6799e4f926e\tflag-o-matic\t09a8beb8e6a8e02dc1e1bd83ac353741\tgnuconfig\tf9125410be4c062f2fcefc8ec59fc223\tl10n\t8cdd85e169b835d518bc2fd59f780d8e\tlibtool\tf143db5a74ccd9ca28c1234deffede96\tmultilib\t98584e405e2b0264d37e8f728327fed1\tpax-utils\ta41d1fd1c111289ffa04490de6ee79d7\tprefix\tc2993e4c430c1ee24f278983d6189501\ttoolchain\tcb10e0ee5d218043f3a738852ca54fb4\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\twrapper\t4251d4c84c25f59094fd557e0063a974\n_md5_=17146b20c4c26faa87eba212e4e586b2\n",
+      "manifest_md5": "a6e1ff3e5e1682ef3ea539b0a043c1f7",
+      "files": [
+        {
+          "src_uri": [
+            "mirror://gnu/gcc/gcc-9.3.0/gcc-9.3.0.tar.xz"
+          ],
+          "size": "70533868",
+          "hashes": {
+            "blake2b": "21efb1432aefad5ed9b9b395e88ef2adfda3a8ea6e3e808cd151da6e66df9fed1bafdc8b8ff055d4b2272ac786d8b7ddc4293bb6b51c55c40a261a0eda0e7cb4",
+            "sha512": "4b9e3639eef6e623747a22c37a904b4750c93b6da77cf3958d5047e9b5ebddb7eebe091cc16ca0a227c0ecbd2bf3b984b221130f269a97ee4cc18f9cf6c444de"
+          },
+          "name": "gcc-9.3.0.tar.xz"
+        },
+        {
+          "src_uri": [
+            "mirror://gentoo/gcc-9.3.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~vapier/dist/gcc-9.3.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~rhill/dist/gcc-9.3.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~zorry/patches/gcc/gcc-9.3.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~blueness/dist/gcc-9.3.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~tamiko/distfiles/gcc-9.3.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~slyfox/distfiles/gcc-9.3.0-patches-4.tar.bz2"
+          ],
+          "size": "15474",
+          "hashes": {
+            "blake2b": "b06fdfce4402850bb1c6c211ace4c3a07ad2114ffa48eac58d1624124d5d1bddd6d2b4faa18be3291a340272c022bea26dfcaf17929828ceb6474a5211401389",
+            "sha512": "54904a4a1c4a784f1a707cbdd9f6f498457e4aa550dc6f3d6eff71ed05a75685e23e6b71c2a614b1dea7e506b9f42fb0109ecfde00ef00373275bbc0409cb7e0"
+          },
+          "name": "gcc-9.3.0-patches-4.tar.bz2"
+        }
+      ]
     },
-    {
-      "src_uri": [
-        "mirror://gentoo/gcc-10.2.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~vapier/dist/gcc-10.2.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~rhill/dist/gcc-10.2.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~zorry/patches/gcc/gcc-10.2.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~blueness/dist/gcc-10.2.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~tamiko/distfiles/gcc-10.2.0-patches-4.tar.bz2",
-        "https://dev.gentoo.org/~slyfox/distfiles/gcc-10.2.0-patches-4.tar.bz2"
+
+    "sys-devel/gcc-10.2.0-r3": {
+      "relations": [
+        "app-arch/zstd",
+        "app-portage/elt-patches",
+        "dev-libs/boehm-gc",
+        "dev-libs/gmp",
+        "dev-libs/isl",
+        "dev-libs/mpc",
+        "dev-libs/mpfr",
+        "dev-util/dejagnu",
+        "dev-util/systemtap",
+        "sys-devel/autogen",
+        "sys-devel/binutils",
+        "sys-devel/bison",
+        "sys-devel/flex",
+        "sys-devel/gcc-config",
+        "sys-devel/gettext",
+        "sys-devel/gnuconfig",
+        "sys-libs/zlib",
+        "virtual/libiconv",
+        "virtual/libintl"
       ],
-      "size": "23266",
-      "hashes": {
-        "blake2b": "8173474d3dea27a440b36eb80c89aabb08c37528c3ec2382839c46fc36336aff7f9cdf3dfbc66947df9286b1cfe9f479d615f77d81ab24ff68a3edf5df5b2350",
-        "sha512": "17080f358a3f231837de35188ad1a6ae554a4ca6199efae6dacf9b17706937379559d6c8de330b4237480fea6f5cffffc1158c1d5ecc36ec3a7b410546a2684b"
+      "relations_by_kind": {
+        "DEPEND": [
+          "app-arch/zstd",
+          "dev-libs/boehm-gc",
+          "dev-libs/gmp",
+          "dev-libs/isl",
+          "dev-libs/mpc",
+          "dev-libs/mpfr",
+          "dev-util/systemtap",
+          "sys-devel/gnuconfig",
+          "sys-libs/zlib",
+          "virtual/libiconv",
+          "virtual/libintl"
+        ],
+        "RDEPEND": [
+          "dev-libs/boehm-gc",
+          "dev-libs/gmp",
+          "dev-libs/isl",
+          "dev-libs/mpc",
+          "dev-libs/mpfr",
+          "sys-libs/zlib",
+          "virtual/libiconv",
+          "virtual/libintl"
+        ],
+        "PDEPEND": [
+          "sys-devel/gcc-config"
+        ],
+        "BDEPEND": [
+          "app-portage/elt-patches",
+          "dev-util/dejagnu",
+          "sys-devel/autogen",
+          "sys-devel/binutils",
+          "sys-devel/bison",
+          "sys-devel/flex",
+          "sys-devel/gettext"
+        ]
       },
-      "name": "gcc-10.2.0-patches-4.tar.bz2"
-    }
-  ]
-},
-
-  "app-arch/zstd-1.4.4-r4": {
-  "relations": [
-    "app-arch/lz4",
-    "app-arch/xz-utils"
-  ],
-  "relations_by_kind": {
-    "DEPEND": [
-      "app-arch/lz4",
-      "app-arch/xz-utils"
-    ],
-    "RDEPEND": [
-      "app-arch/lz4",
-      "app-arch/xz-utils"
-    ]
-  },
-  "category": "app-arch",
-  "revision": "4",
-  "package": "zstd",
-  "catpkg": "app-arch/zstd",
-  "atom": "app-arch/zstd-1.4.4-r4",
-  "eclasses": [
-    [
-      "edos2unix",
-      "33e347e171066657f91f8b0c72ec8773"
-    ],
-    [
-      "eutils",
-      "2d5b3f4b315094768576b6799e4f926e"
-    ],
-    [
-      "flag-o-matic",
-      "09a8beb8e6a8e02dc1e1bd83ac353741"
-    ],
-    [
-      "l10n",
-      "8cdd85e169b835d518bc2fd59f780d8e"
-    ],
-    [
-      "multibuild",
-      "b2c915190b051f55a23b9354b9849847"
-    ],
-    [
-      "multilib",
-      "98584e405e2b0264d37e8f728327fed1"
-    ],
-    [
-      "multilib-build",
-      "9a65133006c608964888346a412cc454"
-    ],
-    [
-      "multilib-minimal",
-      "8bddda43703ba94d8341f4e247f97566"
-    ],
-    [
-      "toolchain-funcs",
-      "605c126bed8d87e4378d5ff1645330cb"
-    ],
-    [
-      "wrapper",
-      "4251d4c84c25f59094fd557e0063a974"
-    ]
-  ],
-  "kit": "gentoo",
-  "branch": "master",
-  "metadata": {
-    "HASH_KEY": "app-arch/zstd-1.4.4-r4",
-    "DEPEND": "app-arch/xz-utils lz4? ( app-arch/lz4 )",
-    "RDEPEND": "app-arch/xz-utils lz4? ( app-arch/lz4 )",
-    "SLOT": "0/1",
-    "SRC_URI": "https://github.com/facebook/zstd/archive/v1.4.4.tar.gz -> zstd-1.4.4.tar.gz",
-    "RESTRICT": "",
-    "HOMEPAGE": "https://facebook.github.io/zstd/",
-    "LICENSE": "|| ( BSD GPL-2 )",
-    "DESCRIPTION": "zstd fast compression library",
-    "KEYWORDS": "~alpha amd64 arm arm64 hppa ~ia64 ~mips ppc ppc64 ~riscv s390 sparc x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris",
-    "INHERITED": "edos2unix l10n wrapper eutils toolchain-funcs multilib flag-o-matic multibuild multilib-build multilib-minimal",
-    "IUSE": "lz4 static-libs +threads abi_x86_32 abi_x86_64 abi_x86_x32 abi_mips_n32 abi_mips_n64 abi_mips_o32 abi_s390_32 abi_s390_64",
-    "REQUIRED_USE": "",
-    "PDEPEND": "",
-    "BDEPEND": "",
-    "EAPI": "7",
-    "PROPERTIES": "",
-    "DEFINED_PHASES": "compile configure install prepare test",
-    "HDEPEND": "",
-    "PYTHON_COMPAT": ""
-  },
-  "md5": "bf789f1a7a778c76b063cd9842966f3d",
-  "metadata_out": "DEFINED_PHASES=compile configure install prepare test\nDEPEND=app-arch/xz-utils lz4? ( app-arch/lz4 )\nDESCRIPTION=zstd fast compression library\nEAPI=7\nHOMEPAGE=https://facebook.github.io/zstd/\nIUSE=lz4 static-libs +threads abi_x86_32 abi_x86_64 abi_x86_x32 abi_mips_n32 abi_mips_n64 abi_mips_o32 abi_s390_32 abi_s390_64\nKEYWORDS=~alpha amd64 arm arm64 hppa ~ia64 ~mips ppc ppc64 ~riscv s390 sparc x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris\nLICENSE=|| ( BSD GPL-2 )\nRDEPEND=app-arch/xz-utils lz4? ( app-arch/lz4 )\nSLOT=0/1\nSRC_URI=https://github.com/facebook/zstd/archive/v1.4.4.tar.gz -> zstd-1.4.4.tar.gz\n_eclasses_=edos2unix\t33e347e171066657f91f8b0c72ec8773\teutils\t2d5b3f4b315094768576b6799e4f926e\tflag-o-matic\t09a8beb8e6a8e02dc1e1bd83ac353741\tl10n\t8cdd85e169b835d518bc2fd59f780d8e\tmultibuild\tb2c915190b051f55a23b9354b9849847\tmultilib\t98584e405e2b0264d37e8f728327fed1\tmultilib-build\t9a65133006c608964888346a412cc454\tmultilib-minimal\t8bddda43703ba94d8341f4e247f97566\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\twrapper\t4251d4c84c25f59094fd557e0063a974\n_md5_=bf789f1a7a778c76b063cd9842966f3d\n",
-  "manifest_md5": "70c9d1f7c3e21c8186266586be3daf88",
-  "files": [
-    {
-      "src_uri": [
-        "https://github.com/facebook/zstd/archive/v1.4.4.tar.gz"
+      "category": "sys-devel",
+      "revision": "3",
+      "package": "gcc",
+      "catpkg": "sys-devel/gcc",
+      "atom": "sys-devel/gcc-10.2.0-r3",
+      "eclasses": [
+        [
+          "edos2unix",
+          "33e347e171066657f91f8b0c72ec8773"
+        ],
+        [
+          "eutils",
+          "2d5b3f4b315094768576b6799e4f926e"
+        ],
+        [
+          "flag-o-matic",
+          "09a8beb8e6a8e02dc1e1bd83ac353741"
+        ],
+        [
+          "gnuconfig",
+          "f9125410be4c062f2fcefc8ec59fc223"
+        ],
+        [
+          "l10n",
+          "8cdd85e169b835d518bc2fd59f780d8e"
+        ],
+        [
+          "libtool",
+          "f143db5a74ccd9ca28c1234deffede96"
+        ],
+        [
+          "multilib",
+          "98584e405e2b0264d37e8f728327fed1"
+        ],
+        [
+          "pax-utils",
+          "a41d1fd1c111289ffa04490de6ee79d7"
+        ],
+        [
+          "prefix",
+          "c2993e4c430c1ee24f278983d6189501"
+        ],
+        [
+          "toolchain",
+          "cb10e0ee5d218043f3a738852ca54fb4"
+        ],
+        [
+          "toolchain-funcs",
+          "605c126bed8d87e4378d5ff1645330cb"
+        ],
+        [
+          "wrapper",
+          "4251d4c84c25f59094fd557e0063a974"
+        ]
       ],
-      "size": "1962617",
-      "hashes": {
-        "blake2b": "e21841a53b6c60703e5500cfc2a02923c4c3e57975aa57e1060310171e0d83d7c8eda1bd0510d5736db5c310d76847d2105ac5f614867fc3a9dc3086a035dfd7",
-        "sha512": "8209837e8eb14e474dfe21d5511085f46cef93b03ab77613fd41e7b8be652418231c38852669c8e0b55b78ad41ea2cb8008d0da122a83f8f27e32b5c86f045cf"
+      "kit": "gentoo",
+      "branch": "master",
+      "metadata": {
+        "HASH_KEY": "sys-devel/gcc-10.2.0-r3",
+        "DEPEND": "sys-devel/gnuconfig sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= ) systemtap? ( dev-util/systemtap ) zstd? ( app-arch/zstd )",
+        "RDEPEND": "sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= )",
+        "SLOT": "10",
+        "SRC_URI": "mirror://gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz mirror://gentoo/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~vapier/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~rhill/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~zorry/patches/gcc/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~blueness/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~tamiko/distfiles/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~slyfox/distfiles/gcc-10.2.0-patches-4.tar.bz2",
+        "RESTRICT": "!test? ( test )",
+        "HOMEPAGE": "https://gcc.gnu.org/",
+        "LICENSE": "GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+",
+        "DESCRIPTION": "The GNU Compiler Collection",
+        "KEYWORDS": "~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86",
+        "INHERITED": "edos2unix l10n wrapper eutils toolchain-funcs multilib flag-o-matic gnuconfig libtool pax-utils prefix toolchain",
+        "IUSE": "test vanilla +nls debug +cxx +nptl +fortran doc hardened multilib objc pgo objc-gc libssp objc++ +openmp fixed-point go +sanitize graphite ada +vtv jit +pie +ssp +pch systemtap d lto zstd",
+        "REQUIRED_USE": "",
+        "PDEPEND": ">=sys-devel/gcc-config-2.3",
+        "BDEPEND": "sys-devel/binutils >=app-portage/elt-patches-20170815 >=sys-devel/bison-1.875 >=sys-devel/flex-2.5.4 nls? ( sys-devel/gettext ) test? ( >=dev-util/dejagnu-1.4.4 >=sys-devel/autogen-5.5.4 )",
+        "EAPI": "7",
+        "PROPERTIES": "",
+        "DEFINED_PHASES": "compile configure install postinst postrm prepare pretend setup test unpack",
+        "HDEPEND": "",
+        "PYTHON_COMPAT": ""
       },
-      "name": "zstd-1.4.4.tar.gz"
+      "md5": "a8f016ca8ac9452cd4ce9d34e21a53cc",
+      "metadata_out": "BDEPEND=sys-devel/binutils >=app-portage/elt-patches-20170815 >=sys-devel/bison-1.875 >=sys-devel/flex-2.5.4 nls? ( sys-devel/gettext ) test? ( >=dev-util/dejagnu-1.4.4 >=sys-devel/autogen-5.5.4 )\nDEFINED_PHASES=compile configure install postinst postrm prepare pretend setup test unpack\nDEPEND=sys-devel/gnuconfig sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= ) systemtap? ( dev-util/systemtap ) zstd? ( app-arch/zstd )\nDESCRIPTION=The GNU Compiler Collection\nEAPI=7\nHOMEPAGE=https://gcc.gnu.org/\nIUSE=test vanilla +nls debug +cxx +nptl +fortran doc hardened multilib objc pgo objc-gc libssp objc++ +openmp fixed-point go +sanitize graphite ada +vtv jit +pie +ssp +pch systemtap d lto zstd\nKEYWORDS=~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86\nLICENSE=GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+\nPDEPEND=>=sys-devel/gcc-config-2.3\nRDEPEND=sys-libs/zlib nls? ( virtual/libintl ) virtual/libiconv >=dev-libs/gmp-4.3.2:0= >=dev-libs/mpfr-2.4.2:0= >=dev-libs/mpc-0.8.1:0= objc-gc? ( >=dev-libs/boehm-gc-7.4.2 ) graphite? ( >=dev-libs/isl-0.14:0= )\nRESTRICT=!test? ( test )\nSLOT=10\nSRC_URI=mirror://gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz mirror://gentoo/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~vapier/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~rhill/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~zorry/patches/gcc/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~blueness/dist/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~tamiko/distfiles/gcc-10.2.0-patches-4.tar.bz2 https://dev.gentoo.org/~slyfox/distfiles/gcc-10.2.0-patches-4.tar.bz2\n_eclasses_=edos2unix\t33e347e171066657f91f8b0c72ec8773\teutils\t2d5b3f4b315094768576b6799e4f926e\tflag-o-matic\t09a8beb8e6a8e02dc1e1bd83ac353741\tgnuconfig\tf9125410be4c062f2fcefc8ec59fc223\tl10n\t8cdd85e169b835d518bc2fd59f780d8e\tlibtool\tf143db5a74ccd9ca28c1234deffede96\tmultilib\t98584e405e2b0264d37e8f728327fed1\tpax-utils\ta41d1fd1c111289ffa04490de6ee79d7\tprefix\tc2993e4c430c1ee24f278983d6189501\ttoolchain\tcb10e0ee5d218043f3a738852ca54fb4\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\twrapper\t4251d4c84c25f59094fd557e0063a974\n_md5_=a8f016ca8ac9452cd4ce9d34e21a53cc\n",
+      "manifest_md5": "a6e1ff3e5e1682ef3ea539b0a043c1f7",
+      "files": [
+        {
+          "src_uri": [
+            "mirror://gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz"
+          ],
+          "size": "75004144",
+          "hashes": {
+            "blake2b": "1d79397330354e61439283cac96a109bf78ffc726265442e6d3ec131f107589ab7349d6612836edd8c8512f7bcc1d901a65a0d5d925d28a5bf3ef5cc3f9787ee",
+            "sha512": "42ae38928bd2e8183af445da34220964eb690b675b1892bbeb7cd5bb62be499011ec9a93397dba5e2fb681afadfc6f2767d03b9035b44ba9be807187ae6dc65e"
+          },
+          "name": "gcc-10.2.0.tar.xz"
+        },
+        {
+          "src_uri": [
+            "mirror://gentoo/gcc-10.2.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~vapier/dist/gcc-10.2.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~rhill/dist/gcc-10.2.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~zorry/patches/gcc/gcc-10.2.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~blueness/dist/gcc-10.2.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~tamiko/distfiles/gcc-10.2.0-patches-4.tar.bz2",
+            "https://dev.gentoo.org/~slyfox/distfiles/gcc-10.2.0-patches-4.tar.bz2"
+          ],
+          "size": "23266",
+          "hashes": {
+            "blake2b": "8173474d3dea27a440b36eb80c89aabb08c37528c3ec2382839c46fc36336aff7f9cdf3dfbc66947df9286b1cfe9f479d615f77d81ab24ff68a3edf5df5b2350",
+            "sha512": "17080f358a3f231837de35188ad1a6ae554a4ca6199efae6dacf9b17706937379559d6c8de330b4237480fea6f5cffffc1158c1d5ecc36ec3a7b410546a2684b"
+          },
+          "name": "gcc-10.2.0-patches-4.tar.bz2"
+        }
+      ]
+    },
+
+    "app-arch/zstd-1.4.4-r4": {
+      "relations": [
+        "app-arch/lz4",
+        "app-arch/xz-utils"
+      ],
+      "relations_by_kind": {
+        "DEPEND": [
+          "app-arch/lz4",
+          "app-arch/xz-utils"
+        ],
+        "RDEPEND": [
+          "app-arch/lz4",
+          "app-arch/xz-utils"
+        ]
+      },
+      "category": "app-arch",
+      "revision": "4",
+      "package": "zstd",
+      "catpkg": "app-arch/zstd",
+      "atom": "app-arch/zstd-1.4.4-r4",
+      "eclasses": [
+        [
+          "edos2unix",
+          "33e347e171066657f91f8b0c72ec8773"
+        ],
+        [
+          "eutils",
+          "2d5b3f4b315094768576b6799e4f926e"
+        ],
+        [
+          "flag-o-matic",
+          "09a8beb8e6a8e02dc1e1bd83ac353741"
+        ],
+        [
+          "l10n",
+          "8cdd85e169b835d518bc2fd59f780d8e"
+        ],
+        [
+          "multibuild",
+          "b2c915190b051f55a23b9354b9849847"
+        ],
+        [
+          "multilib",
+          "98584e405e2b0264d37e8f728327fed1"
+        ],
+        [
+          "multilib-build",
+          "9a65133006c608964888346a412cc454"
+        ],
+        [
+          "multilib-minimal",
+          "8bddda43703ba94d8341f4e247f97566"
+        ],
+        [
+          "toolchain-funcs",
+          "605c126bed8d87e4378d5ff1645330cb"
+        ],
+        [
+          "wrapper",
+          "4251d4c84c25f59094fd557e0063a974"
+        ]
+      ],
+      "kit": "gentoo",
+      "branch": "master",
+      "metadata": {
+        "HASH_KEY": "app-arch/zstd-1.4.4-r4",
+        "DEPEND": "app-arch/xz-utils lz4? ( app-arch/lz4 )",
+        "RDEPEND": "app-arch/xz-utils lz4? ( app-arch/lz4 )",
+        "SLOT": "0/1",
+        "SRC_URI": "https://github.com/facebook/zstd/archive/v1.4.4.tar.gz -> zstd-1.4.4.tar.gz",
+        "RESTRICT": "",
+        "HOMEPAGE": "https://facebook.github.io/zstd/",
+        "LICENSE": "|| ( BSD GPL-2 )",
+        "DESCRIPTION": "zstd fast compression library",
+        "KEYWORDS": "~alpha amd64 arm arm64 hppa ~ia64 ~mips ppc ppc64 ~riscv s390 sparc x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris",
+        "INHERITED": "edos2unix l10n wrapper eutils toolchain-funcs multilib flag-o-matic multibuild multilib-build multilib-minimal",
+        "IUSE": "lz4 static-libs +threads abi_x86_32 abi_x86_64 abi_x86_x32 abi_mips_n32 abi_mips_n64 abi_mips_o32 abi_s390_32 abi_s390_64",
+        "REQUIRED_USE": "",
+        "PDEPEND": "",
+        "BDEPEND": "",
+        "EAPI": "7",
+        "PROPERTIES": "",
+        "DEFINED_PHASES": "compile configure install prepare test",
+        "HDEPEND": "",
+        "PYTHON_COMPAT": ""
+      },
+      "md5": "bf789f1a7a778c76b063cd9842966f3d",
+      "metadata_out": "DEFINED_PHASES=compile configure install prepare test\nDEPEND=app-arch/xz-utils lz4? ( app-arch/lz4 )\nDESCRIPTION=zstd fast compression library\nEAPI=7\nHOMEPAGE=https://facebook.github.io/zstd/\nIUSE=lz4 static-libs +threads abi_x86_32 abi_x86_64 abi_x86_x32 abi_mips_n32 abi_mips_n64 abi_mips_o32 abi_s390_32 abi_s390_64\nKEYWORDS=~alpha amd64 arm arm64 hppa ~ia64 ~mips ppc ppc64 ~riscv s390 sparc x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris\nLICENSE=|| ( BSD GPL-2 )\nRDEPEND=app-arch/xz-utils lz4? ( app-arch/lz4 )\nSLOT=0/1\nSRC_URI=https://github.com/facebook/zstd/archive/v1.4.4.tar.gz -> zstd-1.4.4.tar.gz\n_eclasses_=edos2unix\t33e347e171066657f91f8b0c72ec8773\teutils\t2d5b3f4b315094768576b6799e4f926e\tflag-o-matic\t09a8beb8e6a8e02dc1e1bd83ac353741\tl10n\t8cdd85e169b835d518bc2fd59f780d8e\tmultibuild\tb2c915190b051f55a23b9354b9849847\tmultilib\t98584e405e2b0264d37e8f728327fed1\tmultilib-build\t9a65133006c608964888346a412cc454\tmultilib-minimal\t8bddda43703ba94d8341f4e247f97566\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\twrapper\t4251d4c84c25f59094fd557e0063a974\n_md5_=bf789f1a7a778c76b063cd9842966f3d\n",
+      "manifest_md5": "70c9d1f7c3e21c8186266586be3daf88",
+      "files": [
+        {
+          "src_uri": [
+            "https://github.com/facebook/zstd/archive/v1.4.4.tar.gz"
+          ],
+          "size": "1962617",
+          "hashes": {
+            "blake2b": "e21841a53b6c60703e5500cfc2a02923c4c3e57975aa57e1060310171e0d83d7c8eda1bd0510d5736db5c310d76847d2105ac5f614867fc3a9dc3086a035dfd7",
+            "sha512": "8209837e8eb14e474dfe21d5511085f46cef93b03ab77613fd41e7b8be652418231c38852669c8e0b55b78ad41ea2cb8008d0da122a83f8f27e32b5c86f045cf"
+          },
+          "name": "zstd-1.4.4.tar.gz"
+        }
+      ]
+    },
+
+    "sys-libs/zlib-1.2.11-r3": {
+      "relations": [
+        "app-portage/elt-patches",
+        "sys-devel/autoconf",
+        "sys-devel/automake",
+        "sys-devel/libtool"
+      ],
+      "relations_by_kind": {
+        "DEPEND": [],
+        "RDEPEND": [],
+        "BDEPEND": [
+          "app-portage/elt-patches",
+          "sys-devel/autoconf",
+          "sys-devel/automake",
+          "sys-devel/libtool"
+        ]
+      },
+      "category": "sys-libs",
+      "revision": "3",
+      "package": "zlib",
+      "catpkg": "sys-libs/zlib",
+      "atom": "sys-libs/zlib-1.2.11-r3",
+      "eclasses": [
+        [
+          "autotools",
+          "7d999b62b8749fad43fff00620cedf47"
+        ],
+        [
+          "libtool",
+          "f143db5a74ccd9ca28c1234deffede96"
+        ],
+        [
+          "multibuild",
+          "b2c915190b051f55a23b9354b9849847"
+        ],
+        [
+          "multilib",
+          "98584e405e2b0264d37e8f728327fed1"
+        ],
+        [
+          "multilib-build",
+          "9a65133006c608964888346a412cc454"
+        ],
+        [
+          "multilib-minimal",
+          "8bddda43703ba94d8341f4e247f97566"
+        ],
+        [
+          "toolchain-funcs",
+          "605c126bed8d87e4378d5ff1645330cb"
+        ],
+        [
+          "usr-ldscript",
+          "7c918d239d0f9098867d0c8e33348fc9"
+        ]
+      ],
+      "kit": "gentoo",
+      "branch": "master",
+      "metadata": {
+        "HASH_KEY": "sys-libs/zlib-1.2.11-r3",
+        "DEPEND": "!<dev-libs/libxml2-2.7.7",
+        "RDEPEND": "!<dev-libs/libxml2-2.7.7",
+        "SLOT": "0/1",
+        "SRC_URI": "https://zlib.net/zlib-1.2.11.tar.gz http://www.gzip.org/zlib/zlib-1.2.11.tar.gz http://www.zlib.net/current/beta/zlib-1.2.11.tar.gz",
+        "RESTRICT": "",
+        "HOMEPAGE": "https://zlib.net/",
+        "LICENSE": "ZLIB",
+        "DESCRIPTION": "Standard (de)compression library",
+        "KEYWORDS": "~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86",
+        "INHERITED": "toolchain-funcs multilib libtool autotools multibuild multilib-build multilib-minimal usr-ldscript",
+        "IUSE": "minizip static-libs abi_x86_32 abi_x86_64 abi_x86_x32 abi_mips_n32 abi_mips_n64 abi_mips_o32 abi_s390_32 abi_s390_64 split-usr",
+        "REQUIRED_USE": "",
+        "PDEPEND": "",
+        "BDEPEND": "minizip? ( || ( >=sys-devel/automake-1.16.1:1.16 >=sys-devel/automake-1.15.1:1.15 ) >=sys-devel/autoconf-2.69 >=sys-devel/libtool-2.4 ) >=app-portage/elt-patches-20170815",
+        "EAPI": "7",
+        "PROPERTIES": "",
+        "DEFINED_PHASES": "compile configure install prepare test",
+        "HDEPEND": "",
+        "PYTHON_COMPAT": ""
+      },
+      "md5": "64f38848236f445e6bc6df1326b84d9c",
+      "metadata_out": "BDEPEND=minizip? ( || ( >=sys-devel/automake-1.16.1:1.16 >=sys-devel/automake-1.15.1:1.15 ) >=sys-devel/autoconf-2.69 >=sys-devel/libtool-2.4 ) >=app-portage/elt-patches-20170815\nDEFINED_PHASES=compile configure install prepare test\nDEPEND=!<dev-libs/libxml2-2.7.7\nDESCRIPTION=Standard (de)compression library\nEAPI=7\nHOMEPAGE=https://zlib.net/\nIUSE=minizip static-libs abi_x86_32 abi_x86_64 abi_x86_x32 abi_mips_n32 abi_mips_n64 abi_mips_o32 abi_s390_32 abi_s390_64 split-usr\nKEYWORDS=~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86\nLICENSE=ZLIB\nRDEPEND=!<dev-libs/libxml2-2.7.7\nSLOT=0/1\nSRC_URI=https://zlib.net/zlib-1.2.11.tar.gz http://www.gzip.org/zlib/zlib-1.2.11.tar.gz http://www.zlib.net/current/beta/zlib-1.2.11.tar.gz\n_eclasses_=autotools\t7d999b62b8749fad43fff00620cedf47\tlibtool\tf143db5a74ccd9ca28c1234deffede96\tmultibuild\tb2c915190b051f55a23b9354b9849847\tmultilib\t98584e405e2b0264d37e8f728327fed1\tmultilib-build\t9a65133006c608964888346a412cc454\tmultilib-minimal\t8bddda43703ba94d8341f4e247f97566\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\tusr-ldscript\t7c918d239d0f9098867d0c8e33348fc9\n_md5_=64f38848236f445e6bc6df1326b84d9c\n",
+      "manifest_md5": "fbe77df96f95ba8a78defd856592c44e",
+      "files": [
+        {
+          "src_uri": [
+            "https://zlib.net/zlib-1.2.11.tar.gz",
+            "http://www.gzip.org/zlib/zlib-1.2.11.tar.gz",
+            "http://www.zlib.net/current/beta/zlib-1.2.11.tar.gz"
+          ],
+          "size": "607698",
+          "hashes": {
+            "blake2b": "6bfc4bca5dcadba8a0d4121a2b3ed0bfe440c261003521862c8e6381f1a6f0a72d3fc037351d30afd7ef321e8e8d2ec817c046ac749f2ca0c97fbdc2f7e840b7",
+            "sha512": "73fd3fff4adeccd4894084c15ddac89890cd10ef105dd5e1835e1e9bbb6a49ff229713bd197d203edfa17c2727700fce65a2a235f07568212d820dca88b528ae"
+          },
+          "name": "zlib-1.2.11.tar.gz"
+        }
+      ]
+    },
+    "sys-libs/zlib-1.2.11-r2": {
+      "relations": [
+        "app-portage/elt-patches",
+        "sys-devel/autoconf",
+        "sys-devel/automake",
+        "sys-devel/libtool"
+      ],
+      "relations_by_kind": {
+        "DEPEND": [
+          "app-portage/elt-patches",
+          "sys-devel/autoconf",
+          "sys-devel/automake",
+          "sys-devel/libtool"
+        ],
+        "RDEPEND": []
+      },
+      "category": "sys-libs",
+      "revision": "2",
+      "package": "zlib",
+      "catpkg": "sys-libs/zlib",
+      "atom": "sys-libs/zlib-1.2.11-r2",
+      "eclasses": [
+        [
+          "autotools",
+          "7d999b62b8749fad43fff00620cedf47"
+        ],
+        [
+          "desktop",
+          "7fd20552ce4cc97e8acb132a499a7dd8"
+        ],
+        [
+          "edos2unix",
+          "33e347e171066657f91f8b0c72ec8773"
+        ],
+        [
+          "epatch",
+          "e8f1ec13660dc2f44b32775765d85e42"
+        ],
+        [
+          "estack",
+          "686eaab303305a908fd57b2fd7617800"
+        ],
+        [
+          "eutils",
+          "2d5b3f4b315094768576b6799e4f926e"
+        ],
+        [
+          "l10n",
+          "8cdd85e169b835d518bc2fd59f780d8e"
+        ],
+        [
+          "libtool",
+          "f143db5a74ccd9ca28c1234deffede96"
+        ],
+        [
+          "ltprune",
+          "4f3f2db5ce3ccbeeacdf3f94954043aa"
+        ],
+        [
+          "multibuild",
+          "b2c915190b051f55a23b9354b9849847"
+        ],
+        [
+          "multilib",
+          "98584e405e2b0264d37e8f728327fed1"
+        ],
+        [
+          "multilib-build",
+          "9a65133006c608964888346a412cc454"
+        ],
+        [
+          "multilib-minimal",
+          "8bddda43703ba94d8341f4e247f97566"
+        ],
+        [
+          "preserve-libs",
+          "ef207dc62baddfddfd39a164d9797648"
+        ],
+        [
+          "toolchain-funcs",
+          "605c126bed8d87e4378d5ff1645330cb"
+        ],
+        [
+          "usr-ldscript",
+          "7c918d239d0f9098867d0c8e33348fc9"
+        ],
+        [
+          "vcs-clean",
+          "2a0f74a496fa2b1552c4f3398258b7bf"
+        ],
+        [
+          "wrapper",
+          "4251d4c84c25f59094fd557e0063a974"
+        ]
+      ],
+      "kit": "gentoo",
+      "branch": "master",
+      "metadata": {
+        "HASH_KEY": "sys-libs/zlib-1.2.11-r2",
+        "DEPEND": "minizip? ( || ( >=sys-devel/automake-1.16.1:1.16 >=sys-devel/automake-1.15.1:1.15 ) >=sys-devel/autoconf-2.69 >=sys-devel/libtool-2.4 ) >=app-portage/elt-patches-20170815",
+        "RDEPEND": "!<dev-libs/libxml2-2.7.7",
+        "SLOT": "0/1",
+        "SRC_URI": "https://zlib.net/zlib-1.2.11.tar.gz http://www.gzip.org/zlib/zlib-1.2.11.tar.gz http://www.zlib.net/current/beta/zlib-1.2.11.tar.gz",
+        "RESTRICT": "",
+        "HOMEPAGE": "https://zlib.net/",
+        "LICENSE": "ZLIB",
+        "DESCRIPTION": "Standard (de)compression library",
+        "KEYWORDS": "~alpha amd64 arm arm64 hppa ~ia64 ~m68k ~mips ppc ppc64 ~riscv s390 sparc x86",
+        "INHERITED": "toolchain-funcs multilib libtool autotools desktop edos2unix estack epatch l10n ltprune preserve-libs vcs-clean wrapper eutils multibuild multilib-build multilib-minimal usr-ldscript",
+        "IUSE": "minizip static-libs abi_x86_32 abi_x86_64 abi_x86_x32 abi_mips_n32 abi_mips_n64 abi_mips_o32 abi_s390_32 abi_s390_64 split-usr",
+        "REQUIRED_USE": "",
+        "PDEPEND": "",
+        "BDEPEND": "",
+        "EAPI": "5",
+        "PROPERTIES": "",
+        "DEFINED_PHASES": "compile configure install prepare test",
+        "HDEPEND": "",
+        "PYTHON_COMPAT": ""
+      },
+      "md5": "ac490f5561160862630b608ea52ed787",
+      "metadata_out": "DEFINED_PHASES=compile configure install prepare test\nDEPEND=minizip? ( || ( >=sys-devel/automake-1.16.1:1.16 >=sys-devel/automake-1.15.1:1.15 ) >=sys-devel/autoconf-2.69 >=sys-devel/libtool-2.4 ) >=app-portage/elt-patches-20170815\nDESCRIPTION=Standard (de)compression library\nEAPI=5\nHOMEPAGE=https://zlib.net/\nIUSE=minizip static-libs abi_x86_32 abi_x86_64 abi_x86_x32 abi_mips_n32 abi_mips_n64 abi_mips_o32 abi_s390_32 abi_s390_64 split-usr\nKEYWORDS=~alpha amd64 arm arm64 hppa ~ia64 ~m68k ~mips ppc ppc64 ~riscv s390 sparc x86\nLICENSE=ZLIB\nRDEPEND=!<dev-libs/libxml2-2.7.7\nSLOT=0/1\nSRC_URI=https://zlib.net/zlib-1.2.11.tar.gz http://www.gzip.org/zlib/zlib-1.2.11.tar.gz http://www.zlib.net/current/beta/zlib-1.2.11.tar.gz\n_eclasses_=autotools\t7d999b62b8749fad43fff00620cedf47\tdesktop\t7fd20552ce4cc97e8acb132a499a7dd8\tedos2unix\t33e347e171066657f91f8b0c72ec8773\tepatch\te8f1ec13660dc2f44b32775765d85e42\testack\t686eaab303305a908fd57b2fd7617800\teutils\t2d5b3f4b315094768576b6799e4f926e\tl10n\t8cdd85e169b835d518bc2fd59f780d8e\tlibtool\tf143db5a74ccd9ca28c1234deffede96\tltprune\t4f3f2db5ce3ccbeeacdf3f94954043aa\tmultibuild\tb2c915190b051f55a23b9354b9849847\tmultilib\t98584e405e2b0264d37e8f728327fed1\tmultilib-build\t9a65133006c608964888346a412cc454\tmultilib-minimal\t8bddda43703ba94d8341f4e247f97566\tpreserve-libs\tef207dc62baddfddfd39a164d9797648\ttoolchain-funcs\t605c126bed8d87e4378d5ff1645330cb\tusr-ldscript\t7c918d239d0f9098867d0c8e33348fc9\tvcs-clean\t2a0f74a496fa2b1552c4f3398258b7bf\twrapper\t4251d4c84c25f59094fd557e0063a974\n_md5_=ac490f5561160862630b608ea52ed787\n",
+      "manifest_md5": "fbe77df96f95ba8a78defd856592c44e",
+      "files": [
+        {
+          "src_uri": [
+            "https://zlib.net/zlib-1.2.11.tar.gz",
+            "http://www.gzip.org/zlib/zlib-1.2.11.tar.gz",
+            "http://www.zlib.net/current/beta/zlib-1.2.11.tar.gz"
+          ],
+          "size": "607698",
+          "hashes": {
+            "blake2b": "6bfc4bca5dcadba8a0d4121a2b3ed0bfe440c261003521862c8e6381f1a6f0a72d3fc037351d30afd7ef321e8e8d2ec817c046ac749f2ca0c97fbdc2f7e840b7",
+            "sha512": "73fd3fff4adeccd4894084c15ddac89890cd10ef105dd5e1835e1e9bbb6a49ff229713bd197d203edfa17c2727700fce65a2a235f07568212d820dca88b528ae"
+          },
+          "name": "zlib-1.2.11.tar.gz"
+        }
+      ]
     }
-  ]
-}
-
-
-
-
-}
-
+  }
 }

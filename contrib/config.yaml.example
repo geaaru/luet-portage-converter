@@ -6,7 +6,11 @@ skipped_resolutions:
     - name: eselect-opengl
       category: app-eselect
 
+    - name: binutils-apple
+      category: sys-devel
 
+    - name: gcc-apple
+      category: sys-devel
 
   categories:
     - virtual
@@ -21,7 +25,8 @@ build_template_file: templates/build-pkg.yaml.tmpl
 artefacts:
 - tree: multi-arch/packages
   packages:
-    - sys-devel/gcc:9.3.0
+    - net-libs/libssh2
+#- sys-devel/gcc:9.3.0
 #    - app-emulation/lxd
 #    - app-emulation/lxc
 
@@ -30,6 +35,9 @@ reposcan_sources:
 #  - source1.json
   - /tmp/kit_cache/gentoo-master
 #  - /tmp/kit_cache/geaaru_overlay-master
+
+# Disable use of category with slot as requires. Default is enable.
+# reposcan_requires_slot: false
 
 reposcan_contraints:
   packages:
