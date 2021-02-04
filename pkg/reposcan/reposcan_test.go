@@ -19,11 +19,12 @@ package reposcan_test
 
 import (
 	"errors"
-	//	"fmt"
+	//"fmt"
 
 	. "github.com/Luet-lab/luet-portage-converter/pkg/reposcan"
 
 	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	luet_pkg "github.com/mudler/luet/pkg/package"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -110,6 +111,98 @@ var _ = Describe("Reposcan", func() {
 			}))
 			Expect(len(solution.RuntimeDeps)).Should(Equal(0))
 
+			Expect(solution.ToPack(false)).Should(Equal(
+				&luet_pkg.DefaultPackage{
+					Name:        "noip-updater",
+					Category:    "net-dns",
+					Version:     "2.1.9",
+					Description: "no-ip.com dynamic DNS updater",
+					Uri: []string{
+						"http://www.no-ip.com",
+					},
+					License: "GPL-2",
+					PackageRequires: []*luet_pkg.DefaultPackage{
+						&luet_pkg.DefaultPackage{
+							Name:     "gcc",
+							Category: "sys-devel-10",
+							Version:  ">=0",
+						},
+					},
+					PackageConflicts: nil,
+					Labels: map[string]string{
+						"emerge.packages":          "net-dns/noip-updater",
+						"kit":                      "geaaru_overlay",
+						"DEPEND":                   "sys-devel/gcc virtual/pkgconfig",
+						"original.package.name":    "net-dns/noip-updater",
+						"original.package.version": "2.1.9-r1",
+					},
+				},
+			))
+		})
+
+		It("Load Json file with deps1 without slot on category", func() {
+
+			resolver := NewRepoScanResolver()
+			err := resolver.LoadJson("../../tests/fixtures/reposcan-01.json")
+			Expect(err).Should(BeNil())
+			resolver.SetIgnoreMissingDeps(true)
+			resolver.SetDepsWithSlot(false)
+			err = resolver.BuildMap()
+			Expect(err).Should(BeNil())
+
+			val, ok := resolver.GetMap()["net-dns/noip-updater"]
+			atom := val[0]
+			Expect(ok).Should(Equal(true))
+			Expect(atom.Package).Should(Equal("noip-updater"))
+			Expect(atom.Category).Should(Equal("net-dns"))
+			Expect(atom.Kit).Should(Equal("geaaru_overlay"))
+
+			solution, err := resolver.Resolve("net-dns/noip-updater")
+			Expect(err).Should(BeNil())
+
+			Expect(solution.Package.GetPackageName()).Should(Equal("net-dns/noip-updater"))
+			Expect(solution.Package.Slot).Should(Equal("0"))
+			Expect(solution.Package.License).Should(Equal("GPL-2"))
+			Expect(len(solution.BuildDeps)).Should(Equal(1))
+			Expect(solution.BuildDeps[0]).Should(Equal(gentoo.GentooPackage{
+				Name:          "gcc",
+				Category:      "sys-devel",
+				Version:       "10.2.0",
+				VersionSuffix: "-r3",
+				Slot:          "",
+				License:       "GPL-3+ LGPL-3+ || ( GPL-3+ libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.3+",
+				Repository:    "gentoo",
+				Condition:     gentoo.PkgCondEqual,
+			}))
+			Expect(len(solution.RuntimeDeps)).Should(Equal(0))
+
+			Expect(solution.ToPack(false)).Should(Equal(
+				&luet_pkg.DefaultPackage{
+					Name:        "noip-updater",
+					Category:    "net-dns",
+					Version:     "2.1.9",
+					Description: "no-ip.com dynamic DNS updater",
+					Uri: []string{
+						"http://www.no-ip.com",
+					},
+					License: "GPL-2",
+					PackageRequires: []*luet_pkg.DefaultPackage{
+						&luet_pkg.DefaultPackage{
+							Name:     "gcc",
+							Category: "sys-devel",
+							Version:  ">=0",
+						},
+					},
+					PackageConflicts: nil,
+					Labels: map[string]string{
+						"emerge.packages":          "net-dns/noip-updater",
+						"kit":                      "geaaru_overlay",
+						"DEPEND":                   "sys-devel/gcc virtual/pkgconfig",
+						"original.package.name":    "net-dns/noip-updater",
+						"original.package.version": "2.1.9-r1",
+					},
+				},
+			))
 		})
 
 		It("Load Json file with deps2", func() {
