@@ -181,6 +181,12 @@ type PortageSolution struct {
 	Labels      map[string]string `json:"labels,omitempty"`
 }
 
+func (s *PortageSolution) SetLabel(k, v string) {
+	if v != "" {
+		s.Labels[k] = v
+	}
+}
+
 func (s *PortageSolution) ToPack(runtime bool) *luet_pkg.DefaultPackage {
 
 	version := s.Package.Version

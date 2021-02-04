@@ -207,7 +207,7 @@ func (r *RepoScanResolver) Resolve(pkg string) (*specs.PortageSolution, error) {
 		ans.Uri = append(ans.Uri, atom.GetMetadataValue("HOMEPAGE"))
 	}
 	if atom.HasMetadataKey("IUSE") {
-		ans.Labels["iuse"] = atom.GetMetadataValue("IUSE")
+		ans.SetLabel("IUSE", atom.GetMetadataValue("IUSE"))
 	}
 
 	err = r.retrieveRuntimeDeps(atom, last, ans)
@@ -217,6 +217,7 @@ func (r *RepoScanResolver) Resolve(pkg string) (*specs.PortageSolution, error) {
 
 	err = r.retrieveBuildtimeDeps(atom, last, ans)
 
+	fmt.Println("ANS ", ans)
 	return ans, nil
 }
 
@@ -228,7 +229,7 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 	// Trying to elaborate use flags and use old way as failover
 	if atom.HasMetadataKey("RDEPEND") {
 		rdepend := atom.GetMetadataValue("RDEPEND")
-		solution.Labels["RDEPEND"] = rdepend
+		solution.SetLabel("RDEPEND", rdepend)
 
 		deps, err := ParseDependencies(rdepend)
 		if err != nil {
@@ -278,7 +279,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 	// Trying to elaborate use flags and use old way as failover
 	if atom.HasMetadataKey("DEPEND") {
 		depend := atom.GetMetadataValue("DEPEND")
-		solution.Labels["DEPEND"] = depend
+		solution.SetLabel("DEPEND", depend)
 
 		deps, err := ParseDependencies(depend)
 		if err != nil {
@@ -297,7 +298,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 
 			if atom.HasMetadataKey("BDEPEND") {
 				bdepends := atom.GetMetadataValue("BDEPEND")
-				solution.Labels["BDEPEND"] = bdepends
+				solution.SetLabel("BDEPEND", bdepends)
 
 				deps, err := ParseDependencies(bdepends)
 				if err != nil {
