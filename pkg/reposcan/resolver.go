@@ -39,6 +39,7 @@ type RepoScanResolver struct {
 	IgnoreMissingDeps bool
 	DepsWithSlot      bool
 	DisabledUseFlags  []string
+	DisabledKeywords  []string
 }
 
 func NewRepoScanResolver() *RepoScanResolver {
@@ -59,6 +60,8 @@ func (r *RepoScanResolver) SetDepsWithSlot(v bool)         { r.DepsWithSlot = v 
 func (r *RepoScanResolver) GetDepsWithSlot() bool          { return r.DepsWithSlot }
 func (r *RepoScanResolver) SetDisabledUseFlags(u []string) { r.DisabledUseFlags = u }
 func (r *RepoScanResolver) GetDisabledUseFlags() []string  { return r.DisabledUseFlags }
+func (r *RepoScanResolver) SetDisabledKeywords(k []string) { r.DisabledKeywords = k }
+func (r *RepoScanResolver) GetDisabledKeywords() []string  { return r.DisabledKeywords }
 func (r *RepoScanResolver) IsDisableUseFlag(u string) bool {
 	ans := false
 
@@ -217,7 +220,6 @@ func (r *RepoScanResolver) Resolve(pkg string) (*specs.PortageSolution, error) {
 
 	err = r.retrieveBuildtimeDeps(atom, last, ans)
 
-	fmt.Println("ANS ", ans)
 	return ans, nil
 }
 
@@ -530,16 +532,16 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 			}
 
 			// TODO: check of handle this in a better way
-			keywords := atom.GetMetadataValue("KEYWORDS")
-			if keywords == "" {
-				fmt.Println(fmt.Sprintf(
-					"[%s] Skip version without keywords %s", pkg, p.GetPF()))
-				continue
-			}
-
-			valid, err := r.PackageIsAdmit(gp, p)
+			valid, err := r.KeywordsIsAdmit(&atom, p)
 			if err != nil {
 				return nil, err
+			}
+
+			if valid {
+				valid, err = r.PackageIsAdmit(gp, p)
+				if err != nil {
+					return nil, err
+				}
 			}
 
 			fmt.Println(fmt.Sprintf(
@@ -618,4 +620,30 @@ func (r *RepoScanResolver) PackageIsAdmit(target, atom *gentoo.GentooPackage) (b
 	}
 
 	return valid, nil
+}
+
+func (r *RepoScanResolver) KeywordsIsAdmit(atom *RepoScanAtom, p *gentoo.GentooPackage) (bool, error) {
+	ans := true
+
+	keywords := atom.GetMetadataValue("KEYWORDS")
+	if keywords == "" {
+		fmt.Println(fmt.Sprintf(
+			"[%s] Skip version without keywords %s or disabled.", atom.Atom, p.GetPF()))
+		return false, nil
+	}
+
+	if len(r.DisabledKeywords) > 0 {
+		ak := strings.Split(keywords, " ")
+		for _, k := range ak {
+			for _, d := range r.DisabledKeywords {
+				if d == k {
+					ans = false
+					goto end
+				}
+			}
+		}
+	}
+end:
+
+	return ans, nil
 }

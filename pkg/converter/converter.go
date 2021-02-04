@@ -426,8 +426,11 @@ func (pc *PortageConverter) Generate() error {
 		resolver.SetIgnoreMissingDeps(pc.IgnoreMissingDeps)
 		resolver.SetDepsWithSlot(pc.Specs.ReposcanRequiresWithSlot)
 		resolver.SetDisabledUseFlags(pc.Specs.ReposcanDisabledUseFlags)
+		resolver.SetDisabledKeywords(pc.Specs.ReposcanDisabledKeywords)
 		fmt.Println(fmt.Sprintf("Using dependency with slot on category: %v",
 			resolver.GetDepsWithSlot()))
+		fmt.Println(fmt.Sprintf("Disabled keywords: %s", resolver.GetDisabledKeywords()))
+		fmt.Println(fmt.Sprintf("Disabled USE: %s", resolver.GetDisabledUseFlags()))
 		err = resolver.LoadJsonFiles()
 		if err != nil {
 			return err
