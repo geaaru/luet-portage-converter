@@ -58,6 +58,7 @@ func Execute() {
 		Run: func(cmd *cobra.Command, args []string) {
 			treePath, _ := cmd.Flags().GetStringArray("tree")
 			reposcanSources, _ := cmd.Flags().GetStringArray("reposcan-files")
+			disableUseFlags, _ := cmd.Flags().GetStringArray("disable-use-flag")
 			to, _ := cmd.Flags().GetString("to")
 			rulesFile, _ := cmd.Flags().GetString("rules")
 			override, _ := cmd.Flags().GetBool("override")
@@ -85,6 +86,10 @@ func Execute() {
 				}
 			}
 
+			if len(disableUseFlags) > 0 {
+				converter.Specs.ReposcanDisabledUseFlags = append(converter.Specs.ReposcanDisabledUseFlags, disableUseFlags...)
+			}
+
 			err = converter.Generate()
 			if err != nil {
 				fmt.Println(err)
@@ -100,6 +105,7 @@ func Execute() {
 	rootCmd.Flags().Bool("override", false, "Override existing specs if already present.")
 	rootCmd.Flags().String("backend", "reposcan", "Select backend resolver: qdepends|reposcan.")
 	rootCmd.Flags().StringArray("reposcan-files", []string{}, "Append additional reposcan files. Only for reposcan backend.")
+	rootCmd.Flags().StringArray("disable-use-flag", []string{}, "Append additional use flags to disable.")
 	rootCmd.Flags().Bool("ignore-missing-deps", false, "Ignore missing deps on resolver.")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

@@ -47,6 +47,7 @@ type PortageConverter struct {
 
 	Override          bool
 	IgnoreMissingDeps bool
+	DisabledUseFlags  []string
 }
 
 func NewPortageConverter(targetDir, backend string) *PortageConverter {
@@ -60,6 +61,7 @@ func NewPortageConverter(targetDir, backend string) *PortageConverter {
 		Backend:           backend,
 		Override:          false,
 		IgnoreMissingDeps: false,
+		DisabledUseFlags:  []string{},
 	}
 }
 
@@ -423,6 +425,7 @@ func (pc *PortageConverter) Generate() error {
 		resolver.JsonSources = pc.Specs.ReposcanSources
 		resolver.SetIgnoreMissingDeps(pc.IgnoreMissingDeps)
 		resolver.SetDepsWithSlot(pc.Specs.ReposcanRequiresWithSlot)
+		resolver.SetDisabledUseFlags(pc.Specs.ReposcanDisabledUseFlags)
 		err = resolver.LoadJsonFiles()
 		if err != nil {
 			return err

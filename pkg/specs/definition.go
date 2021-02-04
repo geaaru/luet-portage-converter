@@ -43,6 +43,7 @@ type PortageConverterSpecs struct {
 	ReposcanRequiresWithSlot bool                                `json:"reposcan_requires_slot,omitempty" yaml:"reposcan_requires_slot,omitempty"`
 	ReposcanSources          []string                            `json:"reposcan_sources,omitempty" yaml:"reposcan_sources,omitempty"`
 	ReposcanConstraints      PortageConverterReposcanConstraints `json:"reposcan_contraints,omitempty" yaml:"reposcan_contraints,omitempty"`
+	ReposcanDisabledUseFlags []string                            `json:"reposcan_disabled_use_flags,omitempty" yaml:"reposcan_disabled_use_flags,omitempty"`
 }
 
 type PortageConverterReposcanConstraints struct {
@@ -154,6 +155,10 @@ func (s *PortageConverterSpecs) GetArtefacts() []PortageConverterArtefact {
 
 func (s *PortageConverterSpecs) AddReposcanSource(source string) {
 	s.ReposcanSources = append(s.ReposcanSources, source)
+}
+
+func (s *PortageConverterSpecs) AddReposcanDisabledUseFlags(uses []string) {
+	s.ReposcanDisabledUseFlags = append(s.ReposcanDisabledUseFlags, uses...)
 }
 
 func (a *PortageConverterArtefact) GetPackages() []string { return a.Packages }

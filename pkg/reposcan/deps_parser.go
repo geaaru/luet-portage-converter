@@ -20,6 +20,7 @@ Based on old code of luet simpleparser.
 package reposcan
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -31,6 +32,7 @@ type GentooDependency struct {
 	UseCondition _gentoo.PackageCond
 	SubDeps      []*GentooDependency
 	Dep          *_gentoo.GentooPackage
+	DepInOr      bool
 }
 
 type EbuildDependencies struct {
@@ -125,7 +127,7 @@ func (r *EbuildDependencies) GetDependencies() []*GentooDependency {
 	return ans
 }
 
-func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
+func ParseDependenciesMultiline(rdepend string) (*EbuildDependencies, error) {
 	var lastdep []*GentooDependency = make([]*GentooDependency, 0)
 	var pendingDep = false
 	var orDep = false
@@ -250,6 +252,114 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 				}
 			}
 
+		}
+
+	}
+
+	return ans, nil
+}
+
+func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
+	var idx = 0
+	var last *GentooDependency
+	stack := []*GentooDependency{}
+
+	ans := &EbuildDependencies{
+		Dependencies: make([]*GentooDependency, 0),
+	}
+
+	if rdepend != "" {
+
+		rdepends := strings.Split(rdepend, " ")
+
+		for idx < len(rdepends) {
+			rr := rdepends[idx]
+			rr = strings.TrimSpace(rr)
+
+			if rr != "" {
+				//fmt.Println("PARSING ", rr)
+
+				if rr == "||" {
+					dep, err := NewGentooDependency("", "")
+					if err != nil {
+						return nil, err
+					}
+					dep.DepInOr = true
+
+					if last != nil {
+						last.SubDeps = append(last.SubDeps, dep)
+					}
+					stack = append(stack, dep)
+					last = dep
+					idx++
+					continue
+				}
+
+				if strings.Index(rr, "?") > 0 {
+					// POST: the string is related to use flags
+					dep, err := NewGentooDependency("", rr[:strings.Index(rr, "?")])
+					if err != nil {
+						return nil, err
+					} else {
+						ans.Dependencies = append(ans.Dependencies, dep)
+						stack = append(stack, dep)
+						last = dep
+					}
+
+					//fmt.Println("Add pendency ", dep)
+					idx++
+					continue
+				}
+
+				if rr == "(" {
+					// POST: begin subdeps. Nothing to do.
+					if last == nil {
+						return nil, errors.New("Unexpected round parenthesis without USE flag")
+					}
+					idx++
+					continue
+				}
+
+				if rr == ")" {
+
+					if last == nil {
+						return nil, errors.New("Unexpected round parenthesis on empty stack")
+					}
+
+					// POST: end subdeps.
+					if len(stack) > 1 {
+						//fmt.Println("STACK ", len(stack))
+						// Set as last dep the previous dep in the stack
+						last = stack[len(stack)-2]
+						stack = stack[:len(stack)-1]
+						//		fmt.Println("STACK2 ", len(stack))
+					} else {
+						stack = []*GentooDependency{}
+						last = nil
+					}
+
+					idx++
+					continue
+				}
+
+				if len(stack) > 0 {
+					_, err := last.AddSubDependency(rr, "")
+					if err != nil {
+						return nil, errors.New("Invalid dep " + rr)
+					}
+				} else {
+
+					dep, err := NewGentooDependency(rr, "")
+					if err != nil {
+						// Debug
+						fmt.Println("Ignoring dep", rr)
+					} else {
+						ans.Dependencies = append(ans.Dependencies, dep)
+					}
+				}
+			}
+
+			idx++
 		}
 
 	}

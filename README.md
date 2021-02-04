@@ -47,8 +47,6 @@ skipped_resolutions:
     - name: eselect-opengl
       category: app-eselect
 
-
-
   categories:
     - virtual
 
@@ -74,6 +72,8 @@ reposcan_contraints:
     - dev-lang/python:3.7
     - sys-devel/gcc:9.3.0
 
+reposcan_disabled_use_flags:
+  - test
 ```
 
 ## Create luet specs

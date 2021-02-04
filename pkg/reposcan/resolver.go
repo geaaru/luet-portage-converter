@@ -38,6 +38,7 @@ type RepoScanResolver struct {
 	Map               map[string]([]RepoScanAtom)
 	IgnoreMissingDeps bool
 	DepsWithSlot      bool
+	DisabledUseFlags  []string
 }
 
 func NewRepoScanResolver() *RepoScanResolver {
@@ -52,10 +53,26 @@ func NewRepoScanResolver() *RepoScanResolver {
 	}
 }
 
-func (r *RepoScanResolver) SetIgnoreMissingDeps(v bool) { r.IgnoreMissingDeps = v }
-func (r *RepoScanResolver) IsIgnoreMissingDeps() bool   { return r.IgnoreMissingDeps }
-func (r *RepoScanResolver) SetDepsWithSlot(v bool)      { r.DepsWithSlot = v }
-func (r *RepoScanResolver) GetDepsWithSlot() bool       { return r.DepsWithSlot }
+func (r *RepoScanResolver) SetIgnoreMissingDeps(v bool)    { r.IgnoreMissingDeps = v }
+func (r *RepoScanResolver) IsIgnoreMissingDeps() bool      { return r.IgnoreMissingDeps }
+func (r *RepoScanResolver) SetDepsWithSlot(v bool)         { r.DepsWithSlot = v }
+func (r *RepoScanResolver) GetDepsWithSlot() bool          { return r.DepsWithSlot }
+func (r *RepoScanResolver) SetDisabledUseFlags(u []string) { r.DisabledUseFlags = u }
+func (r *RepoScanResolver) GetDisabledUseFlags() []string  { return r.DisabledUseFlags }
+func (r *RepoScanResolver) IsDisableUseFlag(u string) bool {
+	ans := false
+
+	if len(r.DisabledUseFlags) > 0 {
+		for _, useFlag := range r.DisabledUseFlags {
+			if useFlag == u {
+				ans = true
+				break
+			}
+		}
+	}
+
+	return ans
+}
 
 func (r *RepoScanResolver) LoadJson(path string) error {
 	fd, err := os.Open(path)
@@ -193,29 +210,263 @@ func (r *RepoScanResolver) Resolve(pkg string) (*specs.PortageSolution, error) {
 		ans.Labels["iuse"] = atom.GetMetadataValue("IUSE")
 	}
 
-	rdeps, err := atom.GetRuntimeDeps()
+	err = r.retrieveRuntimeDeps(atom, last, ans)
 	if err != nil {
 		return nil, err
 	}
 
-	rdeps, err = r.elaborateDeps(last, rdeps)
-	if err != nil {
-		return nil, err
-	}
-	ans.RuntimeDeps = append(ans.RuntimeDeps, rdeps...)
-
-	bdeps, err := atom.GetBuildtimeDeps()
-	if err != nil {
-		return nil, err
-	}
-
-	bdeps, err = r.elaborateDeps(last, bdeps)
-	if err != nil {
-		return nil, err
-	}
-	ans.BuildDeps = append(ans.BuildDeps, bdeps...)
+	err = r.retrieveBuildtimeDeps(atom, last, ans)
 
 	return ans, nil
+}
+
+func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.GentooPackage, solution *specs.PortageSolution) error {
+	var err error
+	var rdeps []gentoo.GentooPackage
+	var conflicts []gentoo.GentooPackage
+
+	// Trying to elaborate use flags and use old way as failover
+	if atom.HasMetadataKey("RDEPEND") {
+		rdepend := atom.GetMetadataValue("RDEPEND")
+		solution.Labels["RDEPEND"] = rdepend
+
+		deps, err := ParseDependencies(rdepend)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Error on parsing '%s': %s", rdepend, err.Error()))
+			fmt.Println("Using relations directly.")
+
+			rdeps, err = atom.GetRuntimeDeps()
+			if err != nil {
+				return err
+			}
+		} else {
+			rdeps, conflicts, err = r.elaborateDepsAndUseFlags(deps)
+			if err != nil {
+				return err
+			}
+
+		}
+
+	}
+
+	if len(conflicts) > 0 {
+		conflicts, err = r.elaborateDeps(last, conflicts)
+		if err != nil {
+			return err
+		}
+		solution.RuntimeConflicts = append(solution.RuntimeConflicts, conflicts...)
+	}
+
+	if len(rdeps) > 0 {
+
+		rdeps, err = r.elaborateDeps(last, rdeps)
+		if err != nil {
+			return err
+		}
+
+		solution.RuntimeDeps = append(solution.RuntimeDeps, rdeps...)
+	}
+
+	return nil
+}
+
+func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gentoo.GentooPackage, solution *specs.PortageSolution) error {
+	var err error
+	bdeps := []gentoo.GentooPackage{}
+	conflicts := []gentoo.GentooPackage{}
+
+	// Trying to elaborate use flags and use old way as failover
+	if atom.HasMetadataKey("DEPEND") {
+		depend := atom.GetMetadataValue("DEPEND")
+		solution.Labels["DEPEND"] = depend
+
+		deps, err := ParseDependencies(depend)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Error on parsing '%s': %s", depend, err.Error()))
+			fmt.Println("Using relations directly.")
+
+			bdeps, err = atom.GetBuildtimeDeps()
+			if err != nil {
+				return err
+			}
+		} else {
+			bdeps, conflicts, err = r.elaborateDepsAndUseFlags(deps)
+			if err != nil {
+				return err
+			}
+
+			if atom.HasMetadataKey("BDEPEND") {
+				bdepends := atom.GetMetadataValue("BDEPEND")
+				solution.Labels["BDEPEND"] = bdepends
+
+				deps, err := ParseDependencies(bdepends)
+				if err != nil {
+					fmt.Println(fmt.Sprintf("Error on parsing '%s': %s", bdepends, err.Error()))
+					fmt.Println("Using relations directly.")
+
+					bdeps, err = atom.GetBuildtimeDeps()
+					if err != nil {
+						return err
+					}
+				} else {
+
+					d, c, err := r.elaborateDepsAndUseFlags(deps)
+					if err != nil {
+						return err
+					}
+
+					if len(d) > 0 {
+						bdeps = append(bdeps, d...)
+					}
+
+					if len(c) > 0 {
+						conflicts = append(conflicts, c...)
+					}
+				}
+
+			}
+
+		}
+
+	}
+
+	if len(conflicts) > 0 {
+		conflicts, err = r.elaborateDeps(last, conflicts)
+		if err != nil {
+			return err
+		}
+		solution.BuildConflicts = append(solution.BuildConflicts, conflicts...)
+	}
+
+	if len(bdeps) > 0 {
+
+		bdeps, err = r.elaborateDeps(last, bdeps)
+		if err != nil {
+			return err
+		}
+
+		solution.BuildDeps = append(solution.BuildDeps, bdeps...)
+	}
+
+	return nil
+}
+
+func (r *RepoScanResolver) elaborateDepsAndUseFlags(s *EbuildDependencies) ([]gentoo.GentooPackage, []gentoo.GentooPackage, error) {
+	deps := []gentoo.GentooPackage{}
+	conflicts := []gentoo.GentooPackage{}
+
+	if len(s.Dependencies) == 0 {
+		return deps, conflicts, nil
+	}
+
+	for _, gdep := range s.Dependencies {
+
+		// TODO: do this recursive
+		d, c, err := r.elaborateGentooDependency(gdep)
+		if err != nil {
+			return deps, conflicts, err
+		}
+
+		if len(d) > 0 {
+			deps = append(deps, d...)
+		}
+
+		if len(c) > 0 {
+			conflicts = append(conflicts, c...)
+		}
+
+	}
+
+	return deps, conflicts, nil
+}
+
+func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency) ([]gentoo.GentooPackage, []gentoo.GentooPackage, error) {
+	deps := []gentoo.GentooPackage{}
+	conflicts := []gentoo.GentooPackage{}
+
+	if gdep.Use != "" {
+		// POST: is a use flag GentooDependency
+		if r.IsDisableUseFlag(gdep.Use) {
+			// Ignore deps
+			return deps, conflicts, nil
+		}
+
+		if len(gdep.SubDeps) > 0 {
+			for _, sdep := range gdep.SubDeps {
+				d, c, err := r.elaborateGentooDependency(sdep)
+				if err != nil {
+					return deps, conflicts, err
+				}
+
+				if len(d) > 0 {
+					deps = append(deps, d...)
+				}
+
+				if len(c) > 0 {
+					conflicts = append(conflicts, c...)
+				}
+
+			}
+		}
+
+	} else if gdep.DepInOr {
+		// NOTE: Ignore OR with sub dependency with use flag.
+
+		for _, sdep := range gdep.SubDeps {
+			if sdep.Dep == nil {
+				// Ignore dep
+				continue
+			}
+
+			atom, err := r.GetLastPackage(sdep.Dep.GetPackageName())
+			if err == nil {
+
+				gp, err := atom.ToGentooPackage()
+				if err != nil {
+					return nil, nil, err
+				}
+
+				if !r.DepsWithSlot {
+					gp.Slot = ""
+				}
+
+				if sdep.UseCondition == gentoo.PkgCondNot {
+					conflicts = append(conflicts, *gp)
+				} else {
+					deps = append(deps, *gp)
+				}
+
+				break
+			}
+
+		}
+
+	} else {
+
+		// Check if current deps is available.
+		atom, err := r.GetLastPackage(gdep.Dep.GetPackageName())
+		if err == nil {
+
+			gp, err := atom.ToGentooPackage()
+			if err != nil {
+				return nil, nil, err
+			}
+
+			if !r.DepsWithSlot {
+				gp.Slot = ""
+			}
+
+			if gdep.UseCondition == gentoo.PkgCondNot {
+				conflicts = append(conflicts, *gp)
+			} else {
+				deps = append(deps, *gp)
+			}
+
+		}
+
+	}
+
+	return deps, conflicts, nil
 }
 
 func (r *RepoScanResolver) elaborateDeps(pkg *gentoo.GentooPackage, deps []gentoo.GentooPackage) ([]gentoo.GentooPackage, error) {

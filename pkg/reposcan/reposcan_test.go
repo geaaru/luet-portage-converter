@@ -19,7 +19,7 @@ package reposcan_test
 
 import (
 	"errors"
-	//"fmt"
+	//	"fmt"
 
 	. "github.com/Luet-lab/luet-portage-converter/pkg/reposcan"
 
