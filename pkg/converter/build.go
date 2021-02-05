@@ -115,6 +115,11 @@ func (s *LuetCompilationSpecSanitized) AddRequires(pkgs []*pkg.DefaultPackage) {
 	}
 }
 
+func (s *LuetCompilationSpecSanitized) Requires(pkgs []*pkg.DefaultPackage) {
+	s.PackageRequires = []*st.DefaultPackageSanitized{}
+	s.AddRequires(pkgs)
+}
+
 func (s *LuetCompilationSpecSanitized) AddConflicts(pkgs []*pkg.DefaultPackage) {
 	for _, pkg := range pkgs {
 		p := st.NewDefaultPackageSanitized(pkg)

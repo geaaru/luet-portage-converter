@@ -68,6 +68,8 @@ func Execute() {
 			converter := converter.NewPortageConverter(to, backend)
 			converter.Override = override
 			converter.IgnoreMissingDeps = ignoreMissingDeps
+			converter.TreePaths = treePath
+
 			err := converter.LoadRules(rulesFile)
 			if err != nil {
 				fmt.Println(err)

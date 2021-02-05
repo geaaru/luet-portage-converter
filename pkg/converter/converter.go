@@ -48,6 +48,7 @@ type PortageConverter struct {
 	Override          bool
 	IgnoreMissingDeps bool
 	DisabledUseFlags  []string
+	TreePaths         []string
 }
 
 func NewPortageConverter(targetDir, backend string) *PortageConverter {
@@ -462,6 +463,7 @@ func (pc *PortageConverter) Generate() error {
 		}
 	}
 
+	// Stage1: Write new specs without analyzing requires for build / runtime.
 	for _, pkg := range pc.Solutions {
 
 		fmt.Println(fmt.Sprintf(
@@ -494,6 +496,206 @@ func (pc *PortageConverter) Generate() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	// Stage2: Reload tree and drop redundant dependencies
+	err = pc.Stage2()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (pc *PortageConverter) Stage2() error {
+
+	// Reset reciper
+	pc.ReciperBuild = luet_tree.NewCompilerRecipe(luet_pkg.NewInMemoryDatabase(false))
+	pc.ReciperRuntime = luet_tree.NewInstallerRecipe(luet_pkg.NewInMemoryDatabase(false))
+
+	err := pc.LoadTrees(pc.TreePaths)
+	if err != nil {
+		return err
+	}
+
+	for _, pkg := range pc.Solutions {
+
+		pack := pkg.ToPack(true)
+		updateBuildDeps := false
+		updateRuntimeDeps := false
+		resolvedRuntimeDeps := []*luet_pkg.DefaultPackage{}
+		resolvedBuildtimeDeps := []*luet_pkg.DefaultPackage{}
+
+		// Check buildtime requires
+		fmt.Println(fmt.Sprintf("[%s/%s-%s] Checking buildtime dependencies...",
+			pack.GetCategory(), pack.GetName(), pack.GetVersion()))
+
+		luetPkg := &luet_pkg.DefaultPackage{
+			Name:     pack.GetName(),
+			Category: pack.GetCategory(),
+			Version:  pack.GetVersion(),
+		}
+		pReciper, err := pc.ReciperBuild.GetDatabase().FindPackage(luetPkg)
+		if err != nil {
+			return err
+		}
+
+		deps := pReciper.GetRequires()
+		if len(deps) > 1 {
+
+			for idx, dep := range deps {
+				alreadyInjected := false
+
+				for idx2, d2 := range deps {
+					if idx2 == idx {
+						continue
+					}
+
+					d2pkgs, err := pc.ReciperBuild.GetDatabase().FindPackages(
+						&luet_pkg.DefaultPackage{
+							Name:     d2.GetName(),
+							Category: d2.GetCategory(),
+							Version:  ">=0",
+						},
+					)
+					if err != nil {
+						return err
+					}
+
+					for _, d3 := range d2pkgs[0].GetRequires() {
+						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
+							alreadyInjected = true
+
+							fmt.Println(fmt.Sprintf("[%s/%s-%s] Dropping buildtime dep %s/%s available in %s/%s",
+								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+								dep.GetCategory(), dep.GetName(),
+								d2.GetCategory(), d2.GetName(),
+							))
+							goto next_dep
+						}
+					}
+
+				}
+
+			next_dep:
+
+				if !alreadyInjected {
+					resolvedBuildtimeDeps = append(resolvedBuildtimeDeps, dep)
+				}
+
+			} // end for idx, dep
+
+			if len(resolvedRuntimeDeps) != len(deps) {
+				updateBuildDeps = true
+			}
+
+		} else {
+
+			fmt.Println(fmt.Sprintf("[%s/%s-%s] Only one buildtime dep present. Nothing to do.",
+				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
+
+		}
+
+		// Check runtime requires
+		pReciper, err = pc.ReciperRuntime.GetDatabase().FindPackage(luetPkg)
+		if err != nil {
+			return err
+		}
+
+		deps = pReciper.GetRequires()
+		if len(deps) > 1 {
+
+			for idx, dep := range deps {
+				alreadyInjected := false
+
+				for idx2, d2 := range deps {
+					if idx2 == idx {
+						continue
+					}
+
+					d2pkgs, err := pc.ReciperRuntime.GetDatabase().FindPackages(
+						&luet_pkg.DefaultPackage{
+							Name:     d2.GetName(),
+							Category: d2.GetCategory(),
+							Version:  ">=0",
+						},
+					)
+					if err != nil {
+						return err
+					}
+
+					for _, d3 := range d2pkgs[0].GetRequires() {
+						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
+							alreadyInjected = true
+
+							fmt.Println(fmt.Sprintf("[%s/%s-%s] Dropping runtime dep %s/%s available in %s/%s",
+								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+								dep.GetCategory(), dep.GetName(),
+								d2.GetCategory(), d2.GetName(),
+							))
+							goto next_rdep
+						}
+					}
+
+				}
+
+			next_rdep:
+
+				if !alreadyInjected {
+					resolvedRuntimeDeps = append(resolvedRuntimeDeps, dep)
+				}
+
+			} // end for idx, dep
+
+			if len(resolvedRuntimeDeps) != len(deps) {
+				updateRuntimeDeps = true
+			}
+
+		} else {
+
+			fmt.Println(fmt.Sprintf("[%s/%s-%s] Only one runtime dep present. Nothing to do.",
+				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
+
+		}
+
+		// Write definition
+		if updateRuntimeDeps {
+
+			defFile := filepath.Join(pkg.PackageDir, "definition.yaml")
+			// Convert solution to luet package
+			pack := pkg.ToPack(true)
+			pack.Requires(resolvedRuntimeDeps)
+
+			// Write definition.yaml
+			err = luet_tree.WriteDefinitionFile(pack, defFile)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Write build.yaml
+		if updateBuildDeps {
+
+			buildFile := filepath.Join(pkg.PackageDir, "build.yaml")
+			// Load Build template file
+			buildTmpl, err := NewLuetCompilationSpecSanitizedFromFile(pc.Specs.BuildTmplFile)
+			if err != nil {
+				return err
+			}
+
+			// create build.yaml
+			bPack := pkg.ToPack(false)
+			buildPack, _ := buildTmpl.Clone()
+			buildPack.Requires(resolvedBuildtimeDeps)
+			buildPack.AddConflicts(bPack.PackageConflicts)
+
+			err = buildPack.WriteBuildDefinition(buildFile)
+			if err != nil {
+				return err
+			}
+
+		}
+
 	}
 
 	return nil
