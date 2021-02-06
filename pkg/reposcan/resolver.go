@@ -664,6 +664,8 @@ func (r *RepoScanResolver) assignUseFlags(solution *specs.PortageSolution, uFlag
 	for _, u := range uFlags {
 		if opts.IsAdmitUseFlag(u) && !r.IsDisableUseFlag(u) {
 			solution.Package.UseFlags = append(solution.Package.UseFlags, u)
+		} else {
+			solution.Package.UseFlags = append(solution.Package.UseFlags, "-"+u)
 		}
 	}
 }
