@@ -176,7 +176,7 @@ func (r *RepoScanResolver) IsPresentPackage(pkg string) bool {
 	return ok
 }
 
-func (r *RepoScanResolver) Resolve(pkg string) (*specs.PortageSolution, error) {
+func (r *RepoScanResolver) Resolve(pkg string, opts specs.PortageResolverOpts) (*specs.PortageSolution, error) {
 
 	if pkg == "" {
 		return nil, errors.New("Invalid pkg to resolve")
@@ -213,17 +213,17 @@ func (r *RepoScanResolver) Resolve(pkg string) (*specs.PortageSolution, error) {
 		ans.SetLabel("IUSE", atom.GetMetadataValue("IUSE"))
 	}
 
-	err = r.retrieveRuntimeDeps(atom, last, ans)
+	err = r.retrieveRuntimeDeps(atom, last, ans, &opts)
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.retrieveBuildtimeDeps(atom, last, ans)
+	err = r.retrieveBuildtimeDeps(atom, last, ans, &opts)
 
 	return ans, nil
 }
 
-func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.GentooPackage, solution *specs.PortageSolution) error {
+func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.GentooPackage, solution *specs.PortageSolution, opts *specs.PortageResolverOpts) error {
 	var err error
 	var rdeps []gentoo.GentooPackage
 	var conflicts []gentoo.GentooPackage
@@ -248,6 +248,9 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 				return err
 			}
 
+			// Retrieve the use flags
+			useFlags := deps.GetUseFlags()
+			r.assignUseFlags(solution, useFlags, opts)
 		}
 
 	}
@@ -273,7 +276,7 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 	return nil
 }
 
-func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gentoo.GentooPackage, solution *specs.PortageSolution) error {
+func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gentoo.GentooPackage, solution *specs.PortageSolution, opts *specs.PortageResolverOpts) error {
 	var err error
 	bdeps := []gentoo.GentooPackage{}
 	conflicts := []gentoo.GentooPackage{}
@@ -293,6 +296,10 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 				return err
 			}
 		} else {
+			// Retrieve the use flags
+			useFlags := deps.GetUseFlags()
+			r.assignUseFlags(solution, useFlags, opts)
+
 			bdeps, conflicts, err = r.elaborateDepsAndUseFlags(deps)
 			if err != nil {
 				return err
@@ -312,6 +319,10 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 						return err
 					}
 				} else {
+
+					// Retrieve the use flags
+					useFlags := deps.GetUseFlags()
+					r.assignUseFlags(solution, useFlags, opts)
 
 					d, c, err := r.elaborateDepsAndUseFlags(deps)
 					if err != nil {
@@ -646,4 +657,13 @@ func (r *RepoScanResolver) KeywordsIsAdmit(atom *RepoScanAtom, p *gentoo.GentooP
 end:
 
 	return ans, nil
+}
+
+func (r *RepoScanResolver) assignUseFlags(solution *specs.PortageSolution, uFlags []string, opts *specs.PortageResolverOpts) {
+
+	for _, u := range uFlags {
+		if opts.IsAdmitUseFlag(u) {
+			solution.Package.UseFlags = append(solution.Package.UseFlags, u)
+		}
+	}
 }

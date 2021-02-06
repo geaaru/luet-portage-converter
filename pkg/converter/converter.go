@@ -146,7 +146,12 @@ func (pc *PortageConverter) AppendIfNotPresent(list []gentoo.GentooPackage, pkg 
 	return ans
 }
 
-func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string) error {
+func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string, artefact specs.PortageConverterArtefact) error {
+
+	opts := specs.PortageResolverOpts{
+		EnableUseFlags:   artefact.Uses.Enabled,
+		DisabledUseFlags: artefact.Uses.Disabled,
+	}
 
 	fmt.Println(fmt.Sprintf("Creating solution for %s (%s)...", pkg, treePath))
 
@@ -168,7 +173,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string)
 		return nil
 	}
 
-	solution, err := pc.Resolver.Resolve(pkg)
+	solution, err := pc.Resolver.Resolve(pkg, opts)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error on resolve %s: %s", pkg, err.Error()))
 	}
@@ -247,7 +252,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string)
 					dep_str += ":" + bdep.Slot
 				}
 				// Now we use the same treePath.
-				err := pc.createSolution(dep_str, treePath, stack)
+				err := pc.createSolution(dep_str, treePath, stack, artefact)
 				if err != nil {
 					return err
 				}
@@ -341,7 +346,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string)
 				dep_str += ":" + rdep.Slot
 			}
 			// Now we use the same treePath.
-			err := pc.createSolution(dep_str, treePath, stack)
+			err := pc.createSolution(dep_str, treePath, stack, artefact)
 			if err != nil {
 				return err
 			}
@@ -456,7 +461,7 @@ func (pc *PortageConverter) Generate() error {
 		for _, pkg := range artefact.GetPackages() {
 
 			fmt.Println(fmt.Sprintf("Analyzing package %s...", pkg))
-			err := pc.createSolution(pkg, artefact.GetTree(), []string{})
+			err := pc.createSolution(pkg, artefact.GetTree(), []string{}, artefact)
 			if err != nil {
 				return err
 			}

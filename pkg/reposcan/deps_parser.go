@@ -92,6 +92,25 @@ func (d *GentooDependency) GetDepsList() []*GentooDependency {
 	return ans
 }
 
+func (d *GentooDependency) GetUseFlags() []string {
+	ans := []string{}
+
+	if d.Use != "" {
+		ans = append(ans, d.Use)
+	}
+
+	if len(d.SubDeps) > 0 {
+		for _, sd := range d.SubDeps {
+			ul := sd.GetUseFlags()
+			if len(ul) > 0 {
+				ans = append(ans, ul...)
+			}
+		}
+	}
+
+	return ans
+}
+
 func (d *GentooDependency) AddSubDependency(pkg, use string) (*GentooDependency, error) {
 	ans, err := NewGentooDependency(pkg, use)
 	if err != nil {
@@ -122,6 +141,30 @@ func (r *EbuildDependencies) GetDependencies() []*GentooDependency {
 	ans = make([]*GentooDependency, 0)
 	for _, p := range m {
 		ans = append(ans, p)
+	}
+
+	return ans
+}
+
+func (r *EbuildDependencies) GetUseFlags() []string {
+	ans := []string{}
+
+	for _, d := range r.Dependencies {
+		ul := d.GetUseFlags()
+		if len(ul) > 0 {
+			ans = append(ans, ul...)
+		}
+	}
+
+	// Drop duplicate
+	m := make(map[string]int, 0)
+	for _, u := range ans {
+		m[u] = 1
+	}
+
+	ans = []string{}
+	for k, _ := range m {
+		ans = append(ans, k)
 	}
 
 	return ans

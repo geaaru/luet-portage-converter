@@ -62,8 +62,14 @@ type PortageConverterPkg struct {
 }
 
 type PortageConverterArtefact struct {
-	Tree     string   `json:"tree" yaml:"tree"`
-	Packages []string `json:"packages" yaml:"packages"`
+	Tree     string                   `json:"tree" yaml:"tree"`
+	Uses     PortageConverterUseFlags `json:"uses,omitempty" yaml:"uses,omitempty"`
+	Packages []string                 `json:"packages" yaml:"packages"`
+}
+
+type PortageConverterUseFlags struct {
+	Disabled []string `json:"disabled,omitempty" yaml:"disabled,omitempty"`
+	Enabled  []string `json:"enabled,omitempty" yaml:"enabled,omitempty"`
 }
 
 type PortageConverterInclude struct {
@@ -166,7 +172,12 @@ func (a *PortageConverterArtefact) GetPackages() []string { return a.Packages }
 func (a *PortageConverterArtefact) GetTree() string       { return a.Tree }
 
 type PortageResolver interface {
-	Resolve(pkg string) (*PortageSolution, error)
+	Resolve(pkg string, opts PortageResolverOpts) (*PortageSolution, error)
+}
+
+type PortageResolverOpts struct {
+	EnableUseFlags   []string
+	DisabledUseFlags []string
 }
 
 type PortageSolution struct {
@@ -180,6 +191,37 @@ type PortageSolution struct {
 	Description string            `json:"description,omitempty"`
 	Uri         []string          `json:"uri,omitempty"`
 	Labels      map[string]string `json:"labels,omitempty"`
+}
+
+func NewPortageResolverOpts() PortageResolverOpts {
+	return PortageResolverOpts{
+		EnableUseFlags:   []string{},
+		DisabledUseFlags: []string{},
+	}
+}
+
+func (o *PortageResolverOpts) IsAdmitUseFlag(u string) bool {
+	ans := true
+	if len(o.EnableUseFlags) > 0 {
+		for _, ue := range o.EnableUseFlags {
+			if ue == u {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	if len(o.DisabledUseFlags) > 0 {
+		for _, ud := range o.DisabledUseFlags {
+			if ud == u {
+				ans = false
+				break
+			}
+		}
+	}
+
+	return ans
 }
 
 func (s *PortageSolution) SetLabel(k, v string) {
@@ -207,11 +249,28 @@ func (s *PortageSolution) ToPack(runtime bool) *luet_pkg.DefaultPackage {
 	labels["emerge.packages"] = emergePackage
 	labels["kit"] = s.Package.Repository
 
+	useFlags := []string{}
+
+	if len(s.Package.UseFlags) > 0 {
+		// Avoid duplicated
+		m := make(map[string]int, 0)
+		for _, u := range s.Package.UseFlags {
+			m[u] = 1
+		}
+		for k, _ := range m {
+			useFlags = append(useFlags, k)
+		}
+	}
+
+	if len(useFlags) == 0 {
+		useFlags = nil
+	}
+
 	ans := &luet_pkg.DefaultPackage{
 		Name:        s.Package.Name,
 		Category:    SanitizeCategory(s.Package.Category, s.Package.Slot),
 		Version:     version,
-		UseFlags:    s.Package.UseFlags,
+		UseFlags:    useFlags,
 		Labels:      labels,
 		License:     s.Package.License,
 		Description: s.Description,

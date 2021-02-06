@@ -19,9 +19,10 @@ package reposcan_test
 
 import (
 	"errors"
-	//"fmt"
+	"fmt"
 
 	. "github.com/Luet-lab/luet-portage-converter/pkg/reposcan"
+	specs "github.com/Luet-lab/luet-portage-converter/pkg/specs"
 
 	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
 	luet_pkg "github.com/mudler/luet/pkg/package"
@@ -92,7 +93,9 @@ var _ = Describe("Reposcan", func() {
 			Expect(atom.Category).Should(Equal("net-dns"))
 			Expect(atom.Kit).Should(Equal("geaaru_overlay"))
 
-			solution, err := resolver.Resolve("net-dns/noip-updater")
+			solution, err := resolver.Resolve(
+				"net-dns/noip-updater",
+				specs.NewPortageResolverOpts())
 			Expect(err).Should(BeNil())
 
 			Expect(solution.Package.GetPackageName()).Should(Equal("net-dns/noip-updater"))
@@ -157,7 +160,9 @@ var _ = Describe("Reposcan", func() {
 			Expect(atom.Category).Should(Equal("net-dns"))
 			Expect(atom.Kit).Should(Equal("geaaru_overlay"))
 
-			solution, err := resolver.Resolve("net-dns/noip-updater")
+			solution, err := resolver.Resolve(
+				"net-dns/noip-updater",
+				specs.NewPortageResolverOpts())
 			Expect(err).Should(BeNil())
 
 			Expect(solution.Package.GetPackageName()).Should(Equal("net-dns/noip-updater"))
@@ -221,7 +226,10 @@ var _ = Describe("Reposcan", func() {
 			Expect(atom.Category).Should(Equal("net-dns"))
 			Expect(atom.Kit).Should(Equal("geaaru_overlay"))
 
-			_, err = resolver.Resolve(">=net-dns/noip-updater-2.2.0")
+			_, err = resolver.Resolve(
+				">=net-dns/noip-updater-2.2.0",
+				specs.NewPortageResolverOpts(),
+			)
 			Expect(err).Should(Equal(errors.New("No package found matching >=net-dns/noip-updater-2.2.0")))
 
 		})
@@ -242,7 +250,10 @@ var _ = Describe("Reposcan", func() {
 			Expect(atom.Category).Should(Equal("net-dns"))
 			Expect(atom.Kit).Should(Equal("geaaru_overlay"))
 
-			_, err = resolver.Resolve("net-dns/noip-updater:2")
+			_, err = resolver.Resolve(
+				"net-dns/noip-updater:2",
+				specs.NewPortageResolverOpts(),
+			)
 			Expect(err).Should(Equal(errors.New("No package found matching net-dns/noip-updater:2")))
 
 		})
@@ -266,11 +277,15 @@ var _ = Describe("Reposcan", func() {
 			Expect(err).Should(BeNil())
 			Expect(len(rdeps)).Should(Equal(8))
 
-			solution, err := resolver.Resolve("sys-devel/gcc:9.3.0")
+			solution, err := resolver.Resolve(
+				"sys-devel/gcc:9.3.0",
+				specs.NewPortageResolverOpts(),
+			)
 			Expect(err).Should(BeNil())
 			// We have only one runtime deps because atom aren't
 			// available on json file.
 			Expect(len(solution.RuntimeDeps)).Should(Equal(1))
+			fmt.Println(solution)
 		})
 	})
 
