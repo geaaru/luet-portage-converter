@@ -996,4 +996,80 @@ var _ = Describe("GentooBuilder", func() {
 
 	})
 
+	Context("Parse Dependencies 12", func() {
+
+		rdepend := `aqua? ( x11-libs/gtk+:2[aqua=,abi_x86_32(-)?,abi_x86_64(-)?,abi_x86_x32(-)?,abi_mips_n32(-)?,abi_mips_n64(-)?,abi_mips_o32(-)?,abi_s390_32(-)?,abi_s390_64(-)?] virtual/jpeg:0=[abi_x86_32(-)?,abi_x86_64(-)?,abi_x86_x32(-)?,abi_mips_n32(-)?,abi_mips_n64(-)?,abi_mips_o32(-)?,abi_s390_32(-)?,abi_s390_64(-)?] tiff? ( media-libs/tiff:0[abi_x86_32(-)?,abi_x86_64(-)?,abi_x86_x32(-)?,abi_mips_n32(-)?,abi_mips_n64(-)?,abi_mips_o32(-)?,abi_s390_32(-)?,abi_s390_64(-)?] ) )`
+		gr, err := ParseDependencies(rdepend)
+		It("Check error", func() {
+			Expect(err).Should(BeNil())
+		})
+		It("Check gr", func() {
+			Expect(gr).ShouldNot(BeNil())
+		})
+
+		It("Check deps #", func() {
+			Expect(len(gr.Dependencies)).Should(Equal(2))
+		})
+
+		It("Check dep1", func() {
+			Expect(*gr.Dependencies[0]).Should(Equal(
+				GentooDependency{
+					Use:          "aqua",
+					UseCondition: _gentoo.PkgCondInvalid,
+					SubDeps: []*GentooDependency{
+						&GentooDependency{
+							UseCondition: 0,
+							SubDeps:      make([]*GentooDependency, 0),
+							Dep: &_gentoo.GentooPackage{
+								Name:      "gtk+",
+								Category:  "x11-libs",
+								Slot:      "2",
+								Condition: 0,
+							},
+							DepInOr: false,
+						},
+
+						&GentooDependency{
+							UseCondition: 0,
+							SubDeps:      make([]*GentooDependency, 0),
+							Dep: &_gentoo.GentooPackage{
+								Name:      "jpeg",
+								Category:  "virtual",
+								Slot:      "0=",
+								Condition: 0,
+							},
+							DepInOr: false,
+						},
+					},
+
+					Dep: nil,
+				},
+			))
+		})
+
+		It("Check dep2", func() {
+			Expect(*gr.Dependencies[1]).Should(Equal(
+				GentooDependency{
+					Use:          "tiff",
+					UseCondition: _gentoo.PkgCondInvalid,
+					SubDeps: []*GentooDependency{
+						&GentooDependency{
+							UseCondition: 0,
+							SubDeps:      make([]*GentooDependency, 0),
+							Dep: &_gentoo.GentooPackage{
+								Name:      "tiff",
+								Category:  "media-libs",
+								Slot:      "0",
+								Condition: 0,
+							},
+							DepInOr: false,
+						},
+					},
+
+					Dep: nil,
+				},
+			))
+		})
+	})
+
 })

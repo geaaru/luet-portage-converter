@@ -418,7 +418,7 @@ func (pc *PortageConverter) Generate() error {
 	// Load Build template file
 	buildTmpl, err := NewLuetCompilationSpecSanitizedFromFile(pc.Specs.BuildTmplFile)
 	if err != nil {
-		return err
+		return errors.New("Error on load template: " + err.Error())
 	}
 
 	// Initialize resolver

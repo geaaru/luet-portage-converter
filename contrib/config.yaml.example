@@ -46,7 +46,13 @@ reposcan_contraints:
 
 reposcan_disabled_use_flags:
   - test
-  - qt
+  - qt5
+  - emacs
+  - doc
+  - python_single_target_python3_6
+  - python_single_target_python3_8
+  - python_single_target_python3_9
+  - savedconfig
 
 reposcan_disabled_keywords:
   - ~amd64

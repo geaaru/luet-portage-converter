@@ -22,6 +22,7 @@ package reposcan
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	_gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
@@ -318,6 +319,10 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 		for idx < len(rdepends) {
 			rr := rdepends[idx]
 			rr = strings.TrimSpace(rr)
+
+			// If there is [...] content i drop it before everything
+			reg := regexp.MustCompile(`\[.*\]`)
+			rr = reg.ReplaceAllString(rr, "")
 
 			if rr != "" {
 				//fmt.Println("PARSING ", rr)
