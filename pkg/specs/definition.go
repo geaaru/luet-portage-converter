@@ -46,6 +46,8 @@ type PortageConverterSpecs struct {
 	ReposcanConstraints      PortageConverterReposcanConstraints `json:"reposcan_contraints,omitempty" yaml:"reposcan_contraints,omitempty"`
 	ReposcanDisabledUseFlags []string                            `json:"reposcan_disabled_use_flags,omitempty" yaml:"reposcan_disabled_use_flags,omitempty"`
 	ReposcanDisabledKeywords []string                            `json:"reposcan_disabled_keywords,omitempty" yaml:"reposcan_disabled_keywords,omitempty"`
+
+	MapArtefacts map[string]*PortageConverterArtefact `json:"-" yaml:"-"`
 }
 
 type PortageConverterReposcanConstraints struct {
@@ -63,9 +65,10 @@ type PortageConverterPkg struct {
 }
 
 type PortageConverterArtefact struct {
-	Tree     string                   `json:"tree" yaml:"tree"`
-	Uses     PortageConverterUseFlags `json:"uses,omitempty" yaml:"uses,omitempty"`
-	Packages []string                 `json:"packages" yaml:"packages"`
+	Tree            string                   `json:"tree" yaml:"tree"`
+	Uses            PortageConverterUseFlags `json:"uses,omitempty" yaml:"uses,omitempty"`
+	IgnoreBuildDeps bool                     `json:"ignore_build_deps,omitempty" yaml:"ignore_build_deps,omitempty"`
+	Packages        []string                 `json:"packages" yaml:"packages"`
 }
 
 type PortageConverterUseFlags struct {
@@ -155,6 +158,24 @@ func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 	}
 
 	return ans, nil
+}
+
+func (s *PortageConverterSpecs) GenerateArtefactsMap() {
+
+	s.MapArtefacts = make(map[string]*PortageConverterArtefact, 0)
+
+	for idx, _ := range s.Artefacts {
+		for _, pkg := range s.Artefacts[idx].Packages {
+			s.MapArtefacts[pkg] = &s.Artefacts[idx]
+		}
+	}
+}
+
+func (s *PortageConverterSpecs) GetArtefactByPackage(pkg string) (*PortageConverterArtefact, error) {
+	if a, ok := s.MapArtefacts[pkg]; ok {
+		return a, nil
+	}
+	return nil, errors.New("Package not found")
 }
 
 func (s *PortageConverterSpecs) GetArtefacts() []PortageConverterArtefact {

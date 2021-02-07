@@ -24,6 +24,20 @@ build_template_file: templates/build-pkg.yaml.tmpl
 
 artefacts:
 - tree: multi-arch/packages
+
+# Inside single artefact section is possible define the list of
+# use flags to enable or disable.
+# uses:
+#   disabled:
+#     - use1
+#   enabled:
+#     - use2
+#
+# To avoid cycle on solver we need ignore buildtime dependencies and
+# to use directly build-seed layer or other. This option permits to
+# ignore build deps elaborated.
+# ignore_build_deps: true
+
   packages:
     - net-libs/libssh2
 #- sys-devel/gcc:9.3.0

@@ -148,6 +148,13 @@ func (pc *PortageConverter) AppendIfNotPresent(list []gentoo.GentooPackage, pkg 
 
 func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string, artefact specs.PortageConverterArtefact) error {
 
+	// Check if it's present artefact from map
+	art, err := pc.Specs.GetArtefactByPackage(pkg)
+	if err == nil {
+		// POST: use artefact from map.
+		artefact = *art
+	}
+
 	opts := specs.PortageResolverOpts{
 		EnableUseFlags:   artefact.Uses.Enabled,
 		DisabledUseFlags: artefact.Uses.Disabled,
@@ -308,7 +315,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		p, _ := pc.ReciperRuntime.GetDatabase().FindPackage(dep)
 		if p == nil {
 			fmt.Println(fmt.Sprintf("[%s] Package in conflict %s not in tree. I ignore it.",
-				pkg))
+				pkg, p))
 			continue
 		}
 
@@ -491,10 +498,24 @@ func (pc *PortageConverter) Generate() error {
 			return err
 		}
 
+		// Check if artefact is in map
+		ignoreBuildDeps := false
+		artefact, err := pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageNameWithSlot())
+		if err != nil {
+			if pkg.Package.Slot != "" {
+				artefact, err = pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageName())
+			}
+		}
+		if artefact != nil {
+			ignoreBuildDeps = artefact.IgnoreBuildDeps
+		}
+
 		// create build.yaml
 		bPack := pkg.ToPack(false)
 		buildPack, _ := buildTmpl.Clone()
-		buildPack.AddRequires(bPack.PackageRequires)
+		if !ignoreBuildDeps {
+			buildPack.AddRequires(bPack.PackageRequires)
+		}
 		buildPack.AddConflicts(bPack.PackageConflicts)
 
 		err = buildPack.WriteBuildDefinition(buildFile)
