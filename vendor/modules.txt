@@ -11,7 +11,7 @@ github.com/Microsoft/hcsshim/osversion
 # github.com/MottainaiCI/lxd-compose v0.7.2
 ## explicit
 github.com/MottainaiCI/lxd-compose/pkg/helpers
-# github.com/Sabayon/pkgs-checker v0.8.1-0.20210128171435-eaf496434915
+# github.com/Sabayon/pkgs-checker v0.8.1-0.20210207185030-83863e8d099a
 ## explicit
 github.com/Sabayon/pkgs-checker/pkg/gentoo
 # github.com/asdine/storm v0.0.0-20190418133842-e0f77eada154
@@ -124,15 +124,19 @@ github.com/knqyf263/go-deb-version
 github.com/kyokomi/emoji
 # github.com/logrusorgru/aurora v2.0.3+incompatible
 github.com/logrusorgru/aurora
-# github.com/magiconair/properties v1.8.1
+# github.com/magiconair/properties v1.8.4
+## explicit
 github.com/magiconair/properties
 # github.com/mattn/go-colorable v0.1.2
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
+# github.com/mattn/go-sqlite3 v1.14.6
+## explicit
 # github.com/mitchellh/copystructure v1.0.0
 github.com/mitchellh/copystructure
-# github.com/mitchellh/mapstructure v1.1.2
+# github.com/mitchellh/mapstructure v1.4.1
+## explicit
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v1.0.0
 github.com/mitchellh/reflectwalk
@@ -211,7 +215,8 @@ github.com/opencontainers/runc/libcontainer/system
 github.com/opencontainers/runc/libcontainer/user
 # github.com/otiai10/copy v1.2.1-0.20200916181228-26f84a0b1578
 github.com/otiai10/copy
-# github.com/pelletier/go-toml v1.7.0
+# github.com/pelletier/go-toml v1.8.1
+## explicit
 github.com/pelletier/go-toml
 # github.com/philopon/go-toposort v0.0.0-20170620085441-9be86dbd762f
 github.com/philopon/go-toposort
@@ -221,7 +226,8 @@ github.com/pkg/errors
 github.com/shopspring/decimal
 # github.com/sirupsen/logrus v1.7.0
 github.com/sirupsen/logrus
-# github.com/spf13/afero v1.2.2
+# github.com/spf13/afero v1.5.1
+## explicit
 github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/spf13/cast v1.3.1
@@ -277,11 +283,13 @@ golang.org/x/oauth2
 golang.org/x/oauth2/internal
 # golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20201113135734-0a15ea8d9b02
+# golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c
+## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/text v0.3.4
+# golang.org/x/text v0.3.5
+## explicit
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/htmlindex
@@ -347,11 +355,12 @@ google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/inf.v0 v0.9.1
 gopkg.in/inf.v0
-# gopkg.in/ini.v1 v1.51.0
+# gopkg.in/ini.v1 v1.62.0
+## explicit
 gopkg.in/ini.v1
 # gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
 gopkg.in/tomb.v1
-# gopkg.in/yaml.v2 v2.3.0
+# gopkg.in/yaml.v2 v2.4.0
 ## explicit
 gopkg.in/yaml.v2
 # helm.sh/helm/v3 v3.5.0
