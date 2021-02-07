@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
@@ -260,6 +261,8 @@ func (s *PortageSolution) ToPack(runtime bool) *luet_pkg.DefaultPackage {
 		for k, _ := range m {
 			useFlags = append(useFlags, k)
 		}
+
+		sort.Strings(useFlags)
 	}
 
 	if len(useFlags) == 0 {
