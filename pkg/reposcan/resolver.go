@@ -28,6 +28,7 @@ import (
 
 	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
 	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	. "github.com/mudler/luet/pkg/logger"
 )
 
 type RepoScanResolver struct {
@@ -115,7 +116,7 @@ func (r *RepoScanResolver) LoadRawJson(raw, file string) error {
 
 func (r *RepoScanResolver) LoadJsonFiles() error {
 	for _, file := range r.JsonSources {
-		fmt.Println(fmt.Sprintf("Loading reposcan file %s...", file))
+		InfoC(fmt.Sprintf(":brain: Loading reposcan file %s...", file))
 		err := r.LoadJson(file)
 		if err != nil {
 			return err
@@ -235,8 +236,8 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 
 		deps, err := ParseDependencies(rdepend)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Error on parsing '%s': %s", rdepend, err.Error()))
-			fmt.Println("Using relations directly.")
+			Warning(fmt.Sprintf("Error on parsing '%s': %s", rdepend, err.Error()))
+			Warning("Using relations directly.")
 
 			rdeps, err = atom.GetRuntimeDeps()
 			if err != nil {
@@ -288,8 +289,8 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 
 		deps, err := ParseDependencies(depend)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Error on parsing '%s': %s", depend, err.Error()))
-			fmt.Println("Using relations directly.")
+			Warning(fmt.Sprintf("Error on parsing '%s': %s", depend, err.Error()))
+			Warning("Using relations directly.")
 
 			bdeps, err = atom.GetBuildtimeDeps()
 			if err != nil {
@@ -311,8 +312,8 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 
 				deps, err := ParseDependencies(bdepends)
 				if err != nil {
-					fmt.Println(fmt.Sprintf("Error on parsing '%s': %s", bdepends, err.Error()))
-					fmt.Println("Using relations directly.")
+					Warning(fmt.Sprintf("Error on parsing '%s': %s", bdepends, err.Error()))
+					Warning("Using relations directly.")
 
 					bdeps, err = atom.GetBuildtimeDeps()
 					if err != nil {
@@ -490,7 +491,7 @@ func (r *RepoScanResolver) elaborateDeps(pkg *gentoo.GentooPackage, deps []gento
 		atom, err := r.GetLastPackage(deps[idx].GetPackageName())
 		if err != nil {
 			if r.IsIgnoreMissingDeps() {
-				fmt.Println(
+				Warning(
 					fmt.Sprintf("[%s] Dependency %s not found in map. Ignoring it.",
 						pkg.GetPackageName(), deps[idx].GetPackageName()))
 				continue
@@ -555,7 +556,7 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 				}
 			}
 
-			fmt.Println(fmt.Sprintf(
+			DebugC(fmt.Sprintf(
 				"[%s/%s:%s] Check %s/%s:%s@%s: admitted - %v",
 				gp.Category, gp.GetPF(), gp.Slot,
 				p.Category, p.GetPF(), p.Slot, p.Repository, valid))
@@ -591,7 +592,7 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 		ans = &atoms[0]
 	}
 
-	fmt.Println(
+	DebugC(
 		fmt.Sprintf("[%s] Using package %s:%s",
 			pkg, ans.Atom, ans.GetMetadataValue("SLOT")))
 
@@ -638,7 +639,7 @@ func (r *RepoScanResolver) KeywordsIsAdmit(atom *RepoScanAtom, p *gentoo.GentooP
 
 	keywords := atom.GetMetadataValue("KEYWORDS")
 	if keywords == "" {
-		fmt.Println(fmt.Sprintf(
+		DebugC(fmt.Sprintf(
 			"[%s] Skip version without keywords %s or disabled.", atom.Atom, p.GetPF()))
 		return false, nil
 	}

@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	_gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	. "github.com/mudler/luet/pkg/logger"
 )
 
 type GentooDependency struct {
@@ -210,13 +211,13 @@ func ParseDependenciesMultiline(rdepend string) (*EbuildDependencies, error) {
 					dep, err = lastdep[len(lastdep)-1].AddSubDependency("", rr[:strings.Index(rr, "?")])
 					if err != nil {
 						// Debug
-						fmt.Println("Ignoring subdependency ", rr[:strings.Index(rr, "?")])
+						Debug("Ignoring subdependency ", rr[:strings.Index(rr, "?")])
 					}
 				} else {
 					dep, err = NewGentooDependency("", rr[:strings.Index(rr, "?")])
 					if err != nil {
 						// Debug
-						fmt.Println("Ignoring dep", rr)
+						Debug("Ignoring dep", rr)
 					} else {
 						ans.Dependencies = append(ans.Dependencies, dep)
 					}
@@ -242,7 +243,7 @@ func ParseDependenciesMultiline(rdepend string) (*EbuildDependencies, error) {
 					_, err = dep.AddSubDependency(f, "")
 					if err != nil {
 						// Debug
-						fmt.Println("Ignoring subdependency ", f)
+						Debug("Ignoring subdependency ", f)
 					}
 				}
 
@@ -280,7 +281,7 @@ func ParseDependenciesMultiline(rdepend string) (*EbuildDependencies, error) {
 						dep, err := NewGentooDependency(rrr, "")
 						if err != nil {
 							// Debug
-							fmt.Println("Ignoring dep", rr)
+							Debug("Ignoring dep", rr)
 						} else {
 							ans.Dependencies = append(ans.Dependencies, dep)
 						}
@@ -289,7 +290,7 @@ func ParseDependenciesMultiline(rdepend string) (*EbuildDependencies, error) {
 					dep, err := NewGentooDependency(rr, "")
 					if err != nil {
 						// Debug
-						fmt.Println("Ignoring dep", rr)
+						Debug("Ignoring dep", rr)
 					} else {
 						ans.Dependencies = append(ans.Dependencies, dep)
 					}
@@ -400,7 +401,7 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 					dep, err := NewGentooDependency(rr, "")
 					if err != nil {
 						// Debug
-						fmt.Println("Ignoring dep", rr)
+						Debug("Ignoring dep", rr)
 					} else {
 						ans.Dependencies = append(ans.Dependencies, dep)
 					}

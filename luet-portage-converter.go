@@ -21,9 +21,12 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Luet-lab/luet-portage-converter/pkg/converter"
 
+	. "github.com/mudler/luet/pkg/config"
+	. "github.com/mudler/luet/pkg/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -43,6 +46,26 @@ var (
 	BuildCommit string
 )
 
+func initConfig() error {
+	LuetCfg.Viper.SetEnvPrefix("LUET")
+	LuetCfg.Viper.AutomaticEnv() // read in environment variables that match
+
+	// Create EnvKey Replacer for handle complex structure
+	replacer := strings.NewReplacer(".", "__")
+	LuetCfg.Viper.SetEnvKeyReplacer(replacer)
+	LuetCfg.Viper.SetTypeByDefaultValue(true)
+
+	err := LuetCfg.Viper.Unmarshal(&LuetCfg)
+	if err != nil {
+		return err
+	}
+
+	InitAurora()
+	NewSpinner()
+
+	return nil
+}
+
 func Execute() {
 	var rootCmd = &cobra.Command{
 		Use:     "luet-portage-converter --",
@@ -52,6 +75,12 @@ func Execute() {
 			to, _ := cmd.Flags().GetString("to")
 			if to == "" {
 				fmt.Println("Missing --to argument")
+				os.Exit(1)
+			}
+
+			err := initConfig()
+			if err != nil {
+				fmt.Println("Error on setup config/logger: " + err.Error())
 				os.Exit(1)
 			}
 		},

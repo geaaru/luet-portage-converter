@@ -30,6 +30,7 @@ import (
 
 	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
 	luet_config "github.com/mudler/luet/pkg/config"
+	. "github.com/mudler/luet/pkg/logger"
 	luet_pkg "github.com/mudler/luet/pkg/package"
 	luet_tree "github.com/mudler/luet/pkg/tree"
 )
@@ -70,7 +71,7 @@ func (pc *PortageConverter) LoadTrees(treePath []string) error {
 
 	// Load trees
 	for _, t := range treePath {
-		fmt.Println("Loading tree", t, "...")
+		InfoC(fmt.Sprintf(":evergreen_tree: Loading tree %s...", t))
 		err := pc.ReciperBuild.Load(t)
 		if err != nil {
 			return errors.New("Error on load tree" + err.Error())
@@ -160,11 +161,9 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		DisabledUseFlags: artefact.Uses.Disabled,
 	}
 
-	fmt.Println(fmt.Sprintf("Creating solution for %s (%s)...", pkg, treePath))
-
 	if pc.IsInStack(stack, pkg) {
-		fmt.Println(fmt.Sprintf("Intercepted cycle dep for %s: %s", pkg, stack))
-		fmt.Println("I skip cycle.")
+		DebugC(fmt.Sprintf("Intercepted cycle dep for %s: %s", pkg, stack))
+		DebugC(fmt.Sprintf("[%s] I skip cycle.", pkg))
 		// TODO: Is this correct?
 		return nil
 	}
@@ -176,7 +175,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	}
 
 	if pc.IsDep2Skip(gp) {
-		fmt.Println(fmt.Sprintf("[%s] Skipped dependency %s", stack[len(stack)-1], pkg))
+		DebugC(fmt.Sprintf("[%s] Skipped dependency %s", stack[len(stack)-1], pkg))
 		return nil
 	}
 
@@ -192,10 +191,12 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		solution.Package.Name)
 
 	if _, ok := pc.Cache[cacheKey]; ok {
-		fmt.Println(fmt.Sprintf("Package %s already in cache.", pkg))
+		DebugC(fmt.Sprintf("Package %s already in cache.", pkg))
 		// Nothing to do
 		return nil
 	}
+
+	InfoC(GetAurora().Bold(fmt.Sprintf(":pizza: Creating solution for %s (%s)...", pkg, treePath)))
 
 	pkgDir := fmt.Sprintf("%s/%s/%s/",
 		filepath.Join(pc.TargetDir, treePath),
@@ -224,7 +225,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	// TODO: at the moment we ignore version. Do We want to handle this with Marvin?
 	if p != nil && !pc.Override {
 		// Nothing to do
-		fmt.Println(fmt.Sprintf("Package %s already in tree.", pkg))
+		InfoC(fmt.Sprintf("Package %s already in tree.", pkg))
 		return nil
 	}
 
@@ -235,10 +236,10 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	var bdeps []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
 	for _, bdep := range solution.BuildDeps {
 
-		fmt.Println(fmt.Sprintf("[%s] Analyzing buildtime dep %s...", pkg, bdep.GetPackageName()))
+		DebugC(fmt.Sprintf("[%s] Analyzing buildtime dep %s...", pkg, bdep.GetPackageName()))
 
 		if pc.IsDep2Skip(&bdep) {
-			fmt.Println(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bdep.GetPackageName()))
+			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bdep.GetPackageName()))
 			continue
 		}
 
@@ -267,7 +268,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 				bdeps = pc.AppendIfNotPresent(bdeps, bdep)
 			} else {
 
-				fmt.Println(fmt.Sprintf("[%s] For buildtime dep %s is used package %s",
+				DebugC(fmt.Sprintf("[%s] For buildtime dep %s is used package %s",
 					pkg, bdep.GetPackageName(), p.HumanReadableString()))
 
 				gp := gentoo.GentooPackage{
@@ -279,7 +280,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 				bdeps = pc.AppendIfNotPresent(bdeps, gp)
 			}
 		} else {
-			fmt.Println(fmt.Sprintf("[%s] For build-time dep %s is used package %s",
+			DebugC(fmt.Sprintf("[%s] For build-time dep %s is used package %s",
 				pkg, bdep.GetPackageName(), p.HumanReadableString()))
 
 			gp := gentoo.GentooPackage{
@@ -298,11 +299,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	var bconflicts []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
 	for _, bconflict := range solution.BuildConflicts {
 
-		fmt.Println(fmt.Sprintf("[%s] Analyzing buildtime conflict %s...",
+		DebugC(fmt.Sprintf("[%s] Analyzing buildtime conflict %s...",
 			pkg, bconflict.GetPackageName()))
 
 		if pc.IsDep2Skip(&bconflict) {
-			fmt.Println(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bconflict.GetPackageName()))
+			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bconflict.GetPackageName()))
 			continue
 		}
 
@@ -314,7 +315,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		// Check if it's present the build dep on the tree
 		p, _ := pc.ReciperRuntime.GetDatabase().FindPackage(dep)
 		if p == nil {
-			fmt.Println(fmt.Sprintf("[%s] Package in conflict %s not in tree. I ignore it.",
+			DebugC(fmt.Sprintf("[%s] Package in conflict %s not in tree. I ignore it.",
 				pkg, p))
 			continue
 		}
@@ -333,10 +334,10 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	var rdeps []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
 	for _, rdep := range solution.RuntimeDeps {
 
-		fmt.Println(fmt.Sprintf("[%s] Analyzing runtime dep %s...", pkg, rdep.GetPackageName()))
+		DebugC(fmt.Sprintf("[%s] Analyzing runtime dep %s...", pkg, rdep.GetPackageName()))
 
 		if pc.IsDep2Skip(&rdep) {
-			fmt.Println(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rdep.GetPackageName()))
+			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rdep.GetPackageName()))
 			continue
 		}
 
@@ -362,7 +363,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 		} else {
 			// TODO: handle package list in a better way
-			fmt.Println(fmt.Sprintf("[%s] For runtime dep %s is used package %s",
+			DebugC(fmt.Sprintf("[%s] For runtime dep %s is used package %s",
 				pkg, rdep.GetPackageName(), p[0].HumanReadableString()))
 
 			gp := gentoo.GentooPackage{
@@ -380,11 +381,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	var rconflicts []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
 	for _, rconflict := range solution.RuntimeConflicts {
 
-		fmt.Println(fmt.Sprintf("[%s] Analyzing runtime conflict %s...",
+		DebugC(fmt.Sprintf("[%s] Analyzing runtime conflict %s...",
 			pkg, rconflict.GetPackageName()))
 
 		if pc.IsDep2Skip(&rconflict) {
-			fmt.Println(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rconflict.GetPackageName()))
+			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rconflict.GetPackageName()))
 			continue
 		}
 
@@ -396,7 +397,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		// Check if it's present the build dep on the tree
 		p, _ := pc.ReciperRuntime.GetDatabase().FindPackage(dep)
 		if p == nil {
-			fmt.Println(fmt.Sprintf(
+			DebugC(fmt.Sprintf(
 				"[%s] Runtime package dep in conflict %s not in tree. I ignore it.",
 				pkg))
 			continue
@@ -440,10 +441,12 @@ func (pc *PortageConverter) Generate() error {
 		resolver.SetDepsWithSlot(pc.Specs.ReposcanRequiresWithSlot)
 		resolver.SetDisabledUseFlags(pc.Specs.ReposcanDisabledUseFlags)
 		resolver.SetDisabledKeywords(pc.Specs.ReposcanDisabledKeywords)
-		fmt.Println(fmt.Sprintf("Using dependency with slot on category: %v",
+		InfoC(fmt.Sprintf("Using dependency with slot on category: %v",
 			resolver.GetDepsWithSlot()))
-		fmt.Println(fmt.Sprintf("Disabled keywords: %s", resolver.GetDisabledKeywords()))
-		fmt.Println(fmt.Sprintf("Disabled USE: %s", resolver.GetDisabledUseFlags()))
+		InfoC(fmt.Sprintf("Disabled keywords: %s",
+			GetAurora().Bold(resolver.GetDisabledKeywords())))
+		InfoC(fmt.Sprintf("Disabled USE: %s",
+			GetAurora().Bold(resolver.GetDisabledUseFlags())))
 		err = resolver.LoadJsonFiles()
 		if err != nil {
 			return err
@@ -467,7 +470,7 @@ func (pc *PortageConverter) Generate() error {
 	for _, artefact := range pc.Specs.GetArtefacts() {
 		for _, pkg := range artefact.GetPackages() {
 
-			fmt.Println(fmt.Sprintf("Analyzing package %s...", pkg))
+			DebugC(fmt.Sprintf("Analyzing package %s...", pkg))
 			err := pc.createSolution(pkg, artefact.GetTree(), []string{}, artefact)
 			if err != nil {
 				return err
@@ -478,8 +481,8 @@ func (pc *PortageConverter) Generate() error {
 	// Stage1: Write new specs without analyzing requires for build / runtime.
 	for _, pkg := range pc.Solutions {
 
-		fmt.Println(fmt.Sprintf(
-			"Processing package %s-%s", pkg.Package.GetPackageName(), pkg.Package.GetPVR()))
+		InfoC(fmt.Sprintf(
+			":cake: Processing package %s-%s", pkg.Package.GetPackageName(), pkg.Package.GetPVR()))
 
 		err := os.MkdirAll(pkg.PackageDir, 0755)
 		if err != nil {
@@ -524,6 +527,9 @@ func (pc *PortageConverter) Generate() error {
 		}
 	}
 
+	InfoC(GetAurora().Bold(fmt.Sprintf(
+		"Stage1 Completed: generated %d packages.", len(pc.Solutions))))
+
 	// Stage2: Reload tree and drop redundant dependencies
 	err = pc.Stage2()
 	if err != nil {
@@ -534,6 +540,8 @@ func (pc *PortageConverter) Generate() error {
 }
 
 func (pc *PortageConverter) Stage2() error {
+
+	InfoC(GetAurora().Bold("Stage2 Starting..."))
 
 	// Reset reciper
 	pc.ReciperBuild = luet_tree.NewCompilerRecipe(luet_pkg.NewInMemoryDatabase(false))
@@ -553,8 +561,9 @@ func (pc *PortageConverter) Stage2() error {
 		resolvedBuildtimeDeps := []*luet_pkg.DefaultPackage{}
 
 		// Check buildtime requires
-		fmt.Println(fmt.Sprintf("[%s/%s-%s] Checking buildtime dependencies...",
-			pack.GetCategory(), pack.GetName(), pack.GetVersion()))
+		DebugC(GetAurora().Bold(fmt.Sprintf("[%s/%s-%s]",
+			pack.GetCategory(), pack.GetName(), pack.GetVersion())),
+			"Checking buildtime dependencies...")
 
 		luetPkg := &luet_pkg.DefaultPackage{
 			Name:     pack.GetName(),
@@ -592,7 +601,7 @@ func (pc *PortageConverter) Stage2() error {
 						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
 							alreadyInjected = true
 
-							fmt.Println(fmt.Sprintf("[%s/%s-%s] Dropping buildtime dep %s/%s available in %s/%s",
+							InfoC(fmt.Sprintf("[%s/%s-%s] Dropping buildtime dep %s/%s available in %s/%s",
 								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
 								dep.GetCategory(), dep.GetName(),
 								d2.GetCategory(), d2.GetName(),
@@ -617,7 +626,7 @@ func (pc *PortageConverter) Stage2() error {
 
 		} else {
 
-			fmt.Println(fmt.Sprintf("[%s/%s-%s] Only one buildtime dep present. Nothing to do.",
+			DebugC(fmt.Sprintf("[%s/%s-%s] Only one buildtime dep present. Nothing to do.",
 				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
 
 		}
@@ -654,7 +663,7 @@ func (pc *PortageConverter) Stage2() error {
 						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
 							alreadyInjected = true
 
-							fmt.Println(fmt.Sprintf("[%s/%s-%s] Dropping runtime dep %s/%s available in %s/%s",
+							InfoC(fmt.Sprintf("[%s/%s-%s] Dropping runtime dep %s/%s available in %s/%s",
 								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
 								dep.GetCategory(), dep.GetName(),
 								d2.GetCategory(), d2.GetName(),
@@ -679,7 +688,7 @@ func (pc *PortageConverter) Stage2() error {
 
 		} else {
 
-			fmt.Println(fmt.Sprintf("[%s/%s-%s] Only one runtime dep present. Nothing to do.",
+			DebugC(fmt.Sprintf("[%s/%s-%s] Only one runtime dep present. Nothing to do.",
 				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
 
 		}
