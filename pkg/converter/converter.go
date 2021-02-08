@@ -466,6 +466,9 @@ func (pc *PortageConverter) Generate() error {
 		pc.Resolver = qdepends.NewQDependsResolver()
 	}
 
+	// Create artefacts map
+	pc.Specs.GenerateArtefactsMap()
+
 	// Resolve all packages
 	for _, artefact := range pc.Specs.GetArtefacts() {
 		for _, pkg := range artefact.GetPackages() {
