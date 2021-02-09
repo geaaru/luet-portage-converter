@@ -220,6 +220,9 @@ func (r *RepoScanResolver) Resolve(pkg string, opts specs.PortageResolverOpts) (
 	}
 
 	err = r.retrieveBuildtimeDeps(atom, last, ans, &opts)
+	if err != nil {
+		return nil, err
+	}
 
 	return ans, nil
 }
@@ -456,7 +459,9 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency) ([]
 
 		}
 
-	} else {
+	}
+
+	if gdep.Dep != nil {
 
 		// Check if current deps is available.
 		atom, err := r.GetLastPackage(gdep.Dep.GetPackageName())

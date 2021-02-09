@@ -184,6 +184,10 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		return errors.New(fmt.Sprintf("Error on resolve %s: %s", pkg, err.Error()))
 	}
 
+	DebugC(fmt.Sprintf("[%s] rconflicts %d rdeps %d bconflicts %d bdpes %d",
+		pkg, len(solution.RuntimeConflicts), len(solution.RuntimeDeps),
+		len(solution.BuildConflicts), len(solution.BuildDeps)))
+
 	stack = append(stack, pkg)
 
 	cacheKey := fmt.Sprintf("%s/%s",
@@ -249,11 +253,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		dep.Category = specs.SanitizeCategory(bdep.Category, bdep.Slot)
 
 		// Check if it's present the build dep on the tree
-		p, _ := pc.ReciperBuild.GetDatabase().FindPackage(dep)
+		p, _ := pc.ReciperBuild.GetDatabase().FindPackages(dep)
 		if p == nil {
 
 			// Check if there is a runtime deps/provide for this
-			p, _ := pc.ReciperRuntime.GetDatabase().FindPackage(dep)
+			p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
 			if p == nil {
 				dep_str := fmt.Sprintf("%s/%s", bdep.Category, bdep.Name)
 				if bdep.Slot != "0" {
@@ -269,11 +273,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			} else {
 
 				DebugC(fmt.Sprintf("[%s] For buildtime dep %s is used package %s",
-					pkg, bdep.GetPackageName(), p.HumanReadableString()))
+					pkg, bdep.GetPackageName(), p[0].HumanReadableString()))
 
 				gp := gentoo.GentooPackage{
-					Name:     p.GetName(),
-					Category: p.GetCategory(),
+					Name:     p[0].GetName(),
+					Category: p[0].GetCategory(),
 					Version:  ">=0",
 					Slot:     "0",
 				}
@@ -281,11 +285,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			}
 		} else {
 			DebugC(fmt.Sprintf("[%s] For build-time dep %s is used package %s",
-				pkg, bdep.GetPackageName(), p.HumanReadableString()))
+				pkg, bdep.GetPackageName(), p[0].HumanReadableString()))
 
 			gp := gentoo.GentooPackage{
-				Name:     p.GetName(),
-				Category: p.GetCategory(),
+				Name:     p[0].GetName(),
+				Category: p[0].GetCategory(),
 				Version:  ">=0",
 				Slot:     "0",
 			}
@@ -307,22 +311,9 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			continue
 		}
 
-		dep := luet_pkg.NewPackage(bconflict.Name, ">=0",
-			[]*luet_pkg.DefaultPackage{},
-			[]*luet_pkg.DefaultPackage{})
-		dep.Category = specs.SanitizeCategory(bconflict.Category, bconflict.Slot)
-
-		// Check if it's present the build dep on the tree
-		p, _ := pc.ReciperRuntime.GetDatabase().FindPackage(dep)
-		if p == nil {
-			DebugC(fmt.Sprintf("[%s] Package in conflict %s not in tree. I ignore it.",
-				pkg, p))
-			continue
-		}
-
 		gp := gentoo.GentooPackage{
-			Name:     p.GetName(),
-			Category: p.GetCategory(),
+			Name:     bconflict.Name,
+			Category: specs.SanitizeCategory(bconflict.Category, bconflict.Slot),
 			Version:  ">=0",
 			Slot:     "0",
 		}
@@ -389,23 +380,9 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			continue
 		}
 
-		dep := luet_pkg.NewPackage(rconflict.Name, ">=0",
-			[]*luet_pkg.DefaultPackage{},
-			[]*luet_pkg.DefaultPackage{})
-		dep.Category = specs.SanitizeCategory(rconflict.Category, rconflict.Slot)
-
-		// Check if it's present the build dep on the tree
-		p, _ := pc.ReciperRuntime.GetDatabase().FindPackage(dep)
-		if p == nil {
-			DebugC(fmt.Sprintf(
-				"[%s] Runtime package dep in conflict %s not in tree. I ignore it.",
-				pkg))
-			continue
-		}
-
 		gp := gentoo.GentooPackage{
-			Name:     p.GetName(),
-			Category: p.GetCategory(),
+			Name:     rconflict.Name,
+			Category: specs.SanitizeCategory(rconflict.Category, rconflict.Slot),
 			Version:  ">=0",
 			Slot:     "0",
 		}
