@@ -539,6 +539,8 @@ func (pc *PortageConverter) Stage2() error {
 		updateRuntimeDeps := false
 		resolvedRuntimeDeps := []*luet_pkg.DefaultPackage{}
 		resolvedBuildtimeDeps := []*luet_pkg.DefaultPackage{}
+		resolvedRuntimeConflicts := []*luet_pkg.DefaultPackage{}
+		resolvedBuildConflicts := []*luet_pkg.DefaultPackage{}
 
 		// Check buildtime requires
 		DebugC(GetAurora().Bold(fmt.Sprintf("[%s/%s-%s]",
@@ -553,6 +555,43 @@ func (pc *PortageConverter) Stage2() error {
 		pReciper, err := pc.ReciperBuild.GetDatabase().FindPackage(luetPkg)
 		if err != nil {
 			return err
+		}
+
+		// Drop conflicts not present on tree
+		conflicts := pReciper.GetConflicts()
+		if len(conflicts) > 0 {
+
+			for _, dep := range conflicts {
+				pp, _ := pc.ReciperBuild.GetDatabase().FindPackages(
+					&luet_pkg.DefaultPackage{
+						Name:     dep.GetName(),
+						Category: dep.GetCategory(),
+						Version:  ">=0",
+					},
+				)
+
+				if pp == nil || len(pp) == 0 {
+					pp, _ := pc.ReciperRuntime.GetDatabase().FindPackages(
+						&luet_pkg.DefaultPackage{
+							Name:     dep.GetName(),
+							Category: dep.GetCategory(),
+							Version:  ">=0",
+						},
+					)
+					if pp == nil || len(pp) == 0 {
+						resolvedBuildConflicts = append(resolvedBuildConflicts, dep)
+						InfoC(fmt.Sprintf("[%s/%s-%s] Dropping buildtime conflict %s/%s not available in tree.",
+							pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+							dep.GetCategory(), dep.GetName(),
+						))
+					}
+				}
+			}
+
+			if len(resolvedBuildConflicts) != len(conflicts) {
+				updateBuildDeps = true
+			}
+
 		}
 
 		deps := pReciper.GetRequires()
@@ -581,7 +620,7 @@ func (pc *PortageConverter) Stage2() error {
 						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
 							alreadyInjected = true
 
-							InfoC(fmt.Sprintf("[%s/%s-%s] Dropping buildtime dep %s/%s available in %s/%s",
+							DebugC(fmt.Sprintf("[%s/%s-%s] Dropping buildtime dep %s/%s available in %s/%s",
 								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
 								dep.GetCategory(), dep.GetName(),
 								d2.GetCategory(), d2.GetName(),
@@ -617,6 +656,34 @@ func (pc *PortageConverter) Stage2() error {
 			return err
 		}
 
+		// Drop conflicts not present on tree
+		conflicts = pReciper.GetConflicts()
+		if len(conflicts) > 0 {
+
+			for _, dep := range conflicts {
+				pp, _ := pc.ReciperRuntime.GetDatabase().FindPackages(
+					&luet_pkg.DefaultPackage{
+						Name:     dep.GetName(),
+						Category: dep.GetCategory(),
+						Version:  ">=0",
+					},
+				)
+				if pp == nil || len(pp) == 0 {
+					resolvedRuntimeConflicts = append(resolvedRuntimeConflicts, dep)
+
+					InfoC(fmt.Sprintf("[%s/%s-%s] Dropping runtime conflict %s/%s not available in tree.",
+						pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+						dep.GetCategory(), dep.GetName(),
+					))
+				}
+			}
+
+			if len(resolvedRuntimeConflicts) != len(deps) {
+				updateBuildDeps = true
+			}
+
+		}
+
 		deps = pReciper.GetRequires()
 		if len(deps) > 1 {
 
@@ -643,7 +710,7 @@ func (pc *PortageConverter) Stage2() error {
 						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
 							alreadyInjected = true
 
-							InfoC(fmt.Sprintf("[%s/%s-%s] Dropping runtime dep %s/%s available in %s/%s",
+							DebugC(fmt.Sprintf("[%s/%s-%s] Dropping runtime dep %s/%s available in %s/%s",
 								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
 								dep.GetCategory(), dep.GetName(),
 								d2.GetCategory(), d2.GetName(),
@@ -680,6 +747,7 @@ func (pc *PortageConverter) Stage2() error {
 			// Convert solution to luet package
 			pack := pkg.ToPack(true)
 			pack.Requires(resolvedRuntimeDeps)
+			pack.Conflicts(resolvedRuntimeConflicts)
 
 			// Write definition.yaml
 			err = luet_tree.WriteDefinitionFile(pack, defFile)
@@ -699,10 +767,9 @@ func (pc *PortageConverter) Stage2() error {
 			}
 
 			// create build.yaml
-			bPack := pkg.ToPack(false)
 			buildPack, _ := buildTmpl.Clone()
 			buildPack.Requires(resolvedBuildtimeDeps)
-			buildPack.AddConflicts(bPack.PackageConflicts)
+			buildPack.Conflicts(resolvedBuildConflicts)
 
 			err = buildPack.WriteBuildDefinition(buildFile)
 			if err != nil {

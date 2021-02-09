@@ -126,3 +126,8 @@ func (s *LuetCompilationSpecSanitized) AddConflicts(pkgs []*pkg.DefaultPackage) 
 		s.PackageConflicts = append(s.PackageConflicts, p)
 	}
 }
+
+func (s *LuetCompilationSpecSanitized) Conflicts(pkgs []*pkg.DefaultPackage) {
+	s.PackageConflicts = []*st.DefaultPackageSanitized{}
+	s.AddConflicts(pkgs)
+}
