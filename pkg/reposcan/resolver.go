@@ -236,7 +236,7 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 
 		deps, err := ParseDependencies(rdepend)
 		if err != nil {
-			Warning(fmt.Sprintf("Error on parsing '%s': %s", rdepend, err.Error()))
+			Warning(fmt.Sprintf("[%s] RDEPEND Error on parsing '%s': %s", atom.Atom, rdepend, err.Error()))
 			Warning("Using relations directly.")
 
 			rdeps, err = atom.GetRuntimeDeps()
@@ -289,7 +289,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 
 		deps, err := ParseDependencies(depend)
 		if err != nil {
-			Warning(fmt.Sprintf("Error on parsing '%s': %s", depend, err.Error()))
+			Warning(fmt.Sprintf("[%s] DEPEND Error on parsing '%s': %s", atom.Atom, depend, err.Error()))
 			Warning("Using relations directly.")
 
 			bdeps, err = atom.GetBuildtimeDeps()
@@ -312,7 +312,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 
 				deps, err := ParseDependencies(bdepends)
 				if err != nil {
-					Warning(fmt.Sprintf("Error on parsing '%s': %s", bdepends, err.Error()))
+					Warning(fmt.Sprintf("[%s] BDEPEND: Error on parsing '%s': %s", atom.Atom, bdepends, err.Error()))
 					Warning("Using relations directly.")
 
 					bdeps, err = atom.GetBuildtimeDeps()
@@ -471,7 +471,7 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency) ([]
 				gp.Slot = ""
 			}
 
-			if gdep.UseCondition == gentoo.PkgCondNot {
+			if gdep.Dep.Condition == gentoo.PkgCondNot {
 				conflicts = append(conflicts, *gp)
 			} else {
 				deps = append(deps, *gp)

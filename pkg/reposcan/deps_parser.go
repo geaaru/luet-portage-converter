@@ -307,6 +307,7 @@ func ParseDependenciesMultiline(rdepend string) (*EbuildDependencies, error) {
 func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 	var idx = 0
 	var last *GentooDependency
+	openParenthesis := 0
 	stack := []*GentooDependency{}
 
 	ans := &EbuildDependencies{
@@ -326,7 +327,7 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 			rr = reg.ReplaceAllString(rr, "")
 
 			if rr != "" {
-				//fmt.Println("PARSING ", rr)
+				//fmt.Println("PARSING ", rr, openParenthesis)
 
 				if rr == "||" {
 					dep, err := NewGentooDependency("", "")
@@ -340,6 +341,7 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 					}
 					stack = append(stack, dep)
 					last = dep
+
 					idx++
 					continue
 				}
@@ -365,22 +367,39 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 					if last == nil {
 						return nil, errors.New("Unexpected round parenthesis without USE flag")
 					}
+
+					if openParenthesis > 1 && last.DepInOr {
+						// we need another dep
+						dep, err := last.AddSubDependency("", "")
+						if err != nil {
+							return nil, err
+						}
+						last = dep
+
+						stack = append(stack, dep)
+					}
+
+					openParenthesis++
 					idx++
 					continue
 				}
 
 				if rr == ")" {
 
+					openParenthesis--
 					if last == nil {
 						return nil, errors.New("Unexpected round parenthesis on empty stack")
 					}
-
 					// POST: end subdeps.
 					if len(stack) > 1 {
-						//fmt.Println("STACK ", len(stack))
 						// Set as last dep the previous dep in the stack
-						last = stack[len(stack)-2]
-						stack = stack[:len(stack)-1]
+						if len(stack) == 2 && openParenthesis == 0 {
+							last = nil
+							stack = stack[:len(stack)-2]
+						} else {
+							last = stack[len(stack)-2]
+							stack = stack[:len(stack)-1]
+						}
 						//		fmt.Println("STACK2 ", len(stack))
 					} else {
 						stack = []*GentooDependency{}
