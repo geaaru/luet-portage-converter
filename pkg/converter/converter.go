@@ -579,11 +579,12 @@ func (pc *PortageConverter) Stage2() error {
 						},
 					)
 					if pp == nil || len(pp) == 0 {
-						resolvedBuildConflicts = append(resolvedBuildConflicts, dep)
 						InfoC(fmt.Sprintf("[%s/%s-%s] Dropping buildtime conflict %s/%s not available in tree.",
 							pack.GetCategory(), pack.GetName(), pack.GetVersion(),
 							dep.GetCategory(), dep.GetName(),
 						))
+					} else {
+						resolvedBuildConflicts = append(resolvedBuildConflicts, dep)
 					}
 				}
 			}
@@ -669,12 +670,13 @@ func (pc *PortageConverter) Stage2() error {
 					},
 				)
 				if pp == nil || len(pp) == 0 {
-					resolvedRuntimeConflicts = append(resolvedRuntimeConflicts, dep)
 
 					InfoC(fmt.Sprintf("[%s/%s-%s] Dropping runtime conflict %s/%s not available in tree.",
 						pack.GetCategory(), pack.GetName(), pack.GetVersion(),
 						dep.GetCategory(), dep.GetName(),
 					))
+				} else {
+					resolvedRuntimeConflicts = append(resolvedRuntimeConflicts, dep)
 				}
 			}
 
