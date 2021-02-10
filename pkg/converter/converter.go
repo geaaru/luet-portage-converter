@@ -200,7 +200,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		return nil
 	}
 
-	InfoC(GetAurora().Bold(fmt.Sprintf(":pizza: Creating solution for %s (%s)...", pkg, treePath)))
+	InfoC(GetAurora().Bold(fmt.Sprintf(":pizza: [%s] (%s) Creating solution ...", pkg, treePath)))
 
 	pkgDir := fmt.Sprintf("%s/%s/%s/",
 		filepath.Join(pc.TargetDir, treePath),
@@ -646,7 +646,7 @@ func (pc *PortageConverter) Stage2() error {
 
 			} // end for idx, dep
 
-			if len(resolvedRuntimeDeps) != len(deps) {
+			if len(resolvedBuildtimeDeps) != len(deps) {
 				updateBuildDeps = true
 			}
 
@@ -655,6 +655,7 @@ func (pc *PortageConverter) Stage2() error {
 			DebugC(fmt.Sprintf("[%s/%s-%s] Only one buildtime dep present. Nothing to do.",
 				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
 
+			resolvedBuildtimeDeps = deps
 		}
 
 		// Check runtime requires
@@ -747,6 +748,8 @@ func (pc *PortageConverter) Stage2() error {
 
 			DebugC(fmt.Sprintf("[%s/%s-%s] Only one runtime dep present. Nothing to do.",
 				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
+
+			resolvedRuntimeDeps = deps
 
 		}
 
