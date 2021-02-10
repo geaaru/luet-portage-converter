@@ -35,6 +35,14 @@ import (
 	luet_tree "github.com/mudler/luet/pkg/tree"
 )
 
+// Build time and commit information. This code is get from: https://github.com/mudler/luet/
+//
+// ⚠️ WARNING: should only be set by "-ldflags".
+var (
+	BuildTime   string
+	BuildCommit string
+)
+
 type PortageConverter struct {
 	Config         *luet_config.LuetConfig
 	Cache          map[string]*specs.PortageSolution

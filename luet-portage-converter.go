@@ -38,14 +38,6 @@ Portage/Overlay converter for Luet specs.`
 	version = "0.1.0"
 )
 
-// Build time and commit information. This code is get from: https://github.com/mudler/luet/
-//
-// ⚠️ WARNING: should only be set by "-ldflags".
-var (
-	BuildTime   string
-	BuildCommit string
-)
-
 func initConfig() error {
 	LuetCfg.Viper.SetEnvPrefix("LUET")
 	LuetCfg.Viper.AutomaticEnv() // read in environment variables that match
@@ -70,7 +62,7 @@ func Execute() {
 	var rootCmd = &cobra.Command{
 		Use:     "luet-portage-converter --",
 		Short:   cliName,
-		Version: fmt.Sprintf("%s-g%s %s", version, BuildCommit, BuildTime),
+		Version: fmt.Sprintf("%s-g%s %s", version, converter.BuildCommit, converter.BuildTime),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			to, _ := cmd.Flags().GetString("to")
 			if to == "" {
