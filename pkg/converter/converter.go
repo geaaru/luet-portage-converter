@@ -537,6 +537,10 @@ func (pc *PortageConverter) Stage2() error {
 		pack := pkg.ToPack(true)
 		updateBuildDeps := false
 		updateRuntimeDeps := false
+		runtimeDepsRemoved := 0
+		runtimeConflictsRemoved := 0
+		buildtimeDepsRemoved := 0
+		buildtimeConflictsRemoved := 0
 		resolvedRuntimeDeps := []*luet_pkg.DefaultPackage{}
 		resolvedBuildtimeDeps := []*luet_pkg.DefaultPackage{}
 		resolvedRuntimeConflicts := []*luet_pkg.DefaultPackage{}
@@ -583,6 +587,7 @@ func (pc *PortageConverter) Stage2() error {
 							pack.GetCategory(), pack.GetName(), pack.GetVersion(),
 							dep.GetCategory(), dep.GetName(),
 						))
+						buildtimeConflictsRemoved++
 					} else {
 						resolvedBuildConflicts = append(resolvedBuildConflicts, dep)
 					}
@@ -626,6 +631,7 @@ func (pc *PortageConverter) Stage2() error {
 								dep.GetCategory(), dep.GetName(),
 								d2.GetCategory(), d2.GetName(),
 							))
+							buildtimeDepsRemoved++
 							goto next_dep
 						}
 					}
@@ -675,6 +681,7 @@ func (pc *PortageConverter) Stage2() error {
 						pack.GetCategory(), pack.GetName(), pack.GetVersion(),
 						dep.GetCategory(), dep.GetName(),
 					))
+					runtimeConflictsRemoved++
 				} else {
 					resolvedRuntimeConflicts = append(resolvedRuntimeConflicts, dep)
 				}
@@ -717,6 +724,7 @@ func (pc *PortageConverter) Stage2() error {
 								dep.GetCategory(), dep.GetName(),
 								d2.GetCategory(), d2.GetName(),
 							))
+							runtimeDepsRemoved++
 							goto next_rdep
 						}
 					}
@@ -778,6 +786,16 @@ func (pc *PortageConverter) Stage2() error {
 				return err
 			}
 
+		}
+
+		if updateBuildDeps || updateRuntimeDeps {
+			InfoC(GetAurora().Bold(
+				fmt.Sprintf(
+					":angel: [%s/%s-%s] removed: r.deps %d, r.conflicts %d, b.deps %d, b.conflicts %d.",
+					pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+					runtimeDepsRemoved, runtimeConflictsRemoved,
+					buildtimeDepsRemoved, buildtimeConflictsRemoved,
+				)))
 		}
 
 	}
