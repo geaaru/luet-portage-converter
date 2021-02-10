@@ -680,8 +680,8 @@ func (pc *PortageConverter) Stage2() error {
 				}
 			}
 
-			if len(resolvedRuntimeConflicts) != len(deps) {
-				updateBuildDeps = true
+			if len(resolvedRuntimeConflicts) != len(conflicts) {
+				updateRuntimeDeps = true
 			}
 
 		}
