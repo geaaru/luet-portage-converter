@@ -85,11 +85,16 @@ func Execute() {
 			override, _ := cmd.Flags().GetBool("override")
 			backend, _ := cmd.Flags().GetString("backend")
 			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
+			pkgs, _ := cmd.Flags().GetStringArray("pkg")
 
 			converter := converter.NewPortageConverter(to, backend)
 			converter.Override = override
 			converter.IgnoreMissingDeps = ignoreMissingDeps
 			converter.TreePaths = treePath
+
+			if len(pkgs) > 0 {
+				converter.SetFilteredPackages(pkgs)
+			}
 
 			err := converter.LoadRules(rulesFile)
 			if err != nil {
@@ -130,6 +135,8 @@ func Execute() {
 	rootCmd.Flags().StringArray("reposcan-files", []string{}, "Append additional reposcan files. Only for reposcan backend.")
 	rootCmd.Flags().StringArray("disable-use-flag", []string{}, "Append additional use flags to disable.")
 	rootCmd.Flags().Bool("ignore-missing-deps", false, "Ignore missing deps on resolver.")
+	rootCmd.Flags().StringArrayP("pkg", "p", []string{},
+		"Define the list of the packages to generate instead of the full list defined in rules file.")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
