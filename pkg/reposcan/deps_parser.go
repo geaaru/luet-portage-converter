@@ -69,11 +69,21 @@ func NewGentooDependency(pkg, use string) (*GentooDependency, error) {
 	return ans, nil
 }
 
+func NewGentooDependencyWithSubdeps(pkg, use string, subdeps []*GentooDependency) (*GentooDependency, error) {
+	ans, err := NewGentooDependency(pkg, use)
+	if err != nil {
+		return ans, err
+	}
+
+	ans.SubDeps = subdeps
+	return ans, nil
+}
+
 func (d *GentooDependency) String() string {
 	if d.Dep != nil {
-		return fmt.Sprintf("%s", d.Dep)
+		return fmt.Sprintf("%s (%v)", d.Dep, d.DepInOr)
 	} else {
-		return fmt.Sprintf("%s %d %s", d.Use, d.UseCondition, d.SubDeps)
+		return fmt.Sprintf("%s %d %s (%v)", d.Use, d.UseCondition, d.SubDeps, d.DepInOr)
 	}
 }
 
@@ -327,6 +337,14 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 			rr = reg.ReplaceAllString(rr, "")
 
 			if rr != "" {
+
+				if idx > 0 && rdepends[idx-1] == ")" && rr != "(" && rr != ")" {
+					if len(stack) > 1 && stack[len(stack)-1].DepInOr {
+						stack = stack[:len(stack)-1]
+						last = stack[len(stack)-1]
+					}
+				}
+
 				//fmt.Println("PARSING ", rr, openParenthesis)
 
 				if rr == "||" {
@@ -338,6 +356,8 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 
 					if last != nil {
 						last.SubDeps = append(last.SubDeps, dep)
+					} else {
+						ans.Dependencies = append(ans.Dependencies, dep)
 					}
 					stack = append(stack, dep)
 					last = dep
@@ -368,7 +388,7 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 						return nil, errors.New("Unexpected round parenthesis without USE flag")
 					}
 
-					if openParenthesis > 1 && last.DepInOr {
+					if openParenthesis > 0 && last.DepInOr {
 						// we need another dep
 						dep, err := last.AddSubDependency("", "")
 						if err != nil {
@@ -392,15 +412,8 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 					}
 					// POST: end subdeps.
 					if len(stack) > 1 {
-						// Set as last dep the previous dep in the stack
-						if len(stack) == 2 && openParenthesis == 0 {
-							last = nil
-							stack = stack[:len(stack)-2]
-						} else {
-							last = stack[len(stack)-2]
-							stack = stack[:len(stack)-1]
-						}
-						//		fmt.Println("STACK2 ", len(stack))
+						stack = stack[:len(stack)-1]
+						last = stack[len(stack)-1]
 					} else {
 						stack = []*GentooDependency{}
 						last = nil
