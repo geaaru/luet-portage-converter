@@ -247,7 +247,7 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 				return err
 			}
 		} else {
-			rdeps, conflicts, err = r.elaborateDepsAndUseFlags(deps)
+			rdeps, conflicts, err = r.elaborateDepsAndUseFlags(deps, opts)
 			if err != nil {
 				return err
 			}
@@ -304,7 +304,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 			useFlags := deps.GetUseFlags()
 			r.assignUseFlags(solution, useFlags, opts)
 
-			bdeps, conflicts, err = r.elaborateDepsAndUseFlags(deps)
+			bdeps, conflicts, err = r.elaborateDepsAndUseFlags(deps, opts)
 			if err != nil {
 				return err
 			}
@@ -328,7 +328,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 					useFlags := deps.GetUseFlags()
 					r.assignUseFlags(solution, useFlags, opts)
 
-					d, c, err := r.elaborateDepsAndUseFlags(deps)
+					d, c, err := r.elaborateDepsAndUseFlags(deps, opts)
 					if err != nil {
 						return err
 					}
@@ -369,7 +369,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 	return nil
 }
 
-func (r *RepoScanResolver) elaborateDepsAndUseFlags(s *EbuildDependencies) ([]gentoo.GentooPackage, []gentoo.GentooPackage, error) {
+func (r *RepoScanResolver) elaborateDepsAndUseFlags(s *EbuildDependencies, opts *specs.PortageResolverOpts) ([]gentoo.GentooPackage, []gentoo.GentooPackage, error) {
 	deps := []gentoo.GentooPackage{}
 	conflicts := []gentoo.GentooPackage{}
 
@@ -380,7 +380,7 @@ func (r *RepoScanResolver) elaborateDepsAndUseFlags(s *EbuildDependencies) ([]ge
 	for _, gdep := range s.Dependencies {
 
 		// TODO: do this recursive
-		d, c, err := r.elaborateGentooDependency(gdep)
+		d, c, err := r.elaborateGentooDependency(gdep, opts)
 		if err != nil {
 			return deps, conflicts, err
 		}
@@ -398,20 +398,24 @@ func (r *RepoScanResolver) elaborateDepsAndUseFlags(s *EbuildDependencies) ([]ge
 	return deps, conflicts, nil
 }
 
-func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency) ([]gentoo.GentooPackage, []gentoo.GentooPackage, error) {
+func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opts *specs.PortageResolverOpts) ([]gentoo.GentooPackage, []gentoo.GentooPackage, error) {
 	deps := []gentoo.GentooPackage{}
 	conflicts := []gentoo.GentooPackage{}
 
 	if gdep.Use != "" {
 		// POST: is a use flag GentooDependency
-		if r.IsDisableUseFlag(gdep.Use) {
+		if r.IsDisableUseFlag(gdep.Use) || !opts.IsAdmitUseFlag(gdep.Use) {
+			DebugC(
+				GetAurora().Bold(
+					fmt.Sprintf("Found dep with use flag %s. Ignoring it.",
+						gdep.Use)))
 			// Ignore deps
 			return deps, conflicts, nil
 		}
 
 		if len(gdep.SubDeps) > 0 {
 			for _, sdep := range gdep.SubDeps {
-				d, c, err := r.elaborateGentooDependency(sdep)
+				d, c, err := r.elaborateGentooDependency(sdep, opts)
 				if err != nil {
 					return deps, conflicts, err
 				}
@@ -433,6 +437,16 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency) ([]
 		for _, sdep := range gdep.SubDeps {
 			if sdep.Dep == nil {
 				// Ignore dep
+				continue
+			}
+
+			// POST: is a use flag GentooDependency
+			if r.IsDisableUseFlag(sdep.Use) || !opts.IsAdmitUseFlag(sdep.Use) {
+				DebugC(
+					GetAurora().Bold(
+						fmt.Sprintf("Found sub dep with use flag %s. Ignoring it.",
+							sdep.Use)))
+				// Ignore deps
 				continue
 			}
 
