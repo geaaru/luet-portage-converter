@@ -1,6 +1,6 @@
 /*
 
-Copyright (C) 2017-2019  Daniele Rondina <geaaru@sabayonlinux.org>
+Copyright (C) 2017-2021  Daniele Rondina <geaaru@sabayonlinux.org>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -177,6 +177,11 @@ func (p *GentooPackage) GetPN() string {
 
 func (p *GentooPackage) GetPV() string {
 	return fmt.Sprintf("%s", p.Version)
+}
+
+func (p *GentooPackage) GetPackageNameWithCond() (ans string) {
+	ans = fmt.Sprintf("%s%s", p.Condition.String(), p.GetPackageName())
+	return
 }
 
 func (p *GentooPackage) GetPVR() (ans string) {
@@ -568,12 +573,13 @@ func ParsePackageStr(pkg string) (*GentooPackage, error) {
 		"_beta[0-9-a-z]*",
 	)
 
-	words := strings.Split(pkg, "/")
-	if len(words) != 2 {
+	// The slash is used also in slot.
+	if strings.Index(pkg, "/") < 0 {
 		return nil, errors.New(fmt.Sprintf("Invalid package string %s", pkg))
 	}
-	ans.Category = words[0]
-	pkgname := words[1]
+
+	ans.Category = pkg[:strings.Index(pkg, "/")]
+	pkgname := pkg[strings.Index(pkg, "/")+1:]
 
 	// Validate category
 
@@ -635,14 +641,14 @@ func ParsePackageStr(pkg string) (*GentooPackage, error) {
 
 	// Check if has repository
 	if strings.Contains(pkgname, "::") {
-		words = strings.Split(pkgname, "::")
+		words := strings.Split(pkgname, "::")
 		ans.Repository = words[1]
 		pkgname = words[0]
 	}
 
 	// Check if has slot
 	if strings.Contains(pkgname, ":") {
-		words = strings.Split(pkgname, ":")
+		words := strings.Split(pkgname, ":")
 		ans.Slot = words[1]
 		pkgname = words[0]
 	}
