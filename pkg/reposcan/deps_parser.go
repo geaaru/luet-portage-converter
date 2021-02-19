@@ -337,14 +337,6 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 			rr = reg.ReplaceAllString(rr, "")
 
 			if rr != "" {
-
-				if idx > 0 && rdepends[idx-1] == ")" && rr != "(" && rr != ")" {
-					if len(stack) > 1 && stack[len(stack)-1].DepInOr {
-						stack = stack[:len(stack)-1]
-						last = stack[len(stack)-1]
-					}
-				}
-
 				//fmt.Println("PARSING ", rr, openParenthesis)
 
 				if rr == "||" {
@@ -372,7 +364,11 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 					if err != nil {
 						return nil, err
 					} else {
-						ans.Dependencies = append(ans.Dependencies, dep)
+						if last != nil {
+							last.SubDeps = append(last.SubDeps, dep)
+						} else {
+							ans.Dependencies = append(ans.Dependencies, dep)
+						}
 						stack = append(stack, dep)
 						last = dep
 					}
@@ -412,8 +408,22 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 					}
 					// POST: end subdeps.
 					if len(stack) > 1 {
-						stack = stack[:len(stack)-1]
-						last = stack[len(stack)-1]
+
+						if stack[len(stack)-2].DepInOr == true && idx < len(rdepends)-2 &&
+							strings.TrimSpace(rdepends[idx+1]) != "(" && strings.TrimSpace(rdepends[idx+1]) != ")" &&
+							strings.TrimSpace(rdepends[idx+2]) != ")" &&
+							// is not a use?
+							!strings.Contains(strings.TrimSpace(rdepends[idx+1]), "?") {
+							stack = stack[:len(stack)-2]
+							if len(stack) > 0 {
+								last = stack[len(stack)-1]
+							} else {
+								last = nil
+							}
+						} else {
+							stack = stack[:len(stack)-1]
+							last = stack[len(stack)-1]
+						}
 					} else {
 						stack = []*GentooDependency{}
 						last = nil
@@ -426,7 +436,7 @@ func ParseDependencies(rdepend string) (*EbuildDependencies, error) {
 				if len(stack) > 0 {
 					_, err := last.AddSubDependency(rr, "")
 					if err != nil {
-						return nil, errors.New("Invalid dep " + rr)
+						return nil, errors.New("Invalid dep " + rr + ": " + err.Error())
 					}
 				} else {
 
