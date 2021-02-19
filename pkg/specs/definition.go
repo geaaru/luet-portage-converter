@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2020  Daniele Rondina <geaaru@sabayonlinux.org>
+Copyright (C) 2020-2021  Daniele Rondina <geaaru@sabayonlinux.org>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,17 +18,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package specs
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"path"
 	"path/filepath"
-	"sort"
-	"strings"
 
 	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
-	luet_pkg "github.com/mudler/luet/pkg/package"
 
 	"gopkg.in/yaml.v2"
 )
@@ -47,7 +43,11 @@ type PortageConverterSpecs struct {
 	ReposcanDisabledUseFlags []string                            `json:"reposcan_disabled_use_flags,omitempty" yaml:"reposcan_disabled_use_flags,omitempty"`
 	ReposcanDisabledKeywords []string                            `json:"reposcan_disabled_keywords,omitempty" yaml:"reposcan_disabled_keywords,omitempty"`
 
-	MapArtefacts map[string]*PortageConverterArtefact `json:"-" yaml:"-"`
+	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
+
+	MapArtefacts             map[string]*PortageConverterArtefact       `json:"-" yaml:"-"`
+	MapReplacementsRuntime   map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
+	MapReplacementsBuildtime map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
 }
 
 type PortageConverterReposcanConstraints struct {
@@ -69,6 +69,28 @@ type PortageConverterArtefact struct {
 	Uses            PortageConverterUseFlags `json:"uses,omitempty" yaml:"uses,omitempty"`
 	IgnoreBuildDeps bool                     `json:"ignore_build_deps,omitempty" yaml:"ignore_build_deps,omitempty"`
 	Packages        []string                 `json:"packages" yaml:"packages"`
+
+	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
+
+	MapReplacementsRuntime   map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
+	MapReplacementsBuildtime map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
+	MapIgnoreRuntime         map[string]bool                            `json:"-" yaml:"-"`
+	MapIgnoreBuildtime       map[string]bool                            `json:"-" yaml:"-"`
+}
+
+type PortageConverterReplacements struct {
+	RuntimeDeps  PortageConverterDepReplacements `json:"runtime_deps,omitempty" yaml:"runtime_deps,omitempty"`
+	BuiltimeDeps PortageConverterDepReplacements `json:"buildtime_deps,omitempty" yaml:"buildtime_deps,omitempty"`
+}
+
+type PortageConverterDepReplacements struct {
+	Packages []PortageConverterReplacePackage `json:"packages,omitempty" yaml:"packages,omitempty"`
+	Ignore   []PortageConverterPkg            `json:"ignore,omitempty" yaml:"ignore,omitempty"`
+}
+
+type PortageConverterReplacePackage struct {
+	From PortageConverterPkg `json:"from" yaml:"from"`
+	To   PortageConverterPkg `json:"to" yaml:"to"`
 }
 
 type PortageConverterUseFlags struct {
@@ -171,6 +193,91 @@ func (s *PortageConverterSpecs) GenerateArtefactsMap() {
 	}
 }
 
+func (s *PortageConverterSpecs) HasRuntimeReplacement(pkg string) bool {
+	_, ans := s.MapReplacementsRuntime[pkg]
+	return ans
+}
+
+func (s *PortageConverterSpecs) HasBuildtimeReplacement(pkg string) bool {
+	_, ans := s.MapReplacementsBuildtime[pkg]
+	return ans
+}
+
+func (s *PortageConverterSpecs) GetBuildtimeReplacement(pkg string) (*PortageConverterReplacePackage, error) {
+	ans, ok := s.MapReplacementsBuildtime[pkg]
+	if ok {
+		return ans, nil
+	}
+	return ans, errors.New("No replacement found for key " + pkg)
+}
+
+func (s *PortageConverterSpecs) GetRuntimeReplacement(pkg string) (*PortageConverterReplacePackage, error) {
+	ans, ok := s.MapReplacementsRuntime[pkg]
+	if ok {
+		return ans, nil
+	}
+	return ans, errors.New("No replacement found for key " + pkg)
+}
+
+func (s *PortageConverterSpecs) GenerateReplacementsMap() {
+	s.MapReplacementsRuntime = make(map[string]*PortageConverterReplacePackage, 0)
+	s.MapReplacementsBuildtime = make(map[string]*PortageConverterReplacePackage, 0)
+
+	// Add key from global map
+	if len(s.Replacements.RuntimeDeps.Packages) > 0 {
+		for ridx, r := range s.Replacements.RuntimeDeps.Packages {
+			s.MapReplacementsRuntime[fmt.Sprintf("%s/%s", r.From.Category, r.From.Name)] =
+				&s.Replacements.RuntimeDeps.Packages[ridx]
+		}
+	}
+
+	if len(s.Replacements.BuiltimeDeps.Packages) > 0 {
+		for ridx, r := range s.Replacements.BuiltimeDeps.Packages {
+			s.MapReplacementsBuildtime[fmt.Sprintf("%s/%s", r.From.Category, r.From.Name)] =
+				&s.Replacements.BuiltimeDeps.Packages[ridx]
+		}
+	}
+
+	// Create artefact maps
+	for idx, _ := range s.Artefacts {
+		s.Artefacts[idx].MapReplacementsBuildtime = make(map[string]*PortageConverterReplacePackage, 0)
+		s.Artefacts[idx].MapReplacementsRuntime = make(map[string]*PortageConverterReplacePackage, 0)
+		s.Artefacts[idx].MapIgnoreBuildtime = make(map[string]bool, 0)
+		s.Artefacts[idx].MapIgnoreRuntime = make(map[string]bool, 0)
+
+		if len(s.Artefacts[idx].Replacements.RuntimeDeps.Packages) > 0 {
+			for ridx, r := range s.Artefacts[idx].Replacements.RuntimeDeps.Packages {
+				s.Artefacts[idx].MapReplacementsRuntime[fmt.Sprintf(
+					"%s/%s", r.From.Category, r.From.Name)] =
+					&s.Artefacts[idx].Replacements.RuntimeDeps.Packages[ridx]
+			}
+		}
+
+		if len(s.Artefacts[idx].Replacements.RuntimeDeps.Ignore) > 0 {
+			for _, r := range s.Artefacts[idx].Replacements.RuntimeDeps.Ignore {
+				s.Artefacts[idx].MapIgnoreRuntime[fmt.Sprintf(
+					"%s/%s", r.Category, r.Name)] = true
+			}
+		}
+
+		if len(s.Artefacts[idx].Replacements.BuiltimeDeps.Packages) > 0 {
+			for ridx, r := range s.Artefacts[idx].Replacements.BuiltimeDeps.Packages {
+				s.Artefacts[idx].MapReplacementsBuildtime[fmt.Sprintf(
+					"%s/%s", r.From.Category, r.From.Name)] =
+					&s.Artefacts[idx].Replacements.BuiltimeDeps.Packages[ridx]
+			}
+		}
+
+		if len(s.Artefacts[idx].Replacements.BuiltimeDeps.Ignore) > 0 {
+			for _, r := range s.Artefacts[idx].Replacements.BuiltimeDeps.Ignore {
+				s.Artefacts[idx].MapIgnoreBuildtime[fmt.Sprintf(
+					"%s/%s", r.Category, r.Name)] = true
+			}
+		}
+
+	}
+}
+
 func (s *PortageConverterSpecs) GetArtefactByPackage(pkg string) (*PortageConverterArtefact, error) {
 	if a, ok := s.MapArtefacts[pkg]; ok {
 		return a, nil
@@ -189,9 +296,6 @@ func (s *PortageConverterSpecs) AddReposcanSource(source string) {
 func (s *PortageConverterSpecs) AddReposcanDisabledUseFlags(uses []string) {
 	s.ReposcanDisabledUseFlags = append(s.ReposcanDisabledUseFlags, uses...)
 }
-
-func (a *PortageConverterArtefact) GetPackages() []string { return a.Packages }
-func (a *PortageConverterArtefact) GetTree() string       { return a.Tree }
 
 type PortageResolver interface {
 	Resolve(pkg string, opts PortageResolverOpts) (*PortageSolution, error)
@@ -213,185 +317,4 @@ type PortageSolution struct {
 	Description string            `json:"description,omitempty"`
 	Uri         []string          `json:"uri,omitempty"`
 	Labels      map[string]string `json:"labels,omitempty"`
-}
-
-func NewPortageResolverOpts() PortageResolverOpts {
-	return PortageResolverOpts{
-		EnableUseFlags:   []string{},
-		DisabledUseFlags: []string{},
-	}
-}
-
-func (o *PortageResolverOpts) IsAdmitUseFlag(u string) bool {
-	ans := true
-	if len(o.EnableUseFlags) > 0 {
-		for _, ue := range o.EnableUseFlags {
-			if ue == u {
-				return true
-			}
-		}
-
-		return false
-	}
-
-	if len(o.DisabledUseFlags) > 0 {
-		for _, ud := range o.DisabledUseFlags {
-			if ud == u {
-				ans = false
-				break
-			}
-		}
-	}
-
-	return ans
-}
-
-func (s *PortageSolution) SetLabel(k, v string) {
-	if v != "" {
-		s.Labels[k] = v
-	}
-}
-
-func (s *PortageSolution) ToPack(runtime bool) *luet_pkg.DefaultPackage {
-
-	version := s.Package.Version
-	// TODO: handle particular use cases
-	if strings.HasPrefix(s.Package.VersionSuffix, "_pre") {
-		version = version + s.Package.VersionSuffix
-	}
-
-	emergePackage := s.Package.GetPackageName()
-	if s.Package.Slot != "0" {
-		emergePackage = emergePackage + ":" + s.Package.Slot
-	}
-
-	labels := s.Labels
-	labels["original.package.name"] = s.Package.GetPackageName()
-	labels["original.package.version"] = s.Package.GetPVR()
-	labels["emerge.packages"] = emergePackage
-	labels["kit"] = s.Package.Repository
-
-	useFlags := []string{}
-
-	if len(s.Package.UseFlags) > 0 {
-		// Avoid duplicated
-		m := make(map[string]int, 0)
-		for _, u := range s.Package.UseFlags {
-			m[u] = 1
-		}
-		for k, _ := range m {
-			useFlags = append(useFlags, k)
-		}
-
-		sort.Strings(useFlags)
-	}
-
-	if len(useFlags) == 0 {
-		useFlags = nil
-	}
-
-	ans := &luet_pkg.DefaultPackage{
-		Name:        s.Package.Name,
-		Category:    SanitizeCategory(s.Package.Category, s.Package.Slot),
-		Version:     version,
-		UseFlags:    useFlags,
-		Labels:      labels,
-		License:     s.Package.License,
-		Description: s.Description,
-		Uri:         s.Uri,
-	}
-
-	deps := s.BuildDeps
-	if runtime {
-		deps = s.RuntimeDeps
-	}
-
-	for _, req := range deps {
-
-		dep := &luet_pkg.DefaultPackage{
-			Name:     req.Name,
-			Category: SanitizeCategory(req.Category, req.Slot),
-			UseFlags: req.UseFlags,
-		}
-		if req.Version != "" && req.Condition != gentoo.PkgCondNot &&
-			req.Condition != gentoo.PkgCondAnyRevision &&
-			req.Condition != gentoo.PkgCondMatchVersion &&
-			req.Condition != gentoo.PkgCondEqual {
-
-			// TODO: to complete
-			dep.Version = fmt.Sprintf("%s%s%s",
-				req.Condition.String(), req.Version, req.VersionSuffix)
-
-		} else {
-			dep.Version = ">=0"
-		}
-
-		ans.PackageRequires = append(ans.PackageRequires, dep)
-	}
-
-	if runtime && len(s.RuntimeConflicts) > 0 {
-
-		for _, req := range s.RuntimeConflicts {
-
-			dep := &luet_pkg.DefaultPackage{
-				Name:     req.Name,
-				Category: SanitizeCategory(req.Category, req.Slot),
-				UseFlags: req.UseFlags,
-			}
-			if req.Version != "" && req.Condition == gentoo.PkgCondNot {
-				// TODO: to complete
-				dep.Version = fmt.Sprintf("%s%s%s",
-					req.Condition.String(), req.Version, req.VersionSuffix)
-
-			} else {
-				dep.Version = ">=0"
-			}
-
-			ans.PackageConflicts = append(ans.PackageConflicts, dep)
-		}
-
-	} else if !runtime && len(s.BuildConflicts) > 0 {
-
-		for _, req := range s.BuildConflicts {
-
-			dep := &luet_pkg.DefaultPackage{
-				Name:     req.Name,
-				Category: SanitizeCategory(req.Category, req.Slot),
-				UseFlags: req.UseFlags,
-			}
-			if req.Version != "" && req.Condition == gentoo.PkgCondNot {
-				// TODO: to complete
-				dep.Version = fmt.Sprintf("%s%s%s",
-					req.Condition.String(), req.Version, req.VersionSuffix)
-
-			} else {
-				dep.Version = ">=0"
-			}
-
-			ans.PackageConflicts = append(ans.PackageConflicts, dep)
-		}
-
-	}
-
-	return ans
-}
-
-func (s *PortageSolution) String() string {
-	data, _ := json.Marshal(*s)
-	return string(data)
-}
-
-func SanitizeCategory(cat string, slot string) string {
-	ans := cat
-	if slot != "0" {
-		// Ignore sub-slot
-		if strings.Contains(slot, "/") {
-			slot = slot[0:strings.Index(slot, "/")]
-		}
-
-		if slot != "0" && slot != "" {
-			ans = fmt.Sprintf("%s-%s", cat, slot)
-		}
-	}
-	return ans
 }

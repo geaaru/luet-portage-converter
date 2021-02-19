@@ -496,6 +496,7 @@ func (pc *PortageConverter) Generate() error {
 
 	// Create artefacts map
 	pc.Specs.GenerateArtefactsMap()
+	pc.Specs.GenerateReplacementsMap()
 
 	// Resolve all packages
 	for _, artefact := range pc.Specs.GetArtefacts() {
@@ -571,8 +572,14 @@ func (pc *PortageConverter) Generate() error {
 	InfoC(GetAurora().Bold(fmt.Sprintf(
 		"Stage1 Completed: generated %d packages.", len(pc.Solutions))))
 
-	// Stage2: Reload tree and drop redundant dependencies
+	// Stage2 apply replacements
 	err = pc.Stage2()
+	if err != nil {
+		return err
+	}
+
+	// Stage3: Reload tree and drop redundant dependencies
+	err = pc.Stage3()
 	if err != nil {
 		return err
 	}

@@ -17,6 +17,18 @@ skipped_resolutions:
 #    - cat2
 
 
+replacements:
+  runtime_deps:
+    packages:
+      - from:
+          name: gcc
+          category: sys-devel
+        to:
+          name: base-gcc
+          category: sys-devel
+
+
+
 #include_files:
 #  - artefacts/file1.yml
 

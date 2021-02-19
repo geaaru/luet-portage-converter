@@ -44,14 +44,19 @@ func (pc *PortageConverter) Stage2() error {
 		pack := pkg.ToPack(true)
 		updateBuildDeps := false
 		updateRuntimeDeps := false
-		runtimeDepsRemoved := 0
-		runtimeConflictsRemoved := 0
-		buildtimeDepsRemoved := 0
-		buildtimeConflictsRemoved := 0
+		runtimeDepsReplaced := 0
+		runtimeConflictsReplaced := 0
+		runtimeDepsIgnored := 0
+		buildtimeDepsIgnored := 0
+		buildtimeDepsReplaced := 0
+		buildtimeConflictsReplaced := 0
 		resolvedRuntimeDeps := []*luet_pkg.DefaultPackage{}
 		resolvedBuildtimeDeps := []*luet_pkg.DefaultPackage{}
 		resolvedRuntimeConflicts := []*luet_pkg.DefaultPackage{}
 		resolvedBuildConflicts := []*luet_pkg.DefaultPackage{}
+
+		// Check for artefact replacements
+		art, _ := pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageName())
 
 		// Check buildtime requires
 		DebugC(GetAurora().Bold(fmt.Sprintf("[%s/%s-%s]",
@@ -73,96 +78,113 @@ func (pc *PortageConverter) Stage2() error {
 		if len(conflicts) > 0 {
 
 			for _, dep := range conflicts {
-				pp, _ := pc.ReciperBuild.GetDatabase().FindPackages(
-					&luet_pkg.DefaultPackage{
-						Name:     dep.GetName(),
-						Category: dep.GetCategory(),
-						Version:  ">=0",
-					},
-				)
 
-				if pp == nil || len(pp) == 0 {
-					pp, _ := pc.ReciperRuntime.GetDatabase().FindPackages(
-						&luet_pkg.DefaultPackage{
-							Name:     dep.GetName(),
-							Category: dep.GetCategory(),
-							Version:  ">=0",
-						},
-					)
-					if pp == nil || len(pp) == 0 {
-						InfoC(fmt.Sprintf("[%s/%s-%s] Dropping buildtime conflict %s/%s not available in tree.",
-							pack.GetCategory(), pack.GetName(), pack.GetVersion(),
-							dep.GetCategory(), dep.GetName(),
-						))
-						buildtimeConflictsRemoved++
-					} else {
-						resolvedBuildConflicts = append(resolvedBuildConflicts, dep)
+				pkgstr := fmt.Sprintf("%s/%s", dep.GetCategory(), dep.GetName())
+
+				// Check global replacements
+				if pc.Specs.HasBuildtimeReplacement(pkgstr) {
+
+					to, err := pc.Specs.GetBuildtimeReplacement(pkgstr)
+					if err != nil {
+						return err
 					}
+
+					resolvedBuildConflicts = append(resolvedBuildConflicts,
+						&luet_pkg.DefaultPackage{
+							Name:     to.To.Name,
+							Category: to.To.Category,
+							Version:  ">=0",
+						})
+					buildtimeConflictsReplaced++
+					continue
 				}
+
+				// Check if dep must be ignored
+				if art != nil && art.IgnoreBuildtime(pkgstr) {
+					buildtimeDepsIgnored++
+					continue
+				}
+
+				if art != nil && art.HasBuildtimeReplacement(pkgstr) {
+					to, err := art.GetBuildtimeReplacement(pkgstr)
+					if err != nil {
+						return err
+					}
+
+					resolvedBuildConflicts = append(resolvedBuildConflicts,
+						&luet_pkg.DefaultPackage{
+							Name:     to.To.Name,
+							Category: to.To.Category,
+							Version:  ">=0",
+						})
+
+					buildtimeConflictsReplaced++
+					continue
+				}
+
+				resolvedBuildConflicts = append(resolvedBuildConflicts, dep)
 			}
 
-			if len(resolvedBuildConflicts) != len(conflicts) {
+			if buildtimeConflictsReplaced > 0 || buildtimeDepsIgnored > 0 {
 				updateBuildDeps = true
 			}
 
 		}
 
 		deps := pReciper.GetRequires()
-		if len(deps) > 1 {
+		if len(deps) > 0 {
 
-			for idx, dep := range deps {
-				alreadyInjected := false
+			for _, dep := range deps {
 
-				for idx2, d2 := range deps {
-					if idx2 == idx {
-						continue
-					}
+				pkgstr := fmt.Sprintf("%s/%s", dep.GetCategory(), dep.GetName())
+				// Check global replacements
+				if pc.Specs.HasBuildtimeReplacement(pkgstr) {
 
-					d2pkgs, err := pc.ReciperBuild.GetDatabase().FindPackages(
-						&luet_pkg.DefaultPackage{
-							Name:     d2.GetName(),
-							Category: d2.GetCategory(),
-							Version:  ">=0",
-						},
-					)
+					to, err := pc.Specs.GetBuildtimeReplacement(pkgstr)
 					if err != nil {
 						return err
 					}
 
-					for _, d3 := range d2pkgs[0].GetRequires() {
-						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
-							alreadyInjected = true
+					resolvedBuildtimeDeps = append(resolvedBuildtimeDeps,
+						&luet_pkg.DefaultPackage{
+							Name:     to.To.Name,
+							Category: to.To.Category,
+							Version:  ">=0",
+						})
+					buildtimeDepsReplaced++
+					continue
+				}
 
-							DebugC(fmt.Sprintf("[%s/%s-%s] Dropping buildtime dep %s/%s available in %s/%s",
-								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
-								dep.GetCategory(), dep.GetName(),
-								d2.GetCategory(), d2.GetName(),
-							))
-							buildtimeDepsRemoved++
-							goto next_dep
-						}
+				// Check if dep must be ignored
+				if art != nil && art.IgnoreBuildtime(pkgstr) {
+					buildtimeDepsIgnored++
+					continue
+				}
+
+				if art != nil && art.HasBuildtimeReplacement(pkgstr) {
+					to, err := art.GetBuildtimeReplacement(pkgstr)
+					if err != nil {
+						return err
 					}
 
+					resolvedBuildtimeDeps = append(resolvedBuildtimeDeps,
+						&luet_pkg.DefaultPackage{
+							Name:     to.To.Name,
+							Category: to.To.Category,
+							Version:  ">=0",
+						})
+
+					buildtimeDepsReplaced++
+					continue
 				}
 
-			next_dep:
+				resolvedBuildtimeDeps = append(resolvedBuildtimeDeps, dep)
+			}
 
-				if !alreadyInjected {
-					resolvedBuildtimeDeps = append(resolvedBuildtimeDeps, dep)
-				}
-
-			} // end for idx, dep
-
-			if len(resolvedBuildtimeDeps) != len(deps) {
+			if buildtimeDepsReplaced > 0 || buildtimeDepsIgnored > 0 {
 				updateBuildDeps = true
 			}
 
-		} else {
-
-			DebugC(fmt.Sprintf("[%s/%s-%s] Only one buildtime dep present. Nothing to do.",
-				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
-
-			resolvedBuildtimeDeps = deps
 		}
 
 		// Check runtime requires
@@ -174,89 +196,112 @@ func (pc *PortageConverter) Stage2() error {
 		// Drop conflicts not present on tree
 		conflicts = pReciper.GetConflicts()
 		if len(conflicts) > 0 {
-
 			for _, dep := range conflicts {
-				pp, _ := pc.ReciperRuntime.GetDatabase().FindPackages(
-					&luet_pkg.DefaultPackage{
-						Name:     dep.GetName(),
-						Category: dep.GetCategory(),
-						Version:  ">=0",
-					},
-				)
-				if pp == nil || len(pp) == 0 {
 
-					InfoC(fmt.Sprintf("[%s/%s-%s] Dropping runtime conflict %s/%s not available in tree.",
-						pack.GetCategory(), pack.GetName(), pack.GetVersion(),
-						dep.GetCategory(), dep.GetName(),
-					))
-					runtimeConflictsRemoved++
-				} else {
-					resolvedRuntimeConflicts = append(resolvedRuntimeConflicts, dep)
+				pkgstr := fmt.Sprintf("%s/%s", dep.GetCategory(), dep.GetName())
+				// Check global replacements
+				if pc.Specs.HasRuntimeReplacement(pkgstr) {
+
+					to, err := pc.Specs.GetRuntimeReplacement(pkgstr)
+					if err != nil {
+						return err
+					}
+
+					resolvedRuntimeConflicts = append(resolvedRuntimeConflicts,
+						&luet_pkg.DefaultPackage{
+							Name:     to.To.Name,
+							Category: to.To.Category,
+							Version:  ">=0",
+						})
+					runtimeConflictsReplaced++
+					continue
 				}
+
+				// Check if dep must be ignored
+				if art != nil && art.IgnoreRuntime(pkgstr) {
+					runtimeDepsIgnored++
+					continue
+				}
+
+				if art != nil && art.HasRuntimeReplacement(pkgstr) {
+					to, err := art.GetRuntimeReplacement(pkgstr)
+					if err != nil {
+						return err
+					}
+
+					resolvedRuntimeConflicts = append(resolvedRuntimeConflicts,
+						&luet_pkg.DefaultPackage{
+							Name:     to.To.Name,
+							Category: to.To.Category,
+							Version:  ">=0",
+						})
+
+					runtimeConflictsReplaced++
+					continue
+				}
+
+				resolvedRuntimeConflicts = append(resolvedRuntimeConflicts, dep)
 			}
 
-			if len(resolvedRuntimeConflicts) != len(conflicts) {
+			if runtimeConflictsReplaced > 0 || runtimeDepsIgnored > 0 {
 				updateRuntimeDeps = true
 			}
 
 		}
 
 		deps = pReciper.GetRequires()
-		if len(deps) > 1 {
+		if len(deps) > 0 {
 
-			for idx, dep := range deps {
-				alreadyInjected := false
+			for _, dep := range deps {
 
-				for idx2, d2 := range deps {
-					if idx2 == idx {
-						continue
-					}
+				pkgstr := fmt.Sprintf("%s/%s", dep.GetCategory(), dep.GetName())
+				// Check global replacements
+				if pc.Specs.HasRuntimeReplacement(pkgstr) {
 
-					d2pkgs, err := pc.ReciperRuntime.GetDatabase().FindPackages(
-						&luet_pkg.DefaultPackage{
-							Name:     d2.GetName(),
-							Category: d2.GetCategory(),
-							Version:  ">=0",
-						},
-					)
+					to, err := pc.Specs.GetRuntimeReplacement(pkgstr)
 					if err != nil {
 						return err
 					}
 
-					for _, d3 := range d2pkgs[0].GetRequires() {
-						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
-							alreadyInjected = true
+					resolvedRuntimeDeps = append(resolvedRuntimeDeps,
+						&luet_pkg.DefaultPackage{
+							Name:     to.To.Name,
+							Category: to.To.Category,
+							Version:  ">=0",
+						})
+					runtimeDepsReplaced++
+					continue
+				}
 
-							DebugC(fmt.Sprintf("[%s/%s-%s] Dropping runtime dep %s/%s available in %s/%s",
-								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
-								dep.GetCategory(), dep.GetName(),
-								d2.GetCategory(), d2.GetName(),
-							))
-							runtimeDepsRemoved++
-							goto next_rdep
-						}
+				// Check if dep must be ignored
+				if art != nil && art.IgnoreRuntime(pkgstr) {
+					runtimeDepsIgnored++
+					continue
+				}
+
+				if art != nil && art.HasRuntimeReplacement(pkgstr) {
+					to, err := art.GetRuntimeReplacement(pkgstr)
+					if err != nil {
+						return err
 					}
 
+					resolvedRuntimeDeps = append(resolvedRuntimeDeps,
+						&luet_pkg.DefaultPackage{
+							Name:     to.To.Name,
+							Category: to.To.Category,
+							Version:  ">=0",
+						})
+
+					runtimeDepsReplaced++
+					continue
 				}
 
-			next_rdep:
-
-				if !alreadyInjected {
-					resolvedRuntimeDeps = append(resolvedRuntimeDeps, dep)
-				}
-
-			} // end for idx, dep
-
-			if len(resolvedRuntimeDeps) != len(deps) {
-				updateRuntimeDeps = true
+				resolvedRuntimeDeps = append(resolvedRuntimeDeps, dep)
 			}
 
-		} else {
-
-			DebugC(fmt.Sprintf("[%s/%s-%s] Only one runtime dep present. Nothing to do.",
-				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
-
-			resolvedRuntimeDeps = deps
+			if runtimeDepsReplaced > 0 || runtimeDepsIgnored > 0 {
+				updateRuntimeDeps = true
+			}
 
 		}
 
@@ -301,10 +346,10 @@ func (pc *PortageConverter) Stage2() error {
 		if updateBuildDeps || updateRuntimeDeps {
 			InfoC(GetAurora().Bold(
 				fmt.Sprintf(
-					":angel: [%s/%s-%s] removed: r.deps %d, r.conflicts %d, b.deps %d, b.conflicts %d.",
+					":angel: [%s/%s-%s] replaced: r.deps %d, r.conflicts %d, r.ignored %d, b.deps %d, b.conflicts %d, b.ignored %d",
 					pack.GetCategory(), pack.GetName(), pack.GetVersion(),
-					runtimeDepsRemoved, runtimeConflictsRemoved,
-					buildtimeDepsRemoved, buildtimeConflictsRemoved,
+					runtimeDepsReplaced, runtimeConflictsReplaced, runtimeDepsIgnored,
+					buildtimeDepsReplaced, buildtimeConflictsReplaced, buildtimeDepsIgnored,
 				)))
 		}
 

@@ -463,7 +463,7 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 				}
 
 				if sdep.UseCondition == gentoo.PkgCondNot {
-					conflicts = append(conflicts, *gp)
+					conflicts = append(conflicts, *sdep.Dep)
 				} else {
 					deps = append(deps, *gp)
 				}
@@ -491,7 +491,7 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 			}
 
 			if gdep.Dep.Condition == gentoo.PkgCondNot {
-				conflicts = append(conflicts, *gp)
+				conflicts = append(conflicts, *gdep.Dep)
 			} else {
 				deps = append(deps, *gp)
 			}
@@ -507,12 +507,18 @@ func (r *RepoScanResolver) elaborateDeps(pkg *gentoo.GentooPackage, deps []gento
 	ans := []gentoo.GentooPackage{}
 
 	for idx, _ := range deps {
-		atom, err := r.GetLastPackage(deps[idx].GetPackageName())
+
+		p := deps[idx].GetPackageName()
+		if deps[idx].Slot != "" {
+			p += ":" + deps[idx].Slot
+		}
+
+		atom, err := r.GetLastPackage(p)
 		if err != nil {
 			if r.IsIgnoreMissingDeps() {
 				Warning(
-					fmt.Sprintf("[%s] Dependency %s not found in map. Ignoring it.",
-						pkg.GetPackageName(), deps[idx].GetPackageName()))
+					fmt.Sprintf("[%s] Dependency (%s) %s not found in map. Ignoring it.",
+						pkg.GetPackageName(), deps[idx].Condition.String(), deps[idx].GetPackageName()))
 				continue
 			}
 
@@ -551,7 +557,8 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 
 	atoms, ok := r.Map[gp.GetPackageName()]
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("Package %s not found in map.", pkg))
+		return nil, errors.New(fmt.Sprintf("Package (%s) %s not found in map.",
+			gp.Condition.String(), gp.GetPackageName()))
 	}
 
 	if len(atoms) > 1 {
