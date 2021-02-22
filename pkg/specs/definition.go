@@ -32,9 +32,10 @@ import (
 type PortageConverterSpecs struct {
 	SkippedResolutions PortageConverterSkips `json:"skipped_resolutions,omitempty" yaml:"skipped_resolutions,omitempty"`
 
-	IncludeFiles  []string                   `json:"include_files,omitempty" yaml:"include_files,omitempty"`
-	Artefacts     []PortageConverterArtefact `json:"artefacts,omitempty" yaml:"artefacts,omitempty"`
-	BuildTmplFile string                     `json:"build_template_file" yaml:"build_template_file"`
+	IncludeFiles         []string                   `json:"include_files,omitempty" yaml:"include_files,omitempty"`
+	Artefacts            []PortageConverterArtefact `json:"artefacts,omitempty" yaml:"artefacts,omitempty"`
+	BuildTmplFile        string                     `json:"build_template_file" yaml:"build_template_file"`
+	BuildPortageTmplFile string                     `json:"build_portage_template_file,omitempty" yaml:"build_portage_template_file,omitempty"`
 
 	// Reposcan options
 	ReposcanRequiresWithSlot bool                                `json:"reposcan_requires_slot,omitempty" yaml:"reposcan_requires_slot,omitempty"`
@@ -179,6 +180,10 @@ func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 		ans.BuildTmplFile = filepath.Join(absPath, ans.BuildTmplFile)
 	}
 
+	if ans.BuildPortageTmplFile != "" && ans.BuildPortageTmplFile[0:1] != "/" {
+		// Convert in abs path
+		ans.BuildPortageTmplFile = filepath.Join(absPath, ans.BuildPortageTmplFile)
+	}
 	return ans, nil
 }
 

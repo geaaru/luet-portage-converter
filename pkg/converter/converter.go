@@ -54,6 +54,7 @@ type PortageConverter struct {
 	Backend        string
 	Resolver       specs.PortageResolver
 
+	WithPortagePkgs   bool
 	Override          bool
 	IgnoreMissingDeps bool
 	DisabledUseFlags  []string
@@ -450,6 +451,57 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	return nil
 }
 
+func (pc *PortageConverter) createPortagePackage(pkg *specs.PortageSolution, originalPackage *luet_pkg.DefaultPackage) error {
+	buildTmpl, err := NewLuetCompilationSpecSanitizedFromFile(pc.Specs.BuildPortageTmplFile)
+	if err != nil {
+		return errors.New("Error on load template: " + err.Error())
+	}
+
+	portagePkgDir := filepath.Join(pkg.PackageDir, "portage")
+	err = os.MkdirAll(portagePkgDir, 0755)
+	if err != nil {
+		return err
+	}
+
+	defFile := filepath.Join(portagePkgDir, "definition.yaml")
+	buildFile := filepath.Join(portagePkgDir, "build.yaml")
+
+	dep := &luet_pkg.DefaultPackage{
+		Name:     originalPackage.Name,
+		Category: originalPackage.Category,
+		Version:  originalPackage.Version,
+	}
+	// Set only required labels here
+	labels := make(map[string]string, 0)
+	labels["original.package.name"] = originalPackage.Labels["original.package.name"]
+	labels["original.package.version"] = originalPackage.Labels["original.package.version"]
+	labels["emerge.packages"] = originalPackage.Labels["emerge.packages"]
+	labels["kit"] = originalPackage.Labels["kit"]
+
+	pack := &luet_pkg.DefaultPackage{
+		Name:     fmt.Sprintf("%s-portage", pkg.Package.Name),
+		Category: originalPackage.Category,
+		Version:  originalPackage.Version,
+		Labels:   labels,
+	}
+	pack.Requires([]*luet_pkg.DefaultPackage{dep})
+
+	// Write definition.yaml
+	err = luet_tree.WriteDefinitionFile(pack, defFile)
+	if err != nil {
+		return err
+	}
+
+	buildPack, _ := buildTmpl.Clone()
+	buildPack.AddRequires([]*luet_pkg.DefaultPackage{dep})
+	err = buildPack.WriteBuildDefinition(buildFile)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (pc *PortageConverter) Generate() error {
 	// Load Build template file
 	buildTmpl, err := NewLuetCompilationSpecSanitizedFromFile(pc.Specs.BuildTmplFile)
@@ -566,6 +618,13 @@ func (pc *PortageConverter) Generate() error {
 		err = buildPack.WriteBuildDefinition(buildFile)
 		if err != nil {
 			return err
+		}
+
+		if pc.WithPortagePkgs {
+			err = pc.createPortagePackage(pkg, pack)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

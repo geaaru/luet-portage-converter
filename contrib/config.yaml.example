@@ -34,6 +34,10 @@ replacements:
 
 build_template_file: templates/build-pkg.yaml.tmpl
 
+# Define the template file to use for build *-portage
+# packages.
+build_portage_template_file: templates/build-pkg-portage.yaml.tmpl
+
 artefacts:
 - tree: multi-arch/packages
 
