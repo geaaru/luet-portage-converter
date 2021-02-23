@@ -56,7 +56,7 @@ func (pc *PortageConverter) Stage2() error {
 		resolvedBuildConflicts := []*luet_pkg.DefaultPackage{}
 
 		// Check for artefact replacements
-		art, _ := pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageName())
+		art, _ := pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageNameWithSlot())
 
 		// Check buildtime requires
 		DebugC(GetAurora().Bold(fmt.Sprintf("[%s/%s-%s]",
