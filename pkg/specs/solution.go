@@ -36,9 +36,18 @@ func (s *PortageSolution) SetLabel(k, v string) {
 func (s *PortageSolution) ToPack(runtime bool) *luet_pkg.DefaultPackage {
 
 	version := s.Package.Version
-	// TODO: handle particular use cases
-	if strings.HasPrefix(s.Package.VersionSuffix, "_pre") {
-		version = version + s.Package.VersionSuffix
+
+	if s.OverrideVersion != "" {
+		version = s.OverrideVersion
+	} else {
+		// TODO: handle particular use cases
+		if strings.HasPrefix(s.Package.VersionSuffix, "_pre") {
+			version = version + s.Package.VersionSuffix
+		}
+
+		if s.Package.VersionBuild != "" {
+			version += "+" + s.Package.VersionBuild
+		}
 	}
 
 	emergePackage := s.Package.GetPackageName()

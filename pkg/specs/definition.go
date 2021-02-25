@@ -70,6 +70,7 @@ type PortageConverterArtefact struct {
 	Uses            PortageConverterUseFlags `json:"uses,omitempty" yaml:"uses,omitempty"`
 	IgnoreBuildDeps bool                     `json:"ignore_build_deps,omitempty" yaml:"ignore_build_deps,omitempty"`
 	Packages        []string                 `json:"packages" yaml:"packages"`
+	OverrideVersion string                   `json:"override_version,omitempty" yaml:"override_version,omitempty"`
 
 	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
 
@@ -322,4 +323,6 @@ type PortageSolution struct {
 	Description string            `json:"description,omitempty"`
 	Uri         []string          `json:"uri,omitempty"`
 	Labels      map[string]string `json:"labels,omitempty"`
+
+	OverrideVersion string `json:"override_version,omitempty"`
 }

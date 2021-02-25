@@ -24,6 +24,18 @@ import (
 func (a *PortageConverterArtefact) GetPackages() []string { return a.Packages }
 func (a *PortageConverterArtefact) GetTree() string       { return a.Tree }
 
+func (a *PortageConverterArtefact) HasOverrideVersion() bool {
+	ans := false
+	if a.OverrideVersion != "" {
+		ans = true
+	}
+	return ans
+}
+
+func (a *PortageConverterArtefact) GetOverrideVersion() string {
+	return a.OverrideVersion
+}
+
 func (a *PortageConverterArtefact) IgnoreBuildtime(pkg string) bool {
 	_, ans := a.MapIgnoreBuildtime[pkg]
 	return ans

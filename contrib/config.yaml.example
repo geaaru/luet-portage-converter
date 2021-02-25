@@ -54,6 +54,7 @@ artefacts:
 # ignore build deps elaborated.
 # ignore_build_deps: true
 
+  override_version: "0.1.0+1"
   packages:
     - net-libs/libssh2
 #- sys-devel/gcc:9.3.0

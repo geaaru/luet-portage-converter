@@ -440,9 +440,13 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		}
 		rconflicts = pc.AppendIfNotPresent(rconflicts, gp)
 	}
-	solution.RuntimeConflicts = rconflicts
 
+	solution.RuntimeConflicts = rconflicts
 	solution.PackageDir = pkgDir
+
+	if artefact.HasOverrideVersion() {
+		solution.OverrideVersion = artefact.GetOverrideVersion()
+	}
 
 	pc.Cache[cacheKey] = solution
 
