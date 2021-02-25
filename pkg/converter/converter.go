@@ -444,7 +444,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	solution.RuntimeConflicts = rconflicts
 	solution.PackageDir = pkgDir
 
-	if artefact.HasOverrideVersion() {
+	if artefact.HasOverrideVersion(pkg) {
 		solution.OverrideVersion = artefact.GetOverrideVersion()
 	}
 

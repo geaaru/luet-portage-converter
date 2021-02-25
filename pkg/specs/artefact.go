@@ -24,11 +24,21 @@ import (
 func (a *PortageConverterArtefact) GetPackages() []string { return a.Packages }
 func (a *PortageConverterArtefact) GetTree() string       { return a.Tree }
 
-func (a *PortageConverterArtefact) HasOverrideVersion() bool {
+func (a *PortageConverterArtefact) HasOverrideVersion(pkg string) bool {
 	ans := false
-	if a.OverrideVersion != "" {
+	hasPkg := false
+
+	for _, p := range a.Packages {
+		if p == pkg {
+			hasPkg = true
+			break
+		}
+	}
+
+	if hasPkg && a.OverrideVersion != "" {
 		ans = true
 	}
+
 	return ans
 }
 
