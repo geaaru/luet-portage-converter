@@ -83,6 +83,8 @@ func Execute() {
 			to, _ := cmd.Flags().GetString("to")
 			rulesFile, _ := cmd.Flags().GetString("rules")
 			override, _ := cmd.Flags().GetBool("override")
+			stage2, _ := cmd.Flags().GetBool("disable-stage2")
+			stage3, _ := cmd.Flags().GetBool("disable-stage3")
 			backend, _ := cmd.Flags().GetString("backend")
 			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
 			pkgs, _ := cmd.Flags().GetStringArray("pkg")
@@ -93,6 +95,8 @@ func Execute() {
 			converter.IgnoreMissingDeps = ignoreMissingDeps
 			converter.TreePaths = treePath
 			converter.WithPortagePkgs = withPortagePkgs
+			converter.DisableStage2 = stage2
+			converter.DisableStage3 = stage3
 
 			if len(pkgs) > 0 {
 				converter.SetFilteredPackages(pkgs)
@@ -134,6 +138,8 @@ func Execute() {
 	rootCmd.Flags().String("rules", "", "Rules file.")
 	rootCmd.Flags().Bool("override", false, "Override existing specs if already present.")
 	rootCmd.Flags().String("backend", "reposcan", "Select backend resolver: qdepends|reposcan.")
+	rootCmd.Flags().Bool("disable-stage2", false, "Disable stage2 phase.")
+	rootCmd.Flags().Bool("disable-stage3", false, "Disable stage3 phase.")
 	rootCmd.Flags().StringArray("reposcan-files", []string{}, "Append additional reposcan files. Only for reposcan backend.")
 	rootCmd.Flags().StringArray("disable-use-flag", []string{}, "Append additional use flags to disable.")
 	rootCmd.Flags().Bool("ignore-missing-deps", false, "Ignore missing deps on resolver.")

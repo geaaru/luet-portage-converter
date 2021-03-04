@@ -21,10 +21,48 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
+
 	. "github.com/mudler/luet/pkg/logger"
 	luet_pkg "github.com/mudler/luet/pkg/package"
 	luet_tree "github.com/mudler/luet/pkg/tree"
 )
+
+func (pc *PortageConverter) applyRuntimeMutations(pkg *luet_pkg.DefaultPackage, art *specs.PortageConverterArtefact) {
+
+	if len(art.Mutations.RuntimeDeps.Packages) > 0 {
+
+		rdeps := pkg.GetRequires()
+		for _, p := range art.Mutations.RuntimeDeps.Packages {
+			rdeps = append(rdeps, &luet_pkg.DefaultPackage{
+				Name:     p.Name,
+				Category: p.Category,
+				Version:  ">=0",
+			})
+		}
+
+		pkg.Requires(rdeps)
+	}
+
+	if len(art.Mutations.Uses) > 0 {
+		pkg.UseFlags = append(pkg.UseFlags, art.Mutations.Uses...)
+	}
+
+}
+
+func (pc *PortageConverter) applyBuildtimeMutations(pkg *LuetCompilationSpecSanitized, art *specs.PortageConverterArtefact) {
+	if len(art.Mutations.BuildTimeDeps.Packages) > 0 {
+		bdeps := []*luet_pkg.DefaultPackage{}
+		for _, p := range art.Mutations.BuildTimeDeps.Packages {
+			bdeps = append(bdeps, &luet_pkg.DefaultPackage{
+				Name:     p.Name,
+				Category: p.Category,
+				Version:  ">=0",
+			})
+		}
+		pkg.AddRequires(bdeps)
+	}
+}
 
 func (pc *PortageConverter) Stage2() error {
 
@@ -306,13 +344,18 @@ func (pc *PortageConverter) Stage2() error {
 		}
 
 		// Write definition
-		if updateRuntimeDeps {
+		if updateRuntimeDeps || (art != nil && art.HasRuntimeMutations()) {
 
 			defFile := filepath.Join(pkg.PackageDir, "definition.yaml")
+
 			// Convert solution to luet package
 			pack := pkg.ToPack(true)
 			pack.Requires(resolvedRuntimeDeps)
 			pack.Conflicts(resolvedRuntimeConflicts)
+
+			if art != nil && art.HasRuntimeMutations() {
+				pc.applyRuntimeMutations(pack, art)
+			}
 
 			// Write definition.yaml
 			err = luet_tree.WriteDefinitionFile(pack, defFile)
@@ -322,7 +365,7 @@ func (pc *PortageConverter) Stage2() error {
 		}
 
 		// Write build.yaml
-		if updateBuildDeps {
+		if updateBuildDeps || (art != nil && art.HasBuildtimeMutations()) {
 
 			buildFile := filepath.Join(pkg.PackageDir, "build.yaml")
 			// Load Build template file
@@ -335,6 +378,10 @@ func (pc *PortageConverter) Stage2() error {
 			buildPack, _ := buildTmpl.Clone()
 			buildPack.Requires(resolvedBuildtimeDeps)
 			buildPack.Conflicts(resolvedBuildConflicts)
+
+			if art != nil && art.HasBuildtimeMutations() {
+				pc.applyBuildtimeMutations(buildPack, art)
+			}
 
 			err = buildPack.WriteBuildDefinition(buildFile)
 			if err != nil {

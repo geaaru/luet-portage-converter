@@ -24,6 +24,21 @@ import (
 func (a *PortageConverterArtefact) GetPackages() []string { return a.Packages }
 func (a *PortageConverterArtefact) GetTree() string       { return a.Tree }
 
+func (a *PortageConverterArtefact) HasRuntimeMutations() bool {
+	ans := false
+	if len(a.Mutations.RuntimeDeps.Packages) > 0 || len(a.Mutations.Uses) > 0 {
+		ans = true
+	}
+	return ans
+}
+
+func (a *PortageConverterArtefact) HasBuildtimeMutations() bool {
+	if len(a.Mutations.BuildTimeDeps.Packages) > 0 {
+		return true
+	}
+	return false
+}
+
 func (a *PortageConverterArtefact) HasOverrideVersion(pkg string) bool {
 	ans := false
 	hasPkg := false

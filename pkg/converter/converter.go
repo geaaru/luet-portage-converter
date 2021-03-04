@@ -57,6 +57,8 @@ type PortageConverter struct {
 	WithPortagePkgs   bool
 	Override          bool
 	IgnoreMissingDeps bool
+	DisableStage2     bool
+	DisableStage3     bool
 	DisabledUseFlags  []string
 	TreePaths         []string
 	FilteredPackages  []string
@@ -635,16 +637,24 @@ func (pc *PortageConverter) Generate() error {
 	InfoC(GetAurora().Bold(fmt.Sprintf(
 		"Stage1 Completed: generated %d packages.", len(pc.Solutions))))
 
-	// Stage2 apply replacements
-	err = pc.Stage2()
-	if err != nil {
-		return err
+	// Stage2 apply replacements and mutations
+	if pc.DisableStage2 {
+		InfoC(GetAurora().Bold(fmt.Sprintf("Stage2 Disabled.")))
+	} else {
+		err = pc.Stage2()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Stage3: Reload tree and drop redundant dependencies
-	err = pc.Stage3()
-	if err != nil {
-		return err
+	if pc.DisableStage3 {
+		InfoC(GetAurora().Bold(fmt.Sprintf("Stage3 Disabled.")))
+	} else {
+		err = pc.Stage3()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

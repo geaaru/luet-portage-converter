@@ -55,6 +55,15 @@ artefacts:
 # ignore_build_deps: true
 
   override_version: "0.1.0+1"
+  mutations:
+    runtime_deps:
+      # Define a list of requirements to add on the package.
+      packages:
+        - name: foo
+          category: cat
+    # Define the list of use flags to add
+    uses:
+      - x86_32
   packages:
     - net-libs/libssh2
 #- sys-devel/gcc:9.3.0

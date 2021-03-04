@@ -73,11 +73,22 @@ type PortageConverterArtefact struct {
 	OverrideVersion string                   `json:"override_version,omitempty" yaml:"override_version,omitempty"`
 
 	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
+	Mutations    PortageConverterMutations    `json:"mutations,omitempty" yaml:"mutations,omitempty"`
 
 	MapReplacementsRuntime   map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
 	MapReplacementsBuildtime map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
 	MapIgnoreRuntime         map[string]bool                            `json:"-" yaml:"-"`
 	MapIgnoreBuildtime       map[string]bool                            `json:"-" yaml:"-"`
+}
+
+type PortageConverterMutations struct {
+	RuntimeDeps   PortageConverterMutationDeps `json:"runtime_deps,omitempty" yaml:"runtime_deps,omitempty"`
+	BuildTimeDeps PortageConverterMutationDeps `json:"buildtime_deps,omitempty" yaml:"buildtime_deps,omitempty"`
+	Uses          []string                     `json:"uses,omitempty" yaml:"uses,omitempty"`
+}
+
+type PortageConverterMutationDeps struct {
+	Packages []PortageConverterPkg `json:"packages,omitempty" yaml:"packages,omitempty"`
 }
 
 type PortageConverterReplacements struct {
