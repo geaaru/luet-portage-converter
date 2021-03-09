@@ -68,6 +68,9 @@ func (pc *PortageConverter) Stage3() error {
 			return err
 		}
 
+		// Ensure to use use flags from the tree. Could be mutated.
+		pkg.Package.UseFlags = pReciper.GetUses()
+
 		// Drop conflicts not present on tree
 		conflicts := pReciper.GetConflicts()
 		if len(conflicts) > 0 {
