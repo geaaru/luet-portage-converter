@@ -30,6 +30,11 @@ func (pc *PortageConverter) Stage3() error {
 
 	InfoC(GetAurora().Bold("Stage3 Starting..."))
 
+	if len(pc.Solutions) == 0 {
+		InfoC(GetAurora().Bold("Stage3: No solutions to elaborate. Nothing to do."))
+		return nil
+	}
+
 	// Reset reciper
 	pc.ReciperBuild = luet_tree.NewCompilerRecipe(luet_pkg.NewInMemoryDatabase(false))
 	pc.ReciperRuntime = luet_tree.NewInstallerRecipe(luet_pkg.NewInMemoryDatabase(false))
@@ -108,7 +113,7 @@ func (pc *PortageConverter) Stage3() error {
 				updateBuildDeps = true
 			}
 
-		}
+		} // end len(conflicts)
 
 		deps := pReciper.GetRequires()
 		if len(deps) > 1 {
