@@ -87,6 +87,14 @@ func NewLuetCompilationSpecSanitizedFromFile(file string) (*LuetCompilationSpecS
 	return ans, nil
 }
 
+func (s *LuetCompilationSpecSanitized) GetRequires() []*st.DefaultPackageSanitized {
+	return s.PackageRequires
+}
+
+func (s *LuetCompilationSpecSanitized) GetConflicts() []*st.DefaultPackageSanitized {
+	return s.PackageConflicts
+}
+
 func (s *LuetCompilationSpecSanitized) Yaml() ([]byte, error) {
 	return yaml.Marshal(s)
 }

@@ -59,6 +59,7 @@ type PortageConverter struct {
 	IgnoreMissingDeps bool
 	DisableStage2     bool
 	DisableStage3     bool
+	DisableStage4     bool
 	DisabledUseFlags  []string
 	TreePaths         []string
 	FilteredPackages  []string
@@ -206,6 +207,8 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	// Check if it's present artefact from map
 	art, err := pc.Specs.GetArtefactByPackage(pkg)
 	if err == nil {
+		DebugC(fmt.Sprintf("[%s] Using artefact from map. Uses disabled: %s, enabled: %s",
+			pkg, art.Uses.Disabled, art.Uses.Enabled))
 		// POST: use artefact from map.
 		artefact = *art
 	}
@@ -652,6 +655,16 @@ func (pc *PortageConverter) Generate() error {
 		InfoC(GetAurora().Bold(fmt.Sprintf("Stage3 Disabled.")))
 	} else {
 		err = pc.Stage3()
+		if err != nil {
+			return err
+		}
+	}
+
+	// Stage4: Reload tree and review build dependencies to reduce diamond deps.
+	if pc.DisableStage4 {
+		InfoC(GetAurora().Bold(fmt.Sprintf("Stage4 Disabled.")))
+	} else {
+		err = pc.Stage4()
 		if err != nil {
 			return err
 		}

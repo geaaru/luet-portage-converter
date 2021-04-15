@@ -15,16 +15,42 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
-package reposcan_test
+package converter_test
 
 import (
+	"strings"
 	"testing"
 
+	. "github.com/mudler/luet/pkg/config"
+	. "github.com/mudler/luet/pkg/logger"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
+func initConfig() error {
+	LuetCfg.Viper.SetEnvPrefix("LUET")
+	LuetCfg.Viper.AutomaticEnv() // read in environment variables that match
+
+	// Create EnvKey Replacer for handle complex structure
+	replacer := strings.NewReplacer(".", "__")
+	LuetCfg.Viper.SetEnvKeyReplacer(replacer)
+	LuetCfg.Viper.SetTypeByDefaultValue(true)
+
+	err := LuetCfg.Viper.Unmarshal(&LuetCfg)
+	if err != nil {
+		return err
+	}
+
+	LuetCfg.GetGeneral().Debug = true
+
+	InitAurora()
+	NewSpinner()
+
+	return nil
+}
+
 func TestSolver(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Reposcan Suite")
+	initConfig()
+	RunSpecs(t, "Converter Suite")
 }
