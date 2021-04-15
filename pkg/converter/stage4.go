@@ -51,18 +51,18 @@ func (pc *PortageConverter) Stage4() error {
 	}
 
 	// Create stage4 stuff
-	// TODO: check if create this for every solution or globally
-	levels := NewStage4Levels()
-	tree1 := NewStage4Tree(1)
-	levels.AddTree(tree1)
-
+	var levels *Stage4Levels = nil
 	worker := &Stage4Worker{
-		Map:    make(map[string]*luet_pkg.DefaultPackage, 0),
-		Levels: levels,
+		Map: make(map[string]*luet_pkg.DefaultPackage, 0),
 	}
 
 	for _, pkg := range pc.Solutions {
 
+		levels = NewStage4Levels()
+		tree1 := NewStage4Tree(1)
+		levels.AddTree(tree1)
+
+		worker.Levels = levels
 		pack := pkg.ToPack(true)
 
 		// Check buildtime requires
@@ -80,17 +80,19 @@ func (pc *PortageConverter) Stage4() error {
 		if err != nil {
 			return err
 		}
+
+		DebugC(fmt.Sprintf("Stage4: Created levels structs of %d trees.", len(levels.Levels)))
+		pc.stage4LevelsDumpWrapper(levels, "Starting structure")
+
+		err = levels.Resolve()
+		if err != nil {
+			return errors.New("Error on resolve stage4 levels: " + err.Error())
+		}
+
+		pc.stage4LevelsDumpWrapper(levels, "Resolved structure")
+
 	}
 
-	DebugC(fmt.Sprintf("Stage4: Created levels structs of %d trees.", len(levels.Levels)))
-	pc.stage4LevelsDumpWrapper(levels, "Starting structure")
-
-	err = levels.Resolve()
-	if err != nil {
-		return errors.New("Error on resolve stage4 levels: " + err.Error())
-	}
-
-	pc.stage4LevelsDumpWrapper(levels, "Resolved structure")
 	err = pc.stage4UpdateBuildFiles(worker)
 	if err != nil {
 		return errors.New("Error on update build.yaml files: " + err.Error())

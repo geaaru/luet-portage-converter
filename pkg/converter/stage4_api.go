@@ -461,14 +461,14 @@ func RemoveDependencyFromLuetPackage(pkg, dep *luet_pkg.DefaultPackage) error {
 			dep.GetCategory(), dep.GetName(),
 			pkg.GetCategory(), pkg.GetName(),
 		))
-		return nil
 		/*
-			return errors.New(
-				fmt.Sprintf("Dependency %s/%s not found on package %s/%s",
-					dep.GetCategory(), dep.GetName(),
-					pkg.GetCategory(), pkg.GetName(),
-				))
+			return nil
 		*/
+		return errors.New(
+			fmt.Sprintf("Dependency %s/%s not found on package %s/%s",
+				dep.GetCategory(), dep.GetName(),
+				pkg.GetCategory(), pkg.GetName(),
+			))
 	}
 
 	pkg.PackageRequires = append(pkg.PackageRequires[:pos], pkg.PackageRequires[pos+1:]...)
