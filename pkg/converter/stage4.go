@@ -61,8 +61,8 @@ func (pc *PortageConverter) Stage4() error {
 		levels = NewStage4Levels()
 		tree1 := NewStage4Tree(1)
 		levels.AddTree(tree1)
-
 		worker.Levels = levels
+
 		pack := pkg.ToPack(true)
 
 		// Check buildtime requires
@@ -199,16 +199,10 @@ func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 
 		ppp, err := pc.ReciperBuild.GetDatabase().FindPackages(pkg_search)
 		if err != nil {
-			// Trying to retrieve package from runtime resolver.
-			//ppp, err := pc.ReciperRuntime.GetDatabase().FindPackages(pkg_search)
-			//if err != nil || len(ppp) == 0 {
 			return errors.New(
 				fmt.Sprintf(
 					"Error on retrieve dependencies of the package %s/%s: %s",
 					pkg.GetCategory(), pkg.GetName(), err.Error()))
-			//}
-
-			//pp = ppp[0]
 		}
 
 		pkg.Requires(ppp[0].GetRequires())
