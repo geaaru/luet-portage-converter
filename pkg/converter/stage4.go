@@ -58,9 +58,7 @@ func (pc *PortageConverter) Stage4() error {
 
 	for _, pkg := range pc.Solutions {
 
-		levels = NewStage4Levels()
-		tree1 := NewStage4Tree(1)
-		levels.AddTree(tree1)
+		levels = NewStage4LevelsWithSize(1)
 		worker.Levels = levels
 
 		pack := pkg.ToPack(true)
@@ -80,8 +78,13 @@ func (pc *PortageConverter) Stage4() error {
 		if err != nil {
 			return err
 		}
+		// Setup level1 with all packages
+		err = pc.stage4AlignLevel1(worker)
+		if err != nil {
+			return err
+		}
 
-		DebugC(fmt.Sprintf("Stage4: Created levels structs of %d trees.", len(levels.Levels)))
+		DebugC(fmt.Sprintf("Stage4: Created levels structs of %d trees for %d packages.", len(levels.Levels), len(levels.Map)))
 		pc.stage4LevelsDumpWrapper(levels, "Starting structure")
 
 		err = levels.Resolve()
@@ -90,17 +93,17 @@ func (pc *PortageConverter) Stage4() error {
 		}
 
 		pc.stage4LevelsDumpWrapper(levels, "Resolved structure")
-
 	}
 
-	err = pc.stage4UpdateBuildFiles(worker)
-	if err != nil {
-		return errors.New("Error on update build.yaml files: " + err.Error())
-	}
+	/*
+		err = pc.stage4UpdateBuildFiles(worker)
+		if err != nil {
+			return errors.New("Error on update build.yaml files: " + err.Error())
+		}
 
-	InfoC(GetAurora().Bold(
-		fmt.Sprintf("Stage4 Completed. Updates: %d.", len(levels.Changed))))
-
+		InfoC(GetAurora().Bold(
+			fmt.Sprintf("Stage4 Completed. Updates: %d.", len(levels.Changed))))
+	*/
 	return nil
 }
 
@@ -186,7 +189,7 @@ func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 	v, ok := w.Map[key]
 	if ok {
 		// Package already in map. I will use the same reference.
-		w.Levels.Levels[level-1].AddDependency(v, father)
+		w.Levels.AddDependency(v, father, level-1)
 		pkg = v
 
 	} else {
@@ -208,7 +211,7 @@ func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 		pkg.Requires(ppp[0].GetRequires())
 
 		// Add package to first level
-		w.Levels.Levels[level-1].AddDependency(pkg, father)
+		w.Levels.AddDependency(pkg, father, level-1)
 		w.Map[key] = pkg
 
 	}
@@ -222,6 +225,24 @@ func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 				return err
 			}
 		}
+	}
+
+	return nil
+}
+
+func (pc *PortageConverter) stage4AlignLevel1(w *Stage4Worker) error {
+
+	for pkg, v := range w.Levels.Map {
+
+		if _, ok := w.Levels.Levels[0].Map[pkg]; !ok {
+
+			DebugC("Adding package %d..", pkg)
+			err := w.Levels.AddDependencyRecursive(v, nil, 0)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil
