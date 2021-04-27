@@ -29,8 +29,9 @@ import (
 )
 
 type Stage4Worker struct {
-	Map    map[string]*luet_pkg.DefaultPackage
-	Levels *Stage4Levels
+	Levels  *Stage4Levels
+	Map     map[string]*luet_pkg.DefaultPackage
+	Changed map[string]*luet_pkg.DefaultPackage
 }
 
 func (pc *PortageConverter) Stage4() error {
@@ -53,7 +54,8 @@ func (pc *PortageConverter) Stage4() error {
 	// Create stage4 stuff
 	var levels *Stage4Levels = nil
 	worker := &Stage4Worker{
-		Map: make(map[string]*luet_pkg.DefaultPackage, 0),
+		Map:     make(map[string]*luet_pkg.DefaultPackage, 0),
+		Changed: make(map[string]*luet_pkg.DefaultPackage, 0),
 	}
 
 	for _, pkg := range pc.Solutions {
@@ -96,6 +98,8 @@ func (pc *PortageConverter) Stage4() error {
 		}
 
 		pc.stage4LevelsDumpWrapper(levels, "Resolved structure")
+
+		pc.stage4SyncChanges(worker)
 	}
 
 	err = pc.stage4UpdateBuildFiles(worker)
@@ -104,17 +108,18 @@ func (pc *PortageConverter) Stage4() error {
 	}
 
 	InfoC(GetAurora().Bold(
-		fmt.Sprintf("Stage4 Completed. Updates: %d.", len(levels.Changed))))
+		fmt.Sprintf("Stage4 Completed. Packages updates: %d.", len(levels.Changed))))
+
 	return nil
 }
 
 func (pc *PortageConverter) stage4UpdateBuildFiles(worker *Stage4Worker) error {
 
-	if len(worker.Levels.Changed) == 0 {
+	if len(worker.Changed) == 0 {
 		return nil
 	}
 
-	for _, pkg := range worker.Levels.Changed {
+	for _, pkg := range worker.Changed {
 
 		ppp, err := pc.ReciperBuild.GetDatabase().FindPackages(pkg)
 		if err != nil {
@@ -151,8 +156,8 @@ func (pc *PortageConverter) stage4UpdateBuildFiles(worker *Stage4Worker) error {
 			return err
 		}
 
-		InfoC(fmt.Sprintf("[%s/%s-%s] Update requires (%d -> %d).",
-			pkg.GetCategory(), pkg.GetName(), pkg.GetVersion(),
+		DebugC(fmt.Sprintf("[%s/%s] Update requires (%d -> %d).",
+			pkg.GetCategory(), pkg.GetName(),
 			prevReqs, len(reqs)))
 
 	}
@@ -162,10 +167,10 @@ func (pc *PortageConverter) stage4UpdateBuildFiles(worker *Stage4Worker) error {
 
 func (pc *PortageConverter) stage4LevelsDumpWrapper(levels *Stage4Levels, msg string) {
 	if len(levels.Levels) > 10 {
-		InfoC(fmt.Sprintf(
+		DebugC(fmt.Sprintf(
 			"Stage4: %s:\n", msg))
 		for idx, _ := range levels.Levels {
-			InfoC(levels.Levels[idx].Dump())
+			DebugC(levels.Levels[idx].Dump())
 		}
 
 	} else {
@@ -190,9 +195,7 @@ func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 	v, ok := w.Map[key]
 	if ok {
 		// Package already in map. I will use the same reference.
-		w.Levels.AddDependency(v, father, level-1)
 		pkg = v
-
 	} else {
 
 		pkg_search := &luet_pkg.DefaultPackage{
@@ -210,12 +213,12 @@ func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 		}
 
 		pkg.Requires(ppp[0].GetRequires())
-
-		// Add package to first level
-		w.Levels.AddDependency(pkg, father, level-1)
 		w.Map[key] = pkg
 
 	}
+
+	// Add package to first level
+	w.Levels.AddDependency(pkg, father, level-1)
 
 	if len(pkg.GetRequires()) > 0 {
 
@@ -229,6 +232,14 @@ func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 	}
 
 	return nil
+}
+
+func (pc *PortageConverter) stage4SyncChanges(w *Stage4Worker) {
+	for idx, _ := range w.Levels.Changed {
+		if _, ok := w.Changed[idx]; !ok {
+			w.Changed[idx] = w.Levels.Changed[idx]
+		}
+	}
 }
 
 func (pc *PortageConverter) stage4AlignLevel1(w *Stage4Worker) error {

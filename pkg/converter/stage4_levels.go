@@ -82,14 +82,13 @@ func (l *Stage4Levels) AnalyzeLeaf(pos int, tree *Stage4Tree, leaf *Stage4Leaf) 
 				}
 
 				keyFather := fmt.Sprintf(leaf.Father[idx].GetCategory(), leaf.Father[idx].GetName())
-				//tree.AddDependency(leaf.Father[idx-1], leaf.Father[idx])
 				toAdd, err := l.AddDependencyRecursive(leaf.Father[idx-1], leaf.Father[idx], []string{}, pos)
 				if err != nil {
 					return false, err
 				}
 
 				if toAdd {
-					// Add the dependency
+					// POST Add the dependency only if there isn't a cycle.
 					AddDependencyToLuetPackage(leaf.Father[idx], leaf.Father[idx-1])
 					lastFatherLeaf = leaf.Father[idx]
 					fathersHandled[keyFather] = leaf.Father[idx-1]
@@ -164,7 +163,8 @@ func (l *Stage4Levels) AnalyzeLeaf(pos int, tree *Stage4Tree, leaf *Stage4Leaf) 
 						_, pkgAlreadyElaborated := fathersHandled[fatherKey]
 
 						if !pkgAlreadyElaborated {
-							// The father must to point at the father of the last leaf.
+							// POST: The father must to point at the father of the last leaf.
+
 							err := RemoveDependencyFromLuetPackage(
 								l2.Father[idx],
 								leaf.Package)
