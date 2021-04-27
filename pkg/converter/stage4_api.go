@@ -39,17 +39,29 @@ type Stage4Tree struct {
 	Deps []*luet_pkg.DefaultPackage
 }
 
+type Stage4LeafCache struct {
+	MapAssign map[string]*luet_pkg.DefaultPackage
+}
+
 type Stage4Levels struct {
-	Levels  []*Stage4Tree
-	Map     map[string]*luet_pkg.DefaultPackage
-	Changed map[string]*luet_pkg.DefaultPackage
+	Levels    []*Stage4Tree
+	Map       map[string]*luet_pkg.DefaultPackage
+	Changed   map[string]*luet_pkg.DefaultPackage
+	CacheLeaf map[string]*Stage4LeafCache
+}
+
+func NewStage4LeafCache() *Stage4LeafCache {
+	return &Stage4LeafCache{
+		MapAssign: make(map[string]*luet_pkg.DefaultPackage, 0),
+	}
 }
 
 func NewStage4Levels() *Stage4Levels {
 	return &Stage4Levels{
-		Levels:  []*Stage4Tree{},
-		Map:     make(map[string]*luet_pkg.DefaultPackage, 0),
-		Changed: make(map[string]*luet_pkg.DefaultPackage, 0),
+		Levels:    []*Stage4Tree{},
+		Map:       make(map[string]*luet_pkg.DefaultPackage, 0),
+		Changed:   make(map[string]*luet_pkg.DefaultPackage, 0),
+		CacheLeaf: make(map[string]*Stage4LeafCache, 0),
 	}
 }
 
@@ -78,6 +90,37 @@ func (l *Stage4Levels) AddTree(t *Stage4Tree) {
 	l.Levels = append(l.Levels, t)
 }
 
+func (l *Stage4Levels) RegisterAssignment(p, father, newFather *luet_pkg.DefaultPackage) error {
+
+	key := fmt.Sprintf("%s/%s", p.GetCategory(), p.GetName())
+	fatherKey := fmt.Sprintf("%s/%s", father.GetCategory(), father.GetName())
+
+	v, ok := l.CacheLeaf[key]
+
+	if !ok {
+		v = NewStage4LeafCache()
+	}
+
+	v.MapAssign[fatherKey] = newFather
+	l.CacheLeaf[key] = v
+
+	return nil
+}
+
+func (l *Stage4Levels) GetAssignment(p, father *luet_pkg.DefaultPackage) *luet_pkg.DefaultPackage {
+	key := fmt.Sprintf("%s/%s", p.GetCategory(), p.GetName())
+	fatherKey := fmt.Sprintf("%s/%s", father.GetCategory(), father.GetName())
+
+	v, ok := l.CacheLeaf[key]
+
+	if !ok {
+		return nil
+	}
+
+	ans, _ := v.MapAssign[fatherKey]
+	return ans
+}
+
 func (l *Stage4Levels) AddDependency(p, father *luet_pkg.DefaultPackage, level int) error {
 	if level >= len(l.Levels) {
 		return errors.New("Invalid level")
@@ -96,22 +139,41 @@ func (l *Stage4Levels) AddDependency(p, father *luet_pkg.DefaultPackage, level i
 	return nil
 }
 
-func (l *Stage4Levels) AddDependencyRecursive(p, father *luet_pkg.DefaultPackage, level int) error {
+func IsInStack(stack []string, pkg string) bool {
+	ans := false
+	for _, p := range stack {
+		if p == pkg {
+			ans = true
+			break
+		}
+	}
+	return ans
+}
+
+func (l *Stage4Levels) AddDependencyRecursive(p, father *luet_pkg.DefaultPackage, stack []string, level int) (bool, error) {
+	var err error
+	var toInsert bool = true
+
 	if level >= len(l.Levels) {
-		return errors.New("Invalid level")
+		return false, errors.New("Invalid level")
 	}
 
 	key := fmt.Sprintf("%s/%s", p.GetCategory(), p.GetName())
 
-	DebugC(fmt.Sprintf("Adding recursive %s package to level %d.", key, level))
+	DebugC(fmt.Sprintf("Adding recursive %s package to level %d (%v)", key, level+1, stack))
 
 	_, ok := l.Map[key]
 	if !ok {
-		return errors.New(fmt.Sprintf("On add dependency not found package %s/%s",
+		return false, errors.New(fmt.Sprintf("On add dependency not found package %s/%s",
 			p.GetCategory(), p.GetName()))
 	}
 
-	l.Levels[level].AddDependency(p, father)
+	inStack := IsInStack(stack, key)
+	if inStack {
+		return true, nil
+	}
+
+	stack = append(stack, key)
 
 	if len(p.GetRequires()) > 0 {
 
@@ -120,211 +182,32 @@ func (l *Stage4Levels) AddDependencyRecursive(p, father *luet_pkg.DefaultPackage
 			key = fmt.Sprintf("%s/%s", d.GetCategory(), d.GetName())
 			v, ok := l.Map[key]
 			if !ok {
-				return errors.New(fmt.Sprintf("For package %s/%s not found dependency %s",
+				return false, errors.New(fmt.Sprintf("For package %s/%s not found dependency %s",
 					p.GetCategory(), p.GetName(), key))
 			}
 
-			err := l.AddDependencyRecursive(v, p, level+1)
+			toInsert, err = l.AddDependencyRecursive(v, p, stack, level+1)
 			if err != nil {
-				return err
+				return false, err
+			}
+
+			if !toInsert {
+				break
 			}
 		}
 	}
 
-	return nil
+	if toInsert {
+		return toInsert, l.Levels[level].AddDependency(p, father)
+	} else {
+		DebugC(GetAurora().Bold(fmt.Sprintf("For package %s break cycle.", key)))
+		return false, nil
+	}
 }
 
 func (l *Stage4Levels) AddChangedPackage(pkg *luet_pkg.DefaultPackage) {
 	key := fmt.Sprintf("%s/%s", pkg.GetCategory(), pkg.GetName())
 	l.Changed[key] = pkg
-}
-
-func (l *Stage4Levels) AnalyzeLeaf(pos int, tree *Stage4Tree, leaf *Stage4Leaf) (bool, error) {
-	var firstFatherLeaf *luet_pkg.DefaultPackage = nil
-	var lastFatherLeaf *luet_pkg.DefaultPackage = nil
-	rescan := false
-	isLowerLevel := false
-	nextLevel := pos - 1
-
-	DebugC(GetAurora().Bold(
-		fmt.Sprintf("[P%d-L%d] Levels:\n%s", pos, tree.Id, l.Dump())))
-
-	key := fmt.Sprintf("%s/%s", leaf.Package.GetCategory(), leaf.Package.GetName())
-
-	if pos == len(l.Levels)-1 {
-		isLowerLevel = true
-	}
-
-	DebugC(fmt.Sprintf("[P%d-L%d] Processing leaf %s - lower lever = %v",
-		pos, tree.Id, leaf, isLowerLevel))
-
-	if len(leaf.Father) > 0 {
-		lastFatherLeaf = leaf.Father[0]
-	}
-
-	if leaf.Counter > 1 {
-		// POST: we have different packages
-		//       with the same dependency
-
-		if len(leaf.Father) > 0 {
-			toRemove := []*luet_pkg.DefaultPackage{}
-			for idx, _ := range leaf.Father {
-				if idx == 0 {
-					firstFatherLeaf = leaf.Father[idx]
-					continue
-				}
-				// The father must to point at the father of the last leaf.
-				err := RemoveDependencyFromLuetPackage(
-					leaf.Father[idx],
-					leaf.Package)
-				if err != nil {
-					return false, err
-				}
-
-				// Add the dependency
-				AddDependencyToLuetPackage(leaf.Father[idx], leaf.Father[idx-1])
-
-				//tree.AddDependency(leaf.Father[idx-1], leaf.Father[idx])
-				l.AddDependencyRecursive(leaf.Father[idx-1], leaf.Father[idx], pos)
-				l.AddChangedPackage(leaf.Father[idx])
-
-				lastFatherLeaf = leaf.Father[idx]
-				toRemove = append(toRemove, leaf.Father[idx])
-				rescan = true
-
-			}
-
-			if len(toRemove) > 0 {
-				for _, f := range toRemove {
-					leaf.DelFather(f)
-				}
-			}
-		}
-
-	} else if len(leaf.Father) > 0 {
-		firstFatherLeaf = leaf.Father[0]
-	}
-
-	for nextLevel >= 0 {
-		DebugC(fmt.Sprintf("[P%d-L%d] Analyze upper levels for leaf %s (%d)",
-			pos, tree.Id, key, nextLevel))
-
-		treeUpper := l.Levels[nextLevel]
-
-		l2, ok := treeUpper.Map[key]
-		if ok {
-
-			// POST: found the package with the selected key
-			if len(l2.Father) == 0 {
-				DebugC(fmt.Sprintf("For %s father is nil.", key))
-				if nextLevel == 0 {
-					treeUpper.DropDependency(leaf.Package)
-				}
-			} else {
-
-				toRemove := []*luet_pkg.DefaultPackage{}
-
-				for idx, _ := range l2.Father {
-
-					fmt.Println("FATHER ", l2)
-					DebugC(fmt.Sprintf("[L%d] For %s analyze father %s (%v)",
-						treeUpper.Id, key, l2.Father[idx], isLowerLevel))
-
-					if firstFatherLeaf != nil &&
-						l2.Father[idx].GetCategory() == firstFatherLeaf.GetCategory() &&
-						l2.Father[idx].GetName() == firstFatherLeaf.GetName() {
-
-						DebugC(fmt.Sprintf(
-							"[L%d] For key %s the father %s/%s is the first father. Nothing to do.",
-							treeUpper.Id, key, l2.Father[idx].GetCategory(), l2.Father[idx].GetName()))
-						treeUpper.DropDependency(leaf.Package)
-
-					} else if lastFatherLeaf != nil &&
-						l2.Father[idx].GetCategory() == lastFatherLeaf.GetCategory() &&
-						l2.Father[idx].GetName() == lastFatherLeaf.GetName() {
-
-						DebugC(fmt.Sprintf(
-							"[L%d] For key %s the father %s/%s is the last father. Nothing to do.",
-							treeUpper.Id, key, l2.Father[idx].GetCategory(), l2.Father[idx].GetName()))
-
-					} else {
-
-						if len(l2.Father[idx].GetRequires()) == 1 {
-							pdep := l2.Father[idx].GetRequires()[0]
-
-							if pdep.GetCategory() != lastFatherLeaf.GetCategory() ||
-								pdep.GetName() != lastFatherLeaf.GetName() {
-								err := RemoveDependencyFromLuetPackage(
-									l2.Father[idx], pdep)
-								if err != nil {
-									return false, err
-								}
-
-								treeUpper.DropDependency(pdep)
-								AddDependencyToLuetPackage(l2.Father[idx], lastFatherLeaf)
-								//treeUpper.AddDependency(l2.Father[idx], lastFatherLeaf)
-								l.AddDependencyRecursive(l2.Father[idx], lastFatherLeaf, nextLevel)
-
-								l.AddChangedPackage(l2.Father[idx])
-
-								lastFatherLeaf = l2.Father[idx]
-								rescan = true
-
-							} else {
-								DebugC(fmt.Sprintf("[L%d] Father %s/%s has already the right dependency.",
-									treeUpper.Id, l2.Father[idx].GetCategory(), l2.Father[idx].GetName()))
-							}
-
-						} else if len(l2.Father[idx].GetRequires()) > 1 {
-							// The father must to point at the father of the last leaf.
-							err := RemoveDependencyFromLuetPackage(
-								l2.Father[idx],
-								leaf.Package)
-							if err != nil {
-								return false, err
-							}
-
-							AddDependencyToLuetPackage(l2.Father[idx], lastFatherLeaf)
-
-							l.AddChangedPackage(l2.Father[idx])
-							l.AddDependencyRecursive(lastFatherLeaf, l2.Father[idx], nextLevel)
-
-							lastFatherLeaf = l2.Father[idx]
-							toRemove = append(toRemove, l2.Father[idx])
-							rescan = true
-						} else {
-							DebugC(fmt.Sprintf("For %s father %s/%s is with deps: %s",
-								key, l2.Father[idx].GetCategory(), l2.Father[idx].GetName(),
-								l2.Father[idx].GetRequires()))
-						} ///
-
-					}
-
-				} // end for
-
-				if len(toRemove) > 0 {
-					for _, f := range toRemove {
-						l2.DelFather(f)
-					}
-				}
-
-				if nextLevel > 0 {
-					// Remove the package from the tree.
-					treeUpper.DropDependency(leaf.Package)
-				}
-			}
-
-		}
-
-		DebugC(GetAurora().Bold(fmt.Sprintf(
-			"[P%d-L%d] Completed analysis of the level %d for leaf %s: key found: %v (lasfFather = %s/%s)",
-			pos, tree.Id, treeUpper.Id, key, ok, lastFatherLeaf.GetCategory(),
-			lastFatherLeaf.GetName())))
-
-		nextLevel--
-	}
-
-	return rescan, nil
 }
 
 func (l *Stage4Levels) analyzeLevelLeafs(pos int) (bool, error) {
@@ -342,6 +225,7 @@ func (l *Stage4Levels) analyzeLevelLeafs(pos int) (bool, error) {
 
 		if r {
 			rescan = true
+			break
 		}
 	} // end for key map
 
@@ -354,9 +238,8 @@ func (l *Stage4Levels) Resolve() error {
 
 	// Check if the levels are sufficient for serialization
 	missingLevels := len(l.Levels[0].Map) - pos
-	fmt.Println("MISSING ", missingLevels)
 	// POST: we need to add levels.
-	for i := 0; i < missingLevels; i++ {
+	for i := 1; i <= missingLevels; i++ {
 		tree := NewStage4Tree(pos + i)
 		l.AddTree(tree)
 	}
@@ -370,6 +253,7 @@ func (l *Stage4Levels) Resolve() error {
 			return err
 		}
 		if rescan {
+			DebugC(GetAurora().Bold("Restarting resolution.."))
 			// Restarting analysis from begin
 			pos = initialLevels
 		}

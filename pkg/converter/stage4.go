@@ -84,7 +84,10 @@ func (pc *PortageConverter) Stage4() error {
 			return err
 		}
 
-		DebugC(fmt.Sprintf("Stage4: Created levels structs of %d trees for %d packages.", len(levels.Levels), len(levels.Map)))
+		DebugC(fmt.Sprintf(
+			"Stage4: Created levels structs of %d trees for %d packages.",
+			len(levels.Levels), len(levels.Map)))
+
 		pc.stage4LevelsDumpWrapper(levels, "Starting structure")
 
 		err = levels.Resolve()
@@ -95,15 +98,13 @@ func (pc *PortageConverter) Stage4() error {
 		pc.stage4LevelsDumpWrapper(levels, "Resolved structure")
 	}
 
-	/*
-		err = pc.stage4UpdateBuildFiles(worker)
-		if err != nil {
-			return errors.New("Error on update build.yaml files: " + err.Error())
-		}
+	err = pc.stage4UpdateBuildFiles(worker)
+	if err != nil {
+		return errors.New("Error on update build.yaml files: " + err.Error())
+	}
 
-		InfoC(GetAurora().Bold(
-			fmt.Sprintf("Stage4 Completed. Updates: %d.", len(levels.Changed))))
-	*/
+	InfoC(GetAurora().Bold(
+		fmt.Sprintf("Stage4 Completed. Updates: %d.", len(levels.Changed))))
 	return nil
 }
 
@@ -236,8 +237,8 @@ func (pc *PortageConverter) stage4AlignLevel1(w *Stage4Worker) error {
 
 		if _, ok := w.Levels.Levels[0].Map[pkg]; !ok {
 
-			DebugC("Adding package %d..", pkg)
-			err := w.Levels.AddDependencyRecursive(v, nil, 0)
+			DebugC(fmt.Sprintf("Adding package %s..", pkg))
+			_, err := w.Levels.AddDependencyRecursive(v, nil, []string{}, 0)
 			if err != nil {
 				return err
 			}
