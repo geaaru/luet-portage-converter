@@ -92,12 +92,12 @@ func (l *Stage4Levels) AnalyzeLeaf(pos int, tree *Stage4Tree, leaf *Stage4Leaf) 
 					AddDependencyToLuetPackage(leaf.Father[idx], leaf.Father[idx-1])
 					lastFatherLeaf = leaf.Father[idx]
 					fathersHandled[keyFather] = leaf.Father[idx-1]
+					rescan = true
 				}
 
 				l.AddChangedPackage(leaf.Father[idx])
 
 				toRemove = append(toRemove, leaf.Father[idx])
-				rescan = true
 
 			}
 
@@ -117,10 +117,6 @@ func (l *Stage4Levels) AnalyzeLeaf(pos int, tree *Stage4Tree, leaf *Stage4Leaf) 
 			pos, tree.Id, key, nextLevel))
 
 		treeUpper := l.Levels[nextLevel]
-
-		DebugC(GetAurora().Bold(fmt.Sprintf(
-			"[P%d-L%d] Upper level:\n%s", pos, tree.Id, l.Dump()),
-		))
 
 		l2, ok := treeUpper.Map[key]
 		if ok {

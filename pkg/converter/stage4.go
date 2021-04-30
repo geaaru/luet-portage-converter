@@ -64,9 +64,11 @@ func (pc *PortageConverter) Stage4() error {
 		worker.Levels = levels
 
 		pack := pkg.ToPack(true)
+		levels.Name = fmt.Sprintf(":microscope: [%s/%s-%s]",
+			pack.GetCategory(), pack.GetName(), pack.GetVersion())
 
 		// Check buildtime requires
-		InfoC(GetAurora().Bold(fmt.Sprintf("[%s/%s-%s]",
+		InfoC(GetAurora().Bold(fmt.Sprintf(":dna: [%s/%s-%s]",
 			pack.GetCategory(), pack.GetName(), pack.GetVersion())),
 			"Preparing stage4 levels struct...")
 

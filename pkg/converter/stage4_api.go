@@ -21,7 +21,7 @@ import (
 	"errors"
 	"fmt"
 
-	//cfg "github.com/mudler/luet/pkg/config"
+	cfg "github.com/mudler/luet/pkg/config"
 	. "github.com/mudler/luet/pkg/logger"
 	luet_pkg "github.com/mudler/luet/pkg/package"
 )
@@ -44,6 +44,7 @@ type Stage4LeafCache struct {
 }
 
 type Stage4Levels struct {
+	Name      string
 	Levels    []*Stage4Tree
 	Map       map[string]*luet_pkg.DefaultPackage
 	Changed   map[string]*luet_pkg.DefaultPackage
@@ -160,7 +161,9 @@ func (l *Stage4Levels) AddDependencyRecursive(p, father *luet_pkg.DefaultPackage
 
 	key := fmt.Sprintf("%s/%s", p.GetCategory(), p.GetName())
 
-	DebugC(fmt.Sprintf("Adding recursive %s package to level %d (%v)", key, level+1, stack))
+	if cfg.LuetCfg.GetLogging().Level == "debug" {
+		DebugC(fmt.Sprintf("Adding recursive %s package to level %d (%v)", key, level+1, stack))
+	}
 
 	_, ok := l.Map[key]
 	if !ok {
@@ -214,7 +217,10 @@ func (l *Stage4Levels) analyzeLevelLeafs(pos int) (bool, error) {
 	tree := l.Levels[pos]
 	rescan := false
 
-	DebugC(fmt.Sprintf("[%d-%d] Tree:\n%s", tree.Id, pos, tree.Dump()))
+	if cfg.LuetCfg.GetLogging().Level == "debug" {
+		// Call this only with debug enabled.
+		DebugC(fmt.Sprintf("[%d-%d] Tree:\n%s", tree.Id, pos, tree.Dump()))
+	}
 
 	for _, leaf := range *tree.GetMap() {
 
@@ -245,15 +251,23 @@ func (l *Stage4Levels) Resolve() error {
 	}
 	initialLevels := len(l.Levels)
 
+	tot_pkg := len(l.Levels[0].Map)
+
 	for pos > 0 {
 		pos--
+
+		pkgs := tot_pkg - len(l.Levels[0].Map)
 
 		rescan, err := l.analyzeLevelLeafs(pos)
 		if err != nil {
 			return err
 		}
 		if rescan {
-			DebugC(GetAurora().Bold("Restarting resolution.."))
+			InfoC(
+				fmt.Sprintf(
+					"%s Analyzed packages %2d/%2d ...",
+					l.Name, pkgs, tot_pkg,
+				))
 			// Restarting analysis from begin
 			pos = initialLevels
 		}
