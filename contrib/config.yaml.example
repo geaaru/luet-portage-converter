@@ -97,3 +97,12 @@ reposcan_disabled_use_flags:
 reposcan_disabled_keywords:
   - ~amd64
 
+# Define layers packages to use as provides of singles packages in build phase.
+build_layers:
+  - layer:
+      name: build-core
+      category: layer
+    packages:
+      - dev-lang/python
+      - sys-devel/gcc
+

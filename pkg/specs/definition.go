@@ -46,9 +46,17 @@ type PortageConverterSpecs struct {
 
 	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
 
+	BuildLayers []PortageConverterBuildLayer `json:"build_layers,omitempty" yaml:"build_layers,omitempty"`
+
 	MapArtefacts             map[string]*PortageConverterArtefact       `json:"-" yaml:"-"`
 	MapReplacementsRuntime   map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
 	MapReplacementsBuildtime map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
+	MapBuildLayer            map[string]*PortageConverterBuildLayer     `json:"-" yaml:"-"`
+}
+
+type PortageConverterBuildLayer struct {
+	Layer    PortageConverterPkg `json:"layer,omitempty" yaml:"layer,omitempty"`
+	Packages []string            `json:"packages" yaml:"packages"`
 }
 
 type PortageConverterReposcanConstraints struct {
@@ -112,8 +120,9 @@ type PortageConverterUseFlags struct {
 }
 
 type PortageConverterInclude struct {
-	SkippedResolutions PortageConverterSkips      `json:"skipped_resolutions,omitempty" yaml:"skipped_resolutions,omitempty"`
-	Artefacts          []PortageConverterArtefact `json:"artefacts,omitempty" yaml:"artefacts,omitempty"`
+	SkippedResolutions PortageConverterSkips        `json:"skipped_resolutions,omitempty" yaml:"skipped_resolutions,omitempty"`
+	Artefacts          []PortageConverterArtefact   `json:"artefacts,omitempty" yaml:"artefacts,omitempty"`
+	BuildLayers        []PortageConverterBuildLayer `json:"build_layers,omitempty" yaml:"build_layers,omitempty"`
 }
 
 func SpecsFromYaml(data []byte) (*PortageConverterSpecs, error) {
@@ -184,6 +193,9 @@ func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 				ans.Artefacts = append(ans.Artefacts, data.Artefacts...)
 			}
 
+			if len(data.BuildLayers) > 0 {
+				ans.BuildLayers = append(ans.BuildLayers, data.BuildLayers...)
+			}
 		}
 	}
 
@@ -234,6 +246,31 @@ func (s *PortageConverterSpecs) GetRuntimeReplacement(pkg string) (*PortageConve
 		return ans, nil
 	}
 	return ans, errors.New("No replacement found for key " + pkg)
+}
+
+func (s *PortageConverterSpecs) HasBuildLayer(pkg string) bool {
+	_, ans := s.MapBuildLayer[pkg]
+	return ans
+}
+
+func (s *PortageConverterSpecs) GetBuildLayer(pkg string) (*PortageConverterBuildLayer, error) {
+	ans, ok := s.MapBuildLayer[pkg]
+	if ok {
+		return ans, nil
+	}
+	return ans, errors.New("no build layer found for key " + pkg)
+}
+
+func (s *PortageConverterSpecs) GenerateBuildLayerMap() {
+	s.MapBuildLayer = make(map[string]*PortageConverterBuildLayer, 0)
+
+	if len(s.BuildLayers) > 0 {
+		for idx, _ := range s.BuildLayers {
+			for _, pkg := range s.BuildLayers[idx].Packages {
+				s.MapBuildLayer[pkg] = &s.BuildLayers[idx]
+			}
+		}
+	}
 }
 
 func (s *PortageConverterSpecs) GenerateReplacementsMap() {

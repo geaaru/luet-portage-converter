@@ -304,6 +304,24 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			continue
 		}
 
+		dep_str := fmt.Sprintf("%s/%s", bdep.Category, bdep.Name)
+		if bdep.Slot != "0" {
+			dep_str += ":" + bdep.Slot
+		}
+
+		// Check if there is a layer to use for the dependency
+		if pc.Specs.HasBuildLayer(dep_str) {
+			bLayer, _ := pc.Specs.GetBuildLayer(dep_str)
+			gp := gentoo.GentooPackage{
+				Name:     bLayer.Layer.Name,
+				Category: bLayer.Layer.Category,
+				Version:  ">=0",
+				Slot:     "0",
+			}
+			bdeps = pc.AppendIfNotPresent(bdeps, gp)
+			continue
+		}
+
 		dep := luet_pkg.NewPackage(bdep.Name, ">=0",
 			[]*luet_pkg.DefaultPackage{},
 			[]*luet_pkg.DefaultPackage{})
@@ -316,10 +334,6 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			// Check if there is a runtime deps/provide for this
 			p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
 			if p == nil {
-				dep_str := fmt.Sprintf("%s/%s", bdep.Category, bdep.Name)
-				if bdep.Slot != "0" {
-					dep_str += ":" + bdep.Slot
-				}
 				// Now we use the same treePath.
 				err := pc.createSolution(dep_str, treePath, stack, artefact)
 				if err != nil {
@@ -558,6 +572,7 @@ func (pc *PortageConverter) Generate() error {
 	// Create artefacts map
 	pc.Specs.GenerateArtefactsMap()
 	pc.Specs.GenerateReplacementsMap()
+	pc.Specs.GenerateBuildLayerMap()
 
 	// Resolve all packages
 	for _, artefact := range pc.Specs.GetArtefacts() {
