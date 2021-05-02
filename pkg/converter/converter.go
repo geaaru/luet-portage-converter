@@ -159,7 +159,7 @@ func (pc *PortageConverter) SetFilteredPackages(pkgs []string) {
 	pc.FilteredPackages = pkgs
 }
 
-func (pc *PortageConverter) IsDep2Skip(pkg *gentoo.GentooPackage) bool {
+func (pc *PortageConverter) IsDep2Skip(pkg *gentoo.GentooPackage, buildDep bool) bool {
 
 	for _, skipPkg := range pc.Specs.SkippedResolutions.Packages {
 		if skipPkg.Name == pkg.Name && skipPkg.Category == pkg.Category {
@@ -170,6 +170,14 @@ func (pc *PortageConverter) IsDep2Skip(pkg *gentoo.GentooPackage) bool {
 	for _, cat := range pc.Specs.SkippedResolutions.Categories {
 		if cat == pkg.Category {
 			return true
+		}
+	}
+
+	if buildDep {
+		for _, cat := range pc.Specs.SkippedResolutions.BuildCategories {
+			if cat == pkg.Category {
+				return true
+			}
 		}
 	}
 
@@ -231,7 +239,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		return err
 	}
 
-	if pc.IsDep2Skip(gp) {
+	if pc.IsDep2Skip(gp, false) {
 		DebugC(fmt.Sprintf("[%s] Skipped dependency %s", stack[len(stack)-1], pkg))
 		return nil
 	}
@@ -299,7 +307,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 		DebugC(fmt.Sprintf("[%s] Analyzing buildtime dep %s...", pkg, bdep.GetPackageName()))
 
-		if pc.IsDep2Skip(&bdep) {
+		if pc.IsDep2Skip(&bdep, true) {
 			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bdep.GetPackageName()))
 			continue
 		}
@@ -377,7 +385,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		DebugC(fmt.Sprintf("[%s] Analyzing buildtime conflict %s...",
 			pkg, bconflict.GetPackageName()))
 
-		if pc.IsDep2Skip(&bconflict) {
+		if pc.IsDep2Skip(&bconflict, true) {
 			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bconflict.GetPackageName()))
 			continue
 		}
@@ -398,7 +406,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 		DebugC(fmt.Sprintf("[%s] Analyzing runtime dep %s...", pkg, rdep.GetPackageName()))
 
-		if pc.IsDep2Skip(&rdep) {
+		if pc.IsDep2Skip(&rdep, false) {
 			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rdep.GetPackageName()))
 			continue
 		}
@@ -446,7 +454,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		DebugC(fmt.Sprintf("[%s] Analyzing runtime conflict %s...",
 			pkg, rconflict.GetPackageName()))
 
-		if pc.IsDep2Skip(&rconflict) {
+		if pc.IsDep2Skip(&rconflict, false) {
 			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rconflict.GetPackageName()))
 			continue
 		}

@@ -64,8 +64,9 @@ type PortageConverterReposcanConstraints struct {
 }
 
 type PortageConverterSkips struct {
-	Packages   []PortageConverterPkg `json:"packages,omitempty" yaml:"packages,omitempty"`
-	Categories []string              `json:"categories,omitempty" yaml:"categories,omitempty"`
+	Packages        []PortageConverterPkg `json:"packages,omitempty" yaml:"packages,omitempty"`
+	Categories      []string              `json:"categories,omitempty" yaml:"categories,omitempty"`
+	BuildCategories []string              `json:"build_categories,omitempty" yaml:"build_categories,omitempty"`
 }
 
 type PortageConverterPkg struct {
@@ -187,6 +188,11 @@ func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 			if len(data.SkippedResolutions.Categories) > 0 {
 				ans.SkippedResolutions.Categories = append(ans.SkippedResolutions.Categories,
 					data.SkippedResolutions.Categories...)
+			}
+
+			if len(data.SkippedResolutions.BuildCategories) > 0 {
+				ans.SkippedResolutions.BuildCategories = append(ans.SkippedResolutions.BuildCategories,
+					data.SkippedResolutions.BuildCategories...)
 			}
 
 			if len(data.Artefacts) > 0 {

@@ -12,6 +12,9 @@ skipped_resolutions:
     - name: gcc-apple
       category: sys-devel
 
+  build_categories:
+    - catX
+
   categories:
     - virtual
 #    - cat2
