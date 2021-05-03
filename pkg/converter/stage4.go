@@ -99,6 +99,11 @@ func (pc *PortageConverter) Stage4() error {
 			return errors.New("Error on resolve stage4 levels: " + err.Error())
 		}
 
+		InfoC(
+			fmt.Sprintf(
+				":party: [%s/%s-%s] Analysis completed.",
+				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
+
 		pc.stage4LevelsDumpWrapper(levels, "Resolved structure")
 
 		pc.stage4SyncChanges(worker)
