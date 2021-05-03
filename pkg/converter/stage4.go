@@ -78,7 +78,7 @@ func (pc *PortageConverter) Stage4() error {
 			Version:  pack.GetVersion(),
 		}
 
-		err := pc.stage4AddDeps2Levels(luetPkg, nil, worker, 1)
+		err := pc.stage4AddDeps2Levels(luetPkg, nil, worker, 1, []string{})
 		if err != nil {
 			return err
 		}
@@ -184,9 +184,15 @@ func (pc *PortageConverter) stage4LevelsDumpWrapper(levels *Stage4Levels, msg st
 
 func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 	father *luet_pkg.DefaultPackage,
-	w *Stage4Worker, level int) error {
+	w *Stage4Worker, level int, stack []string) error {
 
 	key := fmt.Sprintf("%s/%s", pkg.GetCategory(), pkg.GetName())
+
+	if pc.IsInStack(stack, key) {
+		Error(fmt.Sprintf("For package %s found cycle: %v", key, stack))
+		return errors.New("Cycle for package " + key)
+	}
+	stack = append(stack, key)
 
 	// Check if level is already available
 	if len(w.Levels.Levels) < level {
@@ -226,7 +232,7 @@ func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 
 		// Add requires
 		for _, dep := range pkg.GetRequires() {
-			err := pc.stage4AddDeps2Levels(dep, pkg, w, level+1)
+			err := pc.stage4AddDeps2Levels(dep, pkg, w, level+1, stack)
 			if err != nil {
 				return err
 			}
