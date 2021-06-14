@@ -184,17 +184,6 @@ func (pc *PortageConverter) IsDep2Skip(pkg *gentoo.GentooPackage, buildDep bool)
 	return false
 }
 
-func (pc *PortageConverter) IsInStack(stack []string, pkg string) bool {
-	ans := false
-	for _, p := range stack {
-		if p == pkg {
-			ans = true
-			break
-		}
-	}
-	return ans
-}
-
 func (pc *PortageConverter) AppendIfNotPresent(list []gentoo.GentooPackage, pkg gentoo.GentooPackage) []gentoo.GentooPackage {
 	ans := list
 	isPresent := false
@@ -226,7 +215,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		DisabledUseFlags: artefact.Uses.Disabled,
 	}
 
-	if pc.IsInStack(stack, pkg) {
+	if IsInStack(stack, pkg) {
 		DebugC(fmt.Sprintf("Intercepted cycle dep for %s: %s", pkg, stack))
 		DebugC(fmt.Sprintf("[%s] I skip cycle.", pkg))
 		// TODO: Is this correct?
