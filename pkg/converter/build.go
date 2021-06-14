@@ -20,7 +20,7 @@ import (
 	"errors"
 	"io/ioutil"
 
-	compiler "github.com/mudler/luet/pkg/compiler"
+	compilerspec "github.com/mudler/luet/pkg/compiler/types/spec"
 	pkg "github.com/mudler/luet/pkg/package"
 	st "github.com/mudler/luet/pkg/spectooling"
 
@@ -46,7 +46,7 @@ type LuetCompilationSpecSanitized struct {
 	Provides         []*st.DefaultPackageSanitized `json:"provides,omitempty" yaml:"provides,omitempty"`
 }
 
-func NewLuetCompilationSpecSanitized(s *compiler.LuetCompilationSpec) *LuetCompilationSpecSanitized {
+func NewLuetCompilationSpecSanitized(s *compilerspec.LuetCompilationSpec) *LuetCompilationSpecSanitized {
 	return &LuetCompilationSpecSanitized{
 		Steps:      s.Steps,
 		Env:        s.Env,
