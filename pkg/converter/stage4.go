@@ -83,7 +83,7 @@ func (pc *PortageConverter) Stage4() error {
 			return err
 		}
 		// Setup level1 with all packages
-		err = pc.stage4AlignLevel1(worker)
+		err = pc.Stage4AlignLevel1(worker)
 		if err != nil {
 			return err
 		}
@@ -255,7 +255,7 @@ func (pc *PortageConverter) stage4SyncChanges(w *Stage4Worker) {
 	}
 }
 
-func (pc *PortageConverter) stage4AlignLevel1(w *Stage4Worker) error {
+func (pc *PortageConverter) Stage4AlignLevel1(w *Stage4Worker) error {
 
 	for pkg, v := range w.Levels.Map {
 
