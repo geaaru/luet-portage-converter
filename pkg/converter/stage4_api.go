@@ -76,6 +76,54 @@ func NewStage4LevelsWithSize(nLevels int) *Stage4Levels {
 	return ans
 }
 
+func (l *Stage4Levels) PackageHasAncient(pkg, ancient *luet_pkg.DefaultPackage, startLevel int) (bool, error) {
+	ans := false
+	found := false
+	key := fmt.Sprintf("%s/%s", pkg.GetCategory(), pkg.GetName())
+
+	if startLevel >= len(l.Levels) {
+		return false, errors.New("Invalid start level")
+	}
+
+	lastLevel := len(l.Levels) - 1
+	for i := startLevel; i <= lastLevel; i++ {
+		// Check if the package is present on the level.
+		if _, ok := l.Levels[i].Map[key]; !ok {
+			continue
+		}
+		found = true
+
+		for _, dep := range l.Levels[i].Map[key].Package.GetRequires() {
+			if dep.GetName() == ancient.GetName() &&
+				dep.GetCategory() == ancient.GetCategory() {
+				ans = true
+				break
+			}
+			if i < lastLevel {
+				hasAncient, err := l.PackageHasAncient(dep, ancient, i+1)
+				if err != nil {
+					return ans, err
+				}
+
+				if hasAncient {
+					ans = true
+					break
+				}
+			}
+		}
+
+		if ans {
+			break
+		}
+	}
+
+	if !found {
+		return false, errors.New("Package " + key + " not found on level " + fmt.Sprintf("%d", startLevel))
+	}
+
+	return ans, nil
+}
+
 func (l *Stage4Levels) GetMap() *map[string]*luet_pkg.DefaultPackage { return &l.Map }
 
 func (l *Stage4Levels) Dump() string {
