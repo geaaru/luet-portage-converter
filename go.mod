@@ -4,12 +4,14 @@ go 1.15
 
 require (
 	github.com/MottainaiCI/lxd-compose v0.7.2
-	github.com/Sabayon/pkgs-checker v0.8.1-0.20210219112152-4b52a9da704d
+	github.com/Sabayon/pkgs-checker v0.8.1
+	github.com/codegangsta/inject v0.0.0-20150114235600-33e0aa1cb7c0 // indirect
+	github.com/genuinetools/img v0.5.11 // indirect
 	github.com/magefile/mage v1.11.0 // indirect
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
-	github.com/mudler/luet v0.0.0-20210125133601-4eab1eb738c5
+	github.com/mudler/luet v0.0.0-20210604142351-a7b4ae67c9b8
 	github.com/onsi/ginkgo v1.14.2
 	github.com/onsi/gomega v1.10.3
 	github.com/pelletier/go-toml v1.8.1 // indirect

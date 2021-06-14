@@ -2,6 +2,7 @@ package bus
 
 import (
 	"github.com/mudler/go-pluggable"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -44,24 +45,59 @@ var (
 	EventRepositoryPreBuild pluggable.EventType = "repository.pre.build"
 	// EventRepositoryPostBuild is the event fired after a repository was built
 	EventRepositoryPostBuild pluggable.EventType = "repository.post.build"
+
+	// Image unpack
+
+	// EventImagePreUnPack is the event fired before unpacking an image to a local dir
+	EventImagePreUnPack pluggable.EventType = "image.pre.unpack"
+	// EventImagePostUnPack is the event fired after unpacking an image to a local dir
+	EventImagePostUnPack pluggable.EventType = "image.post.unpack"
 )
 
 // Manager is the bus instance manager, which subscribes plugins to events emitted by Luet
-var Manager *pluggable.Manager = pluggable.NewManager(
-	[]pluggable.EventType{
-		EventPackageInstall,
-		EventPackageUnInstall,
-		EventPackagePreBuild,
-		EventPackagePreBuildArtifact,
-		EventPackagePostBuildArtifact,
-		EventPackagePostBuild,
-		EventRepositoryPreBuild,
-		EventRepositoryPostBuild,
-		EventImagePreBuild,
-		EventImagePrePull,
-		EventImagePrePush,
-		EventImagePostBuild,
-		EventImagePostPull,
-		EventImagePostPush,
-	},
-)
+var Manager *Bus = &Bus{
+	Manager: pluggable.NewManager(
+		[]pluggable.EventType{
+			EventPackageInstall,
+			EventPackageUnInstall,
+			EventPackagePreBuild,
+			EventPackagePreBuildArtifact,
+			EventPackagePostBuildArtifact,
+			EventPackagePostBuild,
+			EventRepositoryPreBuild,
+			EventRepositoryPostBuild,
+			EventImagePreBuild,
+			EventImagePrePull,
+			EventImagePrePush,
+			EventImagePostBuild,
+			EventImagePostPull,
+			EventImagePostPush,
+			EventImagePreUnPack,
+			EventImagePostUnPack,
+		},
+	),
+}
+
+type Bus struct {
+	*pluggable.Manager
+}
+
+func (b *Bus) Initialize(plugin ...string) {
+	b.Manager.Load(plugin...).Register()
+
+	for _, e := range b.Manager.Events {
+		b.Manager.Response(e, func(p *pluggable.Plugin, r *pluggable.EventResponse) {
+			if r.Errored() {
+				logrus.Fatal("Plugin", p.Name, "at", p.Executable, "Error", r.Error)
+			}
+			logrus.Debug(
+				"plugin_event",
+				"received from",
+				p.Name,
+				"at",
+				p.Executable,
+				r,
+			)
+		})
+	}
+}

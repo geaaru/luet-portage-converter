@@ -26,7 +26,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mudler/luet/pkg/helpers"
+	"github.com/mudler/luet/pkg/helpers/docker"
+	"github.com/mudler/luet/pkg/helpers/match"
 	version "github.com/mudler/luet/pkg/versioner"
 
 	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
@@ -46,7 +47,7 @@ type Package interface {
 
 	GetFingerPrint() string
 	GetPackageName() string
-	GetPackageImageName() string
+	ImageID() string
 	Requires([]*DefaultPackage) Package
 	Conflicts([]*DefaultPackage) Package
 	Revdeps(PackageDatabase) Packages
@@ -113,6 +114,14 @@ type Package interface {
 	GetBuildTimestamp() string
 
 	Clone() Package
+
+	GetMetadataFilePath() string
+	SetTreeDir(s string)
+	GetTreeDir() string
+
+	Mark() Package
+
+	JSON() ([]byte, error)
 }
 
 type Tree interface {
@@ -124,6 +133,19 @@ type Tree interface {
 }
 
 type Packages []Package
+
+type DefaultPackages []*DefaultPackage
+
+func (d DefaultPackages) Hash(salt string) string {
+
+	overallFp := ""
+	for _, c := range d {
+		overallFp = overallFp + c.HashFingerprint("join")
+	}
+	h := md5.New()
+	io.WriteString(h, fmt.Sprintf("%s-%s", overallFp, salt))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
 
 // >> Unmarshallers
 // DefaultPackageFromYaml decodes a package from yaml bytes
@@ -210,6 +232,11 @@ func (t *DefaultPackage) JSON() ([]byte, error) {
 	return buffer.Bytes(), err
 }
 
+// GetMetadataFilePath returns the canonical name of an artifact metadata file
+func (d *DefaultPackage) GetMetadataFilePath() string {
+	return d.GetFingerPrint() + ".metadata.yaml"
+}
+
 // DefaultPackage represent a standard package definition
 type DefaultPackage struct {
 	ID               int               `storm:"id,increment" json:"id"` // primary key with auto increment
@@ -235,6 +262,8 @@ type DefaultPackage struct {
 	BuildTimestamp string   `json:"buildtimestamp,omitempty"`
 
 	Labels map[string]string `json:"labels,omitempty"` // Affects YAML field names too.
+
+	TreeDir string `json:"treedir,omitempty"`
 }
 
 // State represent the package state
@@ -251,6 +280,12 @@ func NewPackage(name, version string, requires []*DefaultPackage, conflicts []*D
 	}
 }
 
+func (p *DefaultPackage) SetTreeDir(s string) {
+	p.TreeDir = s
+}
+func (p *DefaultPackage) GetTreeDir() string {
+	return p.TreeDir
+}
 func (p *DefaultPackage) String() string {
 	b, err := p.JSON()
 	if err != nil {
@@ -289,8 +324,8 @@ func (p *DefaultPackage) GetPackageName() string {
 	return fmt.Sprintf("%s-%s", p.Name, p.Category)
 }
 
-func (p *DefaultPackage) GetPackageImageName() string {
-	return fmt.Sprintf("%s-%s:%s", p.Name, p.Category, p.Version)
+func (p *DefaultPackage) ImageID() string {
+	return docker.StripInvalidStringsFromImage(p.GetFingerPrint())
 }
 
 // GetBuildTimestamp returns the package build timestamp
@@ -325,19 +360,19 @@ func (p *DefaultPackage) IsHidden() bool {
 }
 
 func (p *DefaultPackage) HasLabel(label string) bool {
-	return helpers.MapHasKey(&p.Labels, label)
+	return match.MapHasKey(&p.Labels, label)
 }
 
 func (p *DefaultPackage) MatchLabel(r *regexp.Regexp) bool {
-	return helpers.MapMatchRegex(&p.Labels, r)
+	return match.MapMatchRegex(&p.Labels, r)
 }
 
 func (p *DefaultPackage) HasAnnotation(label string) bool {
-	return helpers.MapHasKey(&p.Annotations, label)
+	return match.MapHasKey(&p.Annotations, label)
 }
 
 func (p *DefaultPackage) MatchAnnotation(r *regexp.Regexp) bool {
-	return helpers.MapMatchRegex(&p.Annotations, r)
+	return match.MapMatchRegex(&p.Annotations, r)
 }
 
 // AddUse adds a use to a package
@@ -471,6 +506,12 @@ func (p *DefaultPackage) Matches(m Package) bool {
 		return true
 	}
 	return false
+}
+
+func (p *DefaultPackage) Mark() Package {
+	marked := p.Clone()
+	marked.SetName("@@" + marked.GetName())
+	return marked
 }
 
 func (p *DefaultPackage) Expand(definitiondb PackageDatabase) (Packages, error) {
@@ -624,6 +665,16 @@ func (set Packages) Best(v version.Versioner) Package {
 	sorted := v.Sort(versionsRaw)
 
 	return versionsMap[sorted[len(sorted)-1]]
+}
+
+func (set Packages) Find(packageName string) (Package, error) {
+	for _, p := range set {
+		if p.GetPackageName() == packageName {
+			return p, nil
+		}
+	}
+
+	return &DefaultPackage{}, errors.New("package not found")
 }
 
 func (set Packages) Unique() Packages {

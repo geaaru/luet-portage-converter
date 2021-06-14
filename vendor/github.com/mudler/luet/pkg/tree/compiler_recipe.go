@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 
 	"github.com/mudler/luet/pkg/helpers"
+	fileHelper "github.com/mudler/luet/pkg/helpers/file"
 	pkg "github.com/mudler/luet/pkg/package"
 	"github.com/pkg/errors"
 )
@@ -55,6 +56,17 @@ func ReadDefinitionFile(path string) (pkg.DefaultPackage, error) {
 // Recipe is the "general" reciper for Trees
 type CompilerRecipe struct {
 	Recipe
+}
+
+// CompilerRecipes copies tree 1:1 as they contain the specs
+// and the build context required for reproducible builds
+func (r *CompilerRecipe) Save(path string) error {
+	for _, p := range r.SourcePath {
+		if err := fileHelper.CopyDir(p, filepath.Join(path, filepath.Base(p))); err != nil {
+			return errors.Wrap(err, "while copying source tree")
+		}
+	}
+	return nil
 }
 
 func (r *CompilerRecipe) Load(path string) error {
@@ -87,12 +99,13 @@ func (r *CompilerRecipe) Load(path string) error {
 			}
 			// Path is set only internally when tree is loaded from disk
 			pack.SetPath(filepath.Dir(currentpath))
+			pack.SetTreeDir(path)
 
 			// Instead of rdeps, have a different tree for build deps.
 			compileDefPath := pack.Rel(CompilerDefinitionFile)
-			if helpers.Exists(compileDefPath) {
+			if fileHelper.Exists(compileDefPath) {
 
-				dat, err := helpers.RenderFiles(compileDefPath, currentpath, "")
+				dat, err := helpers.RenderFiles(compileDefPath, currentpath)
 				if err != nil {
 					return errors.Wrap(err,
 						"Error templating file "+CompilerDefinitionFile+" from "+
@@ -115,22 +128,29 @@ func (r *CompilerRecipe) Load(path string) error {
 			}
 
 		case CollectionFile:
+
 			dat, err := ioutil.ReadFile(currentpath)
 			if err != nil {
 				return errors.Wrap(err, "Error reading file "+currentpath)
 			}
+
 			packs, err := pkg.DefaultPackagesFromYaml(dat)
 			if err != nil {
 				return errors.Wrap(err, "Error reading yaml "+currentpath)
 			}
+
 			packsRaw, err := pkg.GetRawPackages(dat)
+			if err != nil {
+				return errors.Wrap(err, "Error reading raw packages from "+currentpath)
+			}
 
 			for _, pack := range packs {
 				pack.SetPath(filepath.Dir(currentpath))
+				pack.SetTreeDir(path)
 
 				// Instead of rdeps, have a different tree for build deps.
 				compileDefPath := pack.Rel(CompilerDefinitionFile)
-				if helpers.Exists(compileDefPath) {
+				if fileHelper.Exists(compileDefPath) {
 
 					raw := packsRaw.Find(pack.GetName(), pack.GetCategory(), pack.GetVersion())
 					buildyaml, err := ioutil.ReadFile(compileDefPath)
@@ -159,9 +179,7 @@ func (r *CompilerRecipe) Load(path string) error {
 					return errors.Wrap(err, "Error creating package "+pack.GetName())
 				}
 			}
-
 		}
-
 		return nil
 	}
 

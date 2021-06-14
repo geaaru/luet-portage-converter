@@ -32,6 +32,7 @@ var DBInMemoryInstance = &InMemoryDatabase{
 	CacheNoVersion:   map[string]map[string]interface{}{},
 	ProvidesDatabase: map[string]map[string]Package{},
 	RevDepsDatabase:  map[string]map[string]Package{},
+	cached:           map[string]interface{}{},
 }
 
 type InMemoryDatabase struct {
@@ -199,6 +200,10 @@ func (db *InMemoryDatabase) populateCaches(p Package) {
 
 	// Create extra cache between package -> []versions
 	db.Lock()
+	if db.cached == nil {
+		db.cached = map[string]interface{}{}
+	}
+
 	if _, ok := db.cached[p.GetFingerPrint()]; ok {
 		db.Unlock()
 		return
@@ -554,4 +559,8 @@ func (db *InMemoryDatabase) FindPackageMatch(pattern string) (Packages, error) {
 	}
 
 	return Packages(ans), nil
+}
+
+func (db *InMemoryDatabase) FindPackageByFile(pattern string) (Packages, error) {
+	return findPackageByFile(db, pattern)
 }

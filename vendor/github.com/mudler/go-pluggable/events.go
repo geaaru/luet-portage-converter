@@ -15,7 +15,10 @@
 
 package pluggable
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // EventType describes an event type
 type EventType string
@@ -26,6 +29,7 @@ type EventType string
 type Event struct {
 	Name EventType `json:"name"`
 	Data string    `json:"data"`
+	File string    `json:"file"` // If Data >> 10K write content to file instead
 }
 
 // EventResponse describes the event response structure
@@ -42,6 +46,16 @@ func (e Event) JSON() (string, error) {
 	return string(dat), err
 }
 
+// Copy returns a copy of Event
+func (e Event) Copy() *Event {
+	copy := &e
+	return copy
+}
+
+func (e Event) ResponseEventName(s string) EventType {
+	return EventType(fmt.Sprintf("%s-%s", e.Name, s))
+}
+
 // Unmarshal decodes the json payload in the given parameteer
 func (r EventResponse) Unmarshal(i interface{}) error {
 	return json.Unmarshal([]byte(r.Data), i)
@@ -52,7 +66,7 @@ func (r EventResponse) Errored() bool {
 	return len(r.Error) != 0
 }
 
-// NewEvent retuns a new event which can be used for publishing
+// NewEvent returns a new event which can be used for publishing
 // the obj gets automatically serialized in json.
 func NewEvent(name EventType, obj interface{}) (*Event, error) {
 	dat, err := json.Marshal(obj)
