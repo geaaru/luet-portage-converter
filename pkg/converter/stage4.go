@@ -78,7 +78,7 @@ func (pc *PortageConverter) Stage4() error {
 			Version:  pack.GetVersion(),
 		}
 
-		err := pc.stage4AddDeps2Levels(luetPkg, nil, worker, 1, []string{})
+		err := pc.Stage4AddDeps2Levels(luetPkg, nil, worker, 1, []string{})
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func (pc *PortageConverter) Stage4() error {
 			"Stage4: Created levels structs of %d trees for %d packages.",
 			len(levels.Levels), len(levels.Map)))
 
-		pc.stage4LevelsDumpWrapper(levels, "Starting structure")
+		pc.Stage4LevelsDumpWrapper(levels, "Starting structure")
 
 		err = levels.Resolve()
 		if err != nil {
@@ -104,7 +104,7 @@ func (pc *PortageConverter) Stage4() error {
 				":party: [%s/%s-%s] Analysis completed.",
 				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
 
-		pc.stage4LevelsDumpWrapper(levels, "Resolved structure")
+		pc.Stage4LevelsDumpWrapper(levels, "Resolved structure")
 
 		pc.stage4SyncChanges(worker)
 	}
@@ -172,7 +172,7 @@ func (pc *PortageConverter) stage4UpdateBuildFiles(worker *Stage4Worker) error {
 	return nil
 }
 
-func (pc *PortageConverter) stage4LevelsDumpWrapper(levels *Stage4Levels, msg string) {
+func (pc *PortageConverter) Stage4LevelsDumpWrapper(levels *Stage4Levels, msg string) {
 	if len(levels.Levels) > 10 {
 		DebugC(fmt.Sprintf(
 			"Stage4: %s:\n", msg))
@@ -187,13 +187,13 @@ func (pc *PortageConverter) stage4LevelsDumpWrapper(levels *Stage4Levels, msg st
 	}
 }
 
-func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
+func (pc *PortageConverter) Stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 	father *luet_pkg.DefaultPackage,
 	w *Stage4Worker, level int, stack []string) error {
 
 	key := fmt.Sprintf("%s/%s", pkg.GetCategory(), pkg.GetName())
 
-	if pc.IsInStack(stack, key) {
+	if IsInStack(stack, key) {
 		Error(fmt.Sprintf("For package %s found cycle: %v", key, stack))
 		return errors.New("Cycle for package " + key)
 	}
@@ -237,7 +237,7 @@ func (pc *PortageConverter) stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 
 		// Add requires
 		for _, dep := range pkg.GetRequires() {
-			err := pc.stage4AddDeps2Levels(dep, pkg, w, level+1, stack)
+			err := pc.Stage4AddDeps2Levels(dep, pkg, w, level+1, stack)
 			if err != nil {
 				return err
 			}
