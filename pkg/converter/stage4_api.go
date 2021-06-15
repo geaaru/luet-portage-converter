@@ -49,6 +49,8 @@ type Stage4Levels struct {
 	Map       map[string]*luet_pkg.DefaultPackage
 	Changed   map[string]*luet_pkg.DefaultPackage
 	CacheLeaf map[string]*Stage4LeafCache
+
+	Quiet bool
 }
 
 func NewStage4LeafCache() *Stage4LeafCache {
@@ -63,6 +65,7 @@ func NewStage4Levels() *Stage4Levels {
 		Map:       make(map[string]*luet_pkg.DefaultPackage, 0),
 		Changed:   make(map[string]*luet_pkg.DefaultPackage, 0),
 		CacheLeaf: make(map[string]*Stage4LeafCache, 0),
+		Quiet:     false,
 	}
 }
 
@@ -311,11 +314,13 @@ func (l *Stage4Levels) Resolve() error {
 			return err
 		}
 		if rescan {
-			InfoC(
-				fmt.Sprintf(
-					"%s Analyzed packages %2d/%2d ...",
-					l.Name, pkgs, tot_pkg,
-				))
+			if !l.Quiet {
+				InfoC(
+					fmt.Sprintf(
+						"%s Analyzed packages %2d/%2d ...",
+						l.Name, pkgs, tot_pkg,
+					))
+			}
 			// Restarting analysis from begin
 			pos = initialLevels
 		}
