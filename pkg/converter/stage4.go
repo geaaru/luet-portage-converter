@@ -80,12 +80,20 @@ func (pc *PortageConverter) Stage4() error {
 
 		err := pc.Stage4AddDeps2Levels(luetPkg, nil, worker, 1, []string{})
 		if err != nil {
-			return err
+			Warning(fmt.Sprintf(
+				"Stage4: [%s/%s] Error on add deps to levels. Skip package - %s",
+				pack.GetCategory(), pack.GetName(), err.Error()),
+			)
+			continue
 		}
 		// Setup level1 with all packages
 		err = pc.Stage4AlignLevel1(worker)
 		if err != nil {
-			return err
+			Warning(fmt.Sprintf(
+				"Stage4: [%s/%s] Error on align levels. Skip package - %s",
+				pack.GetCategory(), pack.GetName(), err.Error()),
+			)
+			continue
 		}
 
 		DebugC(fmt.Sprintf(
@@ -96,7 +104,11 @@ func (pc *PortageConverter) Stage4() error {
 
 		err = levels.Resolve()
 		if err != nil {
-			return errors.New("Error on resolve stage4 levels: " + err.Error())
+			Warning(fmt.Sprintf(
+				"Stage4: [%s/%s] Error on resolve. Skip package - %s",
+				pack.GetCategory(), pack.GetName(), err.Error()),
+			)
+			continue
 		}
 
 		InfoC(
