@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	//cfg "github.com/mudler/luet/pkg/config"
+	cfg "github.com/mudler/luet/pkg/config"
 	. "github.com/mudler/luet/pkg/logger"
 	luet_pkg "github.com/mudler/luet/pkg/package"
 	luet_tree "github.com/mudler/luet/pkg/tree"
@@ -204,6 +204,14 @@ func (pc *PortageConverter) Stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 	w *Stage4Worker, level int, stack []string) error {
 
 	key := fmt.Sprintf("%s/%s", pkg.GetCategory(), pkg.GetName())
+
+	if cfg.LuetCfg.GetLogging().Level == "debug" {
+		DebugC(fmt.Sprintf(
+			"Adding pkg %s to level %d...",
+			pkg.HumanReadableString(),
+			level,
+		))
+	}
 
 	if IsInStack(stack, key) {
 		Error(fmt.Sprintf("For package %s found cycle: %v", key, stack))
