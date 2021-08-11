@@ -245,7 +245,12 @@ func (pc *PortageConverter) Stage4AddDeps2Levels(pkg *luet_pkg.DefaultPackage,
 					pkg.GetCategory(), pkg.GetName(), err.Error()))
 		}
 
-		pkg.Requires(ppp[0].GetRequires())
+		if len(ppp) > 0 {
+			pkg.Requires(ppp[0].GetRequires())
+		} else {
+			DebugC(fmt.Sprintf("No packages found on reciper for %s.", key))
+		}
+
 		w.Map[key] = pkg
 
 	}
