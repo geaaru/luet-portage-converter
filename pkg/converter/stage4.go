@@ -58,7 +58,9 @@ func (pc *PortageConverter) Stage4() error {
 		Changed: make(map[string]*luet_pkg.DefaultPackage, 0),
 	}
 
-	for _, pkg := range pc.Solutions {
+	nSolutions := len(pc.Solutions)
+
+	for idx, pkg := range pc.Solutions {
 
 		levels = NewStage4LevelsWithSize(1)
 		worker.Levels = levels
@@ -68,8 +70,9 @@ func (pc *PortageConverter) Stage4() error {
 			pack.GetCategory(), pack.GetName(), pack.GetVersion())
 
 		// Check buildtime requires
-		InfoC(GetAurora().Bold(fmt.Sprintf(":dna: [%s/%s-%s]",
-			pack.GetCategory(), pack.GetName(), pack.GetVersion())),
+		InfoC(GetAurora().Bold(fmt.Sprintf(":dna: [%s/%s-%s] [%d/%d]",
+			pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+			idx+1, nSolutions)),
 			"Preparing stage4 levels struct...")
 
 		luetPkg := &luet_pkg.DefaultPackage{
@@ -113,7 +116,7 @@ func (pc *PortageConverter) Stage4() error {
 
 		InfoC(
 			fmt.Sprintf(
-				":party: [%s/%s-%s] Analysis completed.",
+				":party_popper: [%s/%s-%s] Analysis completed.",
 				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
 
 		pc.Stage4LevelsDumpWrapper(levels, "Resolved structure")
