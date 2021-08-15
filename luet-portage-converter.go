@@ -86,6 +86,7 @@ func Execute() {
 			stage2, _ := cmd.Flags().GetBool("disable-stage2")
 			stage3, _ := cmd.Flags().GetBool("disable-stage3")
 			stage4, _ := cmd.Flags().GetBool("enable-stage4")
+			debug, _ := cmd.Flags().GetBool("debug")
 			backend, _ := cmd.Flags().GetString("backend")
 			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
 			pkgs, _ := cmd.Flags().GetStringArray("pkg")
@@ -99,6 +100,10 @@ func Execute() {
 			converter.DisableStage2 = stage2
 			converter.DisableStage3 = stage3
 			converter.DisableStage4 = !stage4
+
+			if debug {
+				LuetCfg.GetGeneral().Debug = debug
+			}
 
 			if len(pkgs) > 0 {
 				converter.SetFilteredPackages(pkgs)
@@ -139,6 +144,7 @@ func Execute() {
 	rootCmd.Flags().String("to", "", "Targer tree where bump new specs.")
 	rootCmd.Flags().String("rules", "", "Rules file.")
 	rootCmd.Flags().Bool("override", false, "Override existing specs if already present.")
+	rootCmd.Flags().BoolP("debug", "d", false, "Enable debug verbosity.")
 	rootCmd.Flags().String("backend", "reposcan", "Select backend resolver: qdepends|reposcan.")
 	rootCmd.Flags().Bool("disable-stage2", false, "Disable stage2 phase.")
 	rootCmd.Flags().Bool("disable-stage3", false, "Disable stage3 phase.")
