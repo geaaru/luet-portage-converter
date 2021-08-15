@@ -150,12 +150,14 @@ func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 
 	content, err := ioutil.ReadFile(file)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("Error on read file %s: %s",
+			file, err.Error()))
 	}
 
 	ans, err := SpecsFromYaml(content)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("Error on parse file %s: %s",
+			file, err.Error()))
 	}
 
 	absPath, err := filepath.Abs(path.Dir(file))
@@ -172,12 +174,14 @@ func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 			}
 			content, err := ioutil.ReadFile(include)
 			if err != nil {
-				return nil, err
+				return nil, errors.New(fmt.Sprintf("Error on read file %s: %s",
+					include, err.Error()))
 			}
 
 			data, err := IncludeFromYaml(content)
 			if err != nil {
-				return nil, err
+				return nil, errors.New(fmt.Sprintf("Error on parse file %s: %s",
+					include, err.Error()))
 			}
 
 			if len(data.SkippedResolutions.Packages) > 0 {
