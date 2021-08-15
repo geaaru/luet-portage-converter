@@ -114,9 +114,11 @@ func (r *RepoScanResolver) LoadRawJson(raw, file string) error {
 	return nil
 }
 
-func (r *RepoScanResolver) LoadJsonFiles() error {
+func (r *RepoScanResolver) LoadJsonFiles(verbose bool) error {
 	for _, file := range r.JsonSources {
-		InfoC(fmt.Sprintf(":brain: Loading reposcan file %s...", file))
+		if verbose {
+			InfoC(fmt.Sprintf(":brain: Loading reposcan file %s...", file))
+		}
 		err := r.LoadJson(file)
 		if err != nil {
 			return err

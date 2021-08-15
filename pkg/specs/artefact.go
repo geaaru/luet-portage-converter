@@ -21,6 +21,15 @@ import (
 	"errors"
 )
 
+func NewPortageConverterArtefact(pkg string) *PortageConverterArtefact {
+	return &PortageConverterArtefact{
+		Tree:            "",
+		IgnoreBuildDeps: false,
+		Packages:        []string{pkg},
+		OverrideVersion: "",
+	}
+}
+
 func (a *PortageConverterArtefact) GetPackages() []string { return a.Packages }
 func (a *PortageConverterArtefact) GetTree() string       { return a.Tree }
 

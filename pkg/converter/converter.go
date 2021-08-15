@@ -204,7 +204,8 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	// Check if it's present artefact from map
 	art, err := pc.Specs.GetArtefactByPackage(pkg)
 	if err == nil {
-		DebugC(fmt.Sprintf("[%s] Using artefact from map. Uses disabled: %s, enabled: %s",
+		DebugC(fmt.Sprintf(
+			"[%s] Using artefact from map. Uses disabled: %s, enabled: %s",
 			pkg, art.Uses.Disabled, art.Uses.Enabled))
 		// POST: use artefact from map.
 		artefact = *art
@@ -522,13 +523,7 @@ func (pc *PortageConverter) createPortagePackage(pkg *specs.PortageSolution, ori
 	return nil
 }
 
-func (pc *PortageConverter) Generate() error {
-	// Load Build template file
-	buildTmpl, err := NewLuetCompilationSpecSanitizedFromFile(pc.Specs.BuildTmplFile)
-	if err != nil {
-		return errors.New("Error on load template: " + err.Error())
-	}
-
+func (pc *PortageConverter) InitConverter(showBanner bool) error {
 	// Initialize resolver
 	if pc.Backend == "reposcan" {
 		if len(pc.Specs.ReposcanSources) == 0 {
@@ -541,13 +536,15 @@ func (pc *PortageConverter) Generate() error {
 		resolver.SetDepsWithSlot(pc.Specs.ReposcanRequiresWithSlot)
 		resolver.SetDisabledUseFlags(pc.Specs.ReposcanDisabledUseFlags)
 		resolver.SetDisabledKeywords(pc.Specs.ReposcanDisabledKeywords)
-		InfoC(fmt.Sprintf("Using dependency with slot on category: %v",
-			resolver.GetDepsWithSlot()))
-		InfoC(fmt.Sprintf("Disabled keywords: %s",
-			GetAurora().Bold(resolver.GetDisabledKeywords())))
-		InfoC(fmt.Sprintf("Disabled USE: %s",
-			GetAurora().Bold(resolver.GetDisabledUseFlags())))
-		err = resolver.LoadJsonFiles()
+		if showBanner {
+			InfoC(fmt.Sprintf("Using dependency with slot on category: %v",
+				resolver.GetDepsWithSlot()))
+			InfoC(fmt.Sprintf("Disabled keywords: %s",
+				GetAurora().Bold(resolver.GetDisabledKeywords())))
+			InfoC(fmt.Sprintf("Disabled USE: %s",
+				GetAurora().Bold(resolver.GetDisabledUseFlags())))
+		}
+		err := resolver.LoadJsonFiles(showBanner)
 		if err != nil {
 			return err
 		}
@@ -570,6 +567,21 @@ func (pc *PortageConverter) Generate() error {
 	pc.Specs.GenerateArtefactsMap()
 	pc.Specs.GenerateReplacementsMap()
 	pc.Specs.GenerateBuildLayerMap()
+
+	return nil
+}
+
+func (pc *PortageConverter) Generate() error {
+	// Load Build template file
+	buildTmpl, err := NewLuetCompilationSpecSanitizedFromFile(pc.Specs.BuildTmplFile)
+	if err != nil {
+		return errors.New("Error on load template: " + err.Error())
+	}
+
+	err = pc.InitConverter(true)
+	if err != nil {
+		return errors.New("Error on initialize converter: " + err.Error())
+	}
 
 	// Resolve all packages
 	for _, artefact := range pc.Specs.GetArtefacts() {

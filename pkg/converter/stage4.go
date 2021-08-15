@@ -116,8 +116,9 @@ func (pc *PortageConverter) Stage4() error {
 
 		InfoC(
 			fmt.Sprintf(
-				":party_popper: [%s/%s-%s] Analysis completed.",
-				pack.GetCategory(), pack.GetName(), pack.GetVersion()))
+				":party_popper: [%s/%s-%s] Analysis completed (%d changes).",
+				pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+				len(levels.Changed)))
 
 		pc.Stage4LevelsDumpWrapper(levels, "Resolved structure")
 
