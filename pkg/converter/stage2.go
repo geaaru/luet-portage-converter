@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package converter
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -108,7 +109,11 @@ func (pc *PortageConverter) Stage2() error {
 		}
 		pReciper, err := pc.ReciperBuild.GetDatabase().FindPackage(luetPkg)
 		if err != nil {
-			return err
+			return errors.New(fmt.Sprintf(
+				"Error on retrieve package %s/%s-%s from tree: %s",
+				pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+				err.Error(),
+			))
 		}
 
 		// Drop conflicts not present on tree
