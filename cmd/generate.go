@@ -25,6 +25,7 @@ import (
 	"github.com/Luet-lab/luet-portage-converter/pkg/converter"
 
 	. "github.com/mudler/luet/pkg/config"
+	. "github.com/mudler/luet/pkg/logger"
 
 	"github.com/spf13/cobra"
 )
@@ -71,6 +72,10 @@ func newGenerateCommand() *cobra.Command {
 
 			if len(pkgs) > 0 {
 				converter.SetFilteredPackages(pkgs)
+			}
+
+			if len(treePath) == 0 {
+				DebugC(GetAurora().Bold("ATTENTION! No trees defined."))
 			}
 
 			err := converter.LoadRules(rulesFile)
