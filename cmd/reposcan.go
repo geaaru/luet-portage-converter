@@ -119,8 +119,9 @@ func newReposcanResolveCommand() *cobra.Command {
 				fmt.Println(solution)
 			} else {
 
-				fmt.Println(fmt.Sprintf("Package: %s",
-					solution.Package.GetPackageNameWithSlot()))
+				fmt.Println(fmt.Sprintf("Package: %s-%s",
+					solution.Package.GetPackageNameWithSlot(),
+					solution.Package.GetPVR()))
 
 				fmt.Println(fmt.Sprintf("Description: %s",
 					solution.Description))
