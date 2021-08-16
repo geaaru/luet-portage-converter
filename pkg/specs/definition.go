@@ -277,7 +277,13 @@ func (s *PortageConverterSpecs) GenerateBuildLayerMap() {
 	if len(s.BuildLayers) > 0 {
 		for idx, _ := range s.BuildLayers {
 			for _, pkg := range s.BuildLayers[idx].Packages {
-				s.MapBuildLayer[pkg] = &s.BuildLayers[idx]
+				gp, err := gentoo.ParsePackageStr(pkg)
+				k := pkg
+				if err == nil && gp.Slot == "0" {
+					// Ensure to skipt slot 0 on key.
+					k = fmt.Sprintf("%s/%s", gp.Category, gp.Name)
+				}
+				s.MapBuildLayer[k] = &s.BuildLayers[idx]
 			}
 		}
 	}
