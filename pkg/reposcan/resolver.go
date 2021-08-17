@@ -262,7 +262,7 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 	}
 
 	if len(conflicts) > 0 {
-		conflicts, err = r.elaborateDeps(last, conflicts)
+		conflicts, err = r.elaborateConflicts(last, conflicts)
 		if err != nil {
 			return err
 		}
@@ -351,7 +351,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 	}
 
 	if len(conflicts) > 0 {
-		conflicts, err = r.elaborateDeps(last, conflicts)
+		conflicts, err = r.elaborateConflicts(last, conflicts)
 		if err != nil {
 			return err
 		}
@@ -492,7 +492,9 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 				gp.Slot = ""
 			}
 
-			if gdep.Dep.Condition == gentoo.PkgCondNot {
+			if gdep.Dep.Condition == gentoo.PkgCondNot ||
+				gdep.Dep.Condition == gentoo.PkgCondNotLess ||
+				gdep.Dep.Condition == gentoo.PkgCondNotGreater {
 				conflicts = append(conflicts, *gdep.Dep)
 			} else {
 				deps = append(deps, *gp)
@@ -536,6 +538,40 @@ func (r *RepoScanResolver) elaborateDeps(pkg *gentoo.GentooPackage, deps []gento
 		}
 
 		ans = append(ans, *gp)
+	}
+
+	sort.Sort(gentoo.GentooPackageSorter(ans))
+
+	return ans, nil
+}
+
+func (r *RepoScanResolver) elaborateConflicts(pkg *gentoo.GentooPackage, deps []gentoo.GentooPackage) ([]gentoo.GentooPackage, error) {
+	ans := []gentoo.GentooPackage{}
+
+	for idx, d := range deps {
+
+		p := deps[idx].GetPackageName()
+		if deps[idx].Slot != "" {
+			p += ":" + deps[idx].Slot
+		}
+
+		_, err := r.GetLastPackage(p)
+		if err != nil {
+			if r.IsIgnoreMissingDeps() {
+				Warning(
+					fmt.Sprintf("[%s] Conflict (%s) %s not found in map. Ignoring it.",
+						pkg.GetPackageName(), deps[idx].Condition.String(), deps[idx].GetPackageName()))
+				continue
+			}
+
+			return nil, err
+		}
+
+		if !r.DepsWithSlot {
+			d.Slot = ""
+		}
+
+		ans = append(ans, d)
 	}
 
 	sort.Sort(gentoo.GentooPackageSorter(ans))
