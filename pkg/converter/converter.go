@@ -60,6 +60,7 @@ type PortageConverter struct {
 	DisableStage2     bool
 	DisableStage3     bool
 	DisableStage4     bool
+	DisableConflicts  bool
 	DisabledUseFlags  []string
 	TreePaths         []string
 	FilteredPackages  []string
@@ -76,6 +77,7 @@ func NewPortageConverter(targetDir, backend string) *PortageConverter {
 		Backend:           backend,
 		Override:          false,
 		IgnoreMissingDeps: false,
+		DisableConflicts:  false,
 		DisabledUseFlags:  []string{},
 		TreePaths:         []string{},
 		FilteredPackages:  []string{},
@@ -316,6 +318,8 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 				Version:  ">=0",
 				Slot:     "0",
 			}
+			DebugC(GetAurora().Bold(fmt.Sprintf("[%s] For dep %s found layer %s/%s.", pkg,
+				dep_str, bLayer.Layer.Name, bLayer.Layer.Category)))
 			bdeps = pc.AppendIfNotPresent(bdeps, gp)
 			continue
 		}
@@ -366,27 +370,48 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		}
 
 	}
+
+	if len(bdeps) == 0 && pc.Specs.HasBuildLayer(cacheKey) {
+		// Check if the packages is present to a layer
+		bLayer, _ := pc.Specs.GetBuildLayer(cacheKey)
+		gp := gentoo.GentooPackage{
+			Name:     bLayer.Layer.Name,
+			Category: bLayer.Layer.Category,
+			Version:  ">=0",
+			Slot:     "0",
+		}
+		bdeps = pc.AppendIfNotPresent(bdeps, gp)
+	}
+
 	solution.BuildDeps = bdeps
 
 	// Check buildtime conflicts
 	var bconflicts []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
-	for _, bconflict := range solution.BuildConflicts {
+	if !pc.DisableConflicts {
+		for _, bconflict := range solution.BuildConflicts {
 
-		DebugC(fmt.Sprintf("[%s] Analyzing buildtime conflict %s...",
-			pkg, bconflict.GetPackageName()))
+			DebugC(fmt.Sprintf("[%s] Analyzing buildtime conflict %s...",
+				pkg, bconflict.GetPackageName()))
 
-		if pc.IsDep2Skip(&bconflict, true) {
-			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bconflict.GetPackageName()))
-			continue
+			if pc.IsDep2Skip(&bconflict, true) {
+				DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bconflict.GetPackageName()))
+				continue
+			}
+
+			gp := gentoo.GentooPackage{
+				Name:     bconflict.Name,
+				Category: specs.SanitizeCategory(bconflict.Category, bconflict.Slot),
+				Version:  ">=0",
+				Slot:     "0",
+			}
+
+			if bconflict.Condition == gentoo.PkgCondNotLess {
+				gp.Version = fmt.Sprintf("<%s", bconflict.Version)
+			} else if bconflict.Condition == gentoo.PkgCondNotGreater {
+				gp.Version = fmt.Sprintf(">%s", bconflict.Version)
+			}
+			bconflicts = pc.AppendIfNotPresent(bconflicts, gp)
 		}
-
-		gp := gentoo.GentooPackage{
-			Name:     bconflict.Name,
-			Category: specs.SanitizeCategory(bconflict.Category, bconflict.Slot),
-			Version:  ">=0",
-			Slot:     "0",
-		}
-		bconflicts = pc.AppendIfNotPresent(bconflicts, gp)
 	}
 	solution.BuildConflicts = bconflicts
 
@@ -439,23 +464,32 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 	// Check runtime conflicts
 	var rconflicts []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
-	for _, rconflict := range solution.RuntimeConflicts {
+	if !pc.DisableConflicts {
+		for _, rconflict := range solution.RuntimeConflicts {
 
-		DebugC(fmt.Sprintf("[%s] Analyzing runtime conflict %s...",
-			pkg, rconflict.GetPackageName()))
+			DebugC(fmt.Sprintf("[%s] Analyzing runtime conflict %s...",
+				pkg, rconflict.GetPackageName()))
 
-		if pc.IsDep2Skip(&rconflict, false) {
-			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rconflict.GetPackageName()))
-			continue
+			if pc.IsDep2Skip(&rconflict, false) {
+				DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rconflict.GetPackageName()))
+				continue
+			}
+
+			gp := gentoo.GentooPackage{
+				Name:     rconflict.Name,
+				Category: specs.SanitizeCategory(rconflict.Category, rconflict.Slot),
+				Version:  ">=0",
+				Slot:     "0",
+			}
+
+			if rconflict.Condition == gentoo.PkgCondNotLess {
+				gp.Version = fmt.Sprintf("<%s", rconflict.Version)
+			} else if rconflict.Condition == gentoo.PkgCondNotGreater {
+				gp.Version = fmt.Sprintf(">%s", rconflict.Version)
+			}
+
+			rconflicts = pc.AppendIfNotPresent(rconflicts, gp)
 		}
-
-		gp := gentoo.GentooPackage{
-			Name:     rconflict.Name,
-			Category: specs.SanitizeCategory(rconflict.Category, rconflict.Slot),
-			Version:  ">=0",
-			Slot:     "0",
-		}
-		rconflicts = pc.AppendIfNotPresent(rconflicts, gp)
 	}
 
 	solution.RuntimeConflicts = rconflicts

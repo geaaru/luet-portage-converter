@@ -56,6 +56,7 @@ func newGenerateCommand() *cobra.Command {
 			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
 			pkgs, _ := cmd.Flags().GetStringArray("pkg")
 			withPortagePkgs, _ := cmd.Flags().GetBool("with-portage-pkg")
+			disableConflicts, _ := cmd.Flags().GetBool("disable-conflicts")
 
 			converter := converter.NewPortageConverter(to, backend)
 			converter.Override = override
@@ -65,6 +66,7 @@ func newGenerateCommand() *cobra.Command {
 			converter.DisableStage2 = stage2
 			converter.DisableStage3 = stage3
 			converter.DisableStage4 = !stage4
+			converter.DisableConflicts = disableConflicts
 
 			if debug {
 				LuetCfg.GetGeneral().Debug = debug
@@ -113,7 +115,8 @@ func newGenerateCommand() *cobra.Command {
 	cmd.Flags().Bool("override", false, "Override existing specs if already present.")
 	cmd.Flags().StringArrayP("pkg", "p", []string{},
 		"Define the list of the packages to generate instead of the full list defined in rules file.")
-	cmd.PersistentFlags().Bool("with-portage-pkg", false, "Generate portage packages for every required package.")
+	cmd.Flags().Bool("with-portage-pkg", false, "Generate portage packages for every required package.")
+	cmd.Flags().Bool("disable-conflicts", false, "Disable elaboration of runtime and buildtime conflicts.")
 
 	return cmd
 }
