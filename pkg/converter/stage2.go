@@ -236,6 +236,11 @@ func (pc *PortageConverter) Stage2() error {
 			return err
 		}
 
+		// Check buildtime requires
+		DebugC(GetAurora().Bold(fmt.Sprintf("[%s/%s-%s]",
+			pack.GetCategory(), pack.GetName(), pack.GetVersion())),
+			"Checking runtime dependencies...")
+
 		// Drop conflicts not present on tree
 		conflicts = pReciper.GetConflicts()
 		if len(conflicts) > 0 {
@@ -298,6 +303,7 @@ func (pc *PortageConverter) Stage2() error {
 			for _, dep := range deps {
 
 				pkgstr := fmt.Sprintf("%s/%s", dep.GetCategory(), dep.GetName())
+
 				// Check global replacements
 				if pc.Specs.HasRuntimeReplacement(pkgstr) {
 
@@ -318,6 +324,9 @@ func (pc *PortageConverter) Stage2() error {
 
 				// Check if dep must be ignored
 				if art != nil && art.IgnoreRuntime(pkgstr) {
+					DebugC(GetAurora().Bold(fmt.Sprintf("[%s/%s-%s]",
+						pack.GetCategory(), pack.GetName(), pack.GetVersion())),
+						"Ignoring runtime dep "+pkgstr)
 					runtimeDepsIgnored++
 					continue
 				}
