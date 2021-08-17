@@ -129,14 +129,7 @@ func (s *PortageSolution) ToPack(runtime bool) *luet_pkg.DefaultPackage {
 				UseFlags: req.UseFlags,
 			}
 
-			if req.Version != "" && req.Condition == gentoo.PkgCondNot {
-				// TODO: to complete
-				dep.Version = fmt.Sprintf("%s%s%s",
-					req.Condition.String(), req.Version, req.VersionSuffix)
-
-			} else {
-				dep.Version = ">=0"
-			}
+			dep.Version = req.Version
 
 			// Skip itself. Maybe we need handle this case in a better way.
 			if dep.Name == s.Package.Name && dep.Category == SanitizeCategory(s.Package.Category, s.Package.Slot) {
@@ -155,14 +148,7 @@ func (s *PortageSolution) ToPack(runtime bool) *luet_pkg.DefaultPackage {
 				Category: SanitizeCategory(req.Category, req.Slot),
 				UseFlags: req.UseFlags,
 			}
-			if req.Version != "" && req.Condition == gentoo.PkgCondNot {
-				// TODO: to complete
-				dep.Version = fmt.Sprintf("%s%s%s",
-					req.Condition.String(), req.Version, req.VersionSuffix)
-
-			} else {
-				dep.Version = ">=0"
-			}
+			dep.Version = req.Version
 
 			ans.PackageConflicts = append(ans.PackageConflicts, dep)
 		}
