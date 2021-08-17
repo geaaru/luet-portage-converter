@@ -85,7 +85,7 @@ func (pc *PortageConverter) Stage3() error {
 					&luet_pkg.DefaultPackage{
 						Name:     dep.GetName(),
 						Category: dep.GetCategory(),
-						Version:  ">=0",
+						Version:  dep.GetVersion(),
 					},
 				)
 
@@ -94,7 +94,7 @@ func (pc *PortageConverter) Stage3() error {
 						&luet_pkg.DefaultPackage{
 							Name:     dep.GetName(),
 							Category: dep.GetCategory(),
-							Version:  ">=0",
+							Version:  dep.GetVersion(),
 						},
 					)
 					if pp == nil || len(pp) == 0 {
@@ -188,7 +188,7 @@ func (pc *PortageConverter) Stage3() error {
 					&luet_pkg.DefaultPackage{
 						Name:     dep.GetName(),
 						Category: dep.GetCategory(),
-						Version:  ">=0",
+						Version:  dep.GetVersion(),
 					},
 				)
 				if pp == nil || len(pp) == 0 {
