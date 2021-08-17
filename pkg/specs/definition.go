@@ -227,7 +227,14 @@ func (s *PortageConverterSpecs) GenerateArtefactsMap() {
 
 	for idx, _ := range s.Artefacts {
 		for _, pkg := range s.Artefacts[idx].Packages {
-			s.MapArtefacts[pkg] = &s.Artefacts[idx]
+			k := pkg
+			gp, err := gentoo.ParsePackageStr(pkg)
+			if err == nil && gp.Slot == "0" {
+				// Ensure to skipt slot 0 on key.
+				k = fmt.Sprintf("%s/%s", gp.Category, gp.Name)
+			}
+
+			s.MapArtefacts[k] = &s.Artefacts[idx]
 		}
 	}
 }
