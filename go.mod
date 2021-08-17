@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/MottainaiCI/lxd-compose v0.7.2
-	github.com/Sabayon/pkgs-checker v0.8.1
+	github.com/Sabayon/pkgs-checker v0.8.3-0.20210817132559-0c7522ef9462
 	github.com/codegangsta/inject v0.0.0-20150114235600-33e0aa1cb7c0 // indirect
 	github.com/genuinetools/img v0.5.11 // indirect
 	github.com/magefile/mage v1.11.0 // indirect
