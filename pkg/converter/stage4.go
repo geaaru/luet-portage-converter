@@ -131,7 +131,7 @@ func (pc *PortageConverter) Stage4() error {
 	}
 
 	InfoC(GetAurora().Bold(
-		fmt.Sprintf("Stage4 Completed. Packages updates: %d.", len(levels.Changed))))
+		fmt.Sprintf("Stage4 Completed. Packages updates: %d.", len(worker.Changed))))
 
 	return nil
 }
