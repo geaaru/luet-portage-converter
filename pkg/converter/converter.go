@@ -381,6 +381,9 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			Slot:     "0",
 		}
 		bdeps = pc.AppendIfNotPresent(bdeps, gp)
+
+		DebugC(fmt.Sprintf("[%s] For build-time using only layer %s",
+			pkg, gp.GetPackageName()))
 	}
 
 	solution.BuildDeps = bdeps
@@ -679,6 +682,10 @@ func (pc *PortageConverter) Generate() error {
 		buildPack, _ := buildTmpl.Clone()
 		if !ignoreBuildDeps {
 			buildPack.AddRequires(bPack.PackageRequires)
+		} else {
+			DebugC(fmt.Sprintf(
+				"[%s] :warning: Ignoring all build deps..",
+				pkg.Package.GetPackageName()))
 		}
 		buildPack.AddConflicts(bPack.PackageConflicts)
 
@@ -693,7 +700,8 @@ func (pc *PortageConverter) Generate() error {
 				return err
 			}
 		}
-	}
+
+	} // end pc.Solutions
 
 	InfoC(GetAurora().Bold(fmt.Sprintf(
 		"Stage1 Completed: generated %d packages.", len(pc.Solutions))))
