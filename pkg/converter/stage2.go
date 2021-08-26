@@ -236,7 +236,7 @@ func (pc *PortageConverter) Stage2() error {
 			return err
 		}
 
-		// Check buildtime requires
+		// Check runtime requires
 		DebugC(GetAurora().Bold(fmt.Sprintf("[%s/%s-%s]",
 			pack.GetCategory(), pack.GetName(), pack.GetVersion())),
 			"Checking runtime dependencies...")
