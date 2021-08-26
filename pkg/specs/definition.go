@@ -266,7 +266,13 @@ func (s *PortageConverterSpecs) GetRuntimeReplacement(pkg string) (*PortageConve
 }
 
 func (s *PortageConverterSpecs) HasBuildLayer(pkg string) bool {
-	_, ans := s.MapBuildLayer[pkg]
+	gp, err := gentoo.ParsePackageStr(pkg)
+	k := pkg
+	if err == nil && gp.Slot == "0" {
+		// Ensure to skipt slot 0 on key.
+		k = fmt.Sprintf("%s/%s", gp.Category, gp.Name)
+	}
+	_, ans := s.MapBuildLayer[k]
 	return ans
 }
 
@@ -294,6 +300,21 @@ func (s *PortageConverterSpecs) GenerateBuildLayerMap() {
 			}
 		}
 	}
+}
+
+func (s *PortageConverterSpecs) PackageIsALayer(pkg *gentoo.GentooPackage) bool {
+	ans := false
+
+	if len(s.BuildLayers) > 0 {
+		for idx, _ := range s.BuildLayers {
+			ans, _ := s.BuildLayers[idx].Layer.EqualTo(pkg)
+			if ans {
+				break
+			}
+		}
+	}
+
+	return ans
 }
 
 func (s *PortageConverterSpecs) GenerateReplacementsMap() {
