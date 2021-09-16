@@ -137,7 +137,7 @@ func newReposcanResolveCommand() *cobra.Command {
 				}
 
 				fmt.Println("Runtime deps:")
-				for _, p := range solution.BuildDeps {
+				for _, p := range solution.RuntimeDeps {
 					fmt.Println("-" + p.GetPackageNameWithSlot())
 				}
 
