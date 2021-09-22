@@ -126,9 +126,9 @@ func newReposcanResolveCommand() *cobra.Command {
 				fmt.Println(fmt.Sprintf("Description: %s",
 					solution.Description))
 
-				uses := "Use flags:"
+				fmt.Println("Use flags:")
 				for _, use := range solution.Package.UseFlags {
-					uses += " " + use
+					fmt.Println("- " + use)
 				}
 
 				fmt.Println("Build deps:")
