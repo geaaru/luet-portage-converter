@@ -29,6 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+/*
 func NewPackage(name, cat, version string, deps []*luet_pkg.DefaultPackage) *luet_pkg.DefaultPackage {
 	return &luet_pkg.DefaultPackage{
 		Name:            name,
@@ -37,6 +38,7 @@ func NewPackage(name, cat, version string, deps []*luet_pkg.DefaultPackage) *lue
 		PackageRequires: deps,
 	}
 }
+*/
 
 var _ = Describe("Converter", func() {
 	Context("Stage4", func() {
