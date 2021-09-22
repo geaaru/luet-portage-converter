@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package converter_test
 
 import (
-	"fmt"
+	//"fmt"
 	luet_pkg "github.com/mudler/luet/pkg/package"
 
 	. "github.com/Luet-lab/luet-portage-converter/pkg/converter"
