@@ -57,6 +57,7 @@ func newGenerateCommand() *cobra.Command {
 			pkgs, _ := cmd.Flags().GetStringArray("pkg")
 			withPortagePkgs, _ := cmd.Flags().GetBool("with-portage-pkg")
 			disableConflicts, _ := cmd.Flags().GetBool("disable-conflicts")
+			layer4Rdepends, _ := cmd.Flags().GetBool("layer4rdepends")
 
 			converter := converter.NewPortageConverter(to, backend)
 			converter.Override = override
@@ -67,6 +68,7 @@ func newGenerateCommand() *cobra.Command {
 			converter.DisableStage3 = stage3
 			converter.DisableStage4 = !stage4
 			converter.DisableConflicts = disableConflicts
+			converter.UsingLayerForRuntime = layer4Rdepends
 
 			if debug {
 				LuetCfg.GetGeneral().Debug = debug
@@ -117,6 +119,7 @@ func newGenerateCommand() *cobra.Command {
 		"Define the list of the packages to generate instead of the full list defined in rules file.")
 	cmd.Flags().Bool("with-portage-pkg", false, "Generate portage packages for every required package.")
 	cmd.Flags().Bool("disable-conflicts", false, "Disable elaboration of runtime and buildtime conflicts.")
+	cmd.Flags().Bool("layer4rdepends", false, "Check layer for runtime deps and skip generation.")
 
 	return cmd
 }

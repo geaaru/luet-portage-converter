@@ -54,33 +54,35 @@ type PortageConverter struct {
 	Backend        string
 	Resolver       specs.PortageResolver
 
-	WithPortagePkgs   bool
-	Override          bool
-	IgnoreMissingDeps bool
-	DisableStage2     bool
-	DisableStage3     bool
-	DisableStage4     bool
-	DisableConflicts  bool
-	DisabledUseFlags  []string
-	TreePaths         []string
-	FilteredPackages  []string
+	WithPortagePkgs      bool
+	Override             bool
+	IgnoreMissingDeps    bool
+	DisableStage2        bool
+	DisableStage3        bool
+	DisableStage4        bool
+	DisableConflicts     bool
+	UsingLayerForRuntime bool
+	DisabledUseFlags     []string
+	TreePaths            []string
+	FilteredPackages     []string
 }
 
 func NewPortageConverter(targetDir, backend string) *PortageConverter {
 	return &PortageConverter{
 		// TODO: we use it as singleton
-		Config:            luet_config.LuetCfg,
-		Cache:             make(map[string]*specs.PortageSolution, 0),
-		ReciperBuild:      luet_tree.NewCompilerRecipe(luet_pkg.NewInMemoryDatabase(false)),
-		ReciperRuntime:    luet_tree.NewInstallerRecipe(luet_pkg.NewInMemoryDatabase(false)),
-		TargetDir:         targetDir,
-		Backend:           backend,
-		Override:          false,
-		IgnoreMissingDeps: false,
-		DisableConflicts:  false,
-		DisabledUseFlags:  []string{},
-		TreePaths:         []string{},
-		FilteredPackages:  []string{},
+		Config:               luet_config.LuetCfg,
+		Cache:                make(map[string]*specs.PortageSolution, 0),
+		ReciperBuild:         luet_tree.NewCompilerRecipe(luet_pkg.NewInMemoryDatabase(false)),
+		ReciperRuntime:       luet_tree.NewInstallerRecipe(luet_pkg.NewInMemoryDatabase(false)),
+		TargetDir:            targetDir,
+		Backend:              backend,
+		Override:             false,
+		IgnoreMissingDeps:    false,
+		DisableConflicts:     false,
+		UsingLayerForRuntime: false,
+		DisabledUseFlags:     []string{},
+		TreePaths:            []string{},
+		FilteredPackages:     []string{},
 	}
 }
 
@@ -426,6 +428,26 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 		if pc.IsDep2Skip(&rdep, false) {
 			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rdep.GetPackageName()))
+			continue
+		}
+
+		dep_str := fmt.Sprintf("%s/%s", rdep.Category, rdep.Name)
+		if rdep.Slot != "0" {
+			dep_str += ":" + rdep.Slot
+		}
+
+		// Check if there is a layer to use for the dependency
+		if pc.UsingLayerForRuntime && pc.Specs.HasBuildLayer(dep_str) {
+			bLayer, _ := pc.Specs.GetBuildLayer(dep_str)
+			gp := gentoo.GentooPackage{
+				Name:     bLayer.Layer.Name,
+				Category: bLayer.Layer.Category,
+				Version:  ">=0",
+				Slot:     "0",
+			}
+			DebugC(GetAurora().Bold(fmt.Sprintf("[%s] For runtime dep %s found layer %s/%s.", pkg,
+				dep_str, bLayer.Layer.Name, bLayer.Layer.Category)))
+			rdeps = pc.AppendIfNotPresent(rdeps, gp)
 			continue
 		}
 
