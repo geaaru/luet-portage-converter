@@ -84,10 +84,17 @@ type PortageConverterArtefact struct {
 	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
 	Mutations    PortageConverterMutations    `json:"mutations,omitempty" yaml:"mutations,omitempty"`
 
+	Finalize Finalizer `json:"finalizer,omitempty" yaml:"finalizer,omitempty"`
+
 	MapReplacementsRuntime   map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
 	MapReplacementsBuildtime map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
 	MapIgnoreRuntime         map[string]bool                            `json:"-" yaml:"-"`
 	MapIgnoreBuildtime       map[string]bool                            `json:"-" yaml:"-"`
+}
+
+type Finalizer struct {
+	Shell   []string `json:"shell,omitempty" yaml:"shell,omitempty"`
+	Install []string `json:"install,omitempty" yaml:"install,omitempty"`
 }
 
 type PortageConverterMutations struct {

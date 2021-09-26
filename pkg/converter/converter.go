@@ -677,6 +677,7 @@ func (pc *PortageConverter) Generate() error {
 
 		defFile := filepath.Join(pkg.PackageDir, "definition.yaml")
 		buildFile := filepath.Join(pkg.PackageDir, "build.yaml")
+		finalizerFile := filepath.Join(pkg.PackageDir, "finalize.yaml")
 
 		// Convert solution to luet package
 		pack := pkg.ToPack(true)
@@ -697,6 +698,16 @@ func (pc *PortageConverter) Generate() error {
 		}
 		if artefact != nil {
 			ignoreBuildDeps = artefact.IgnoreBuildDeps
+
+			// Check if there is a finalize to write
+			if artefact.Finalize.IsValid() {
+				err = artefact.Finalize.WriteFinalize(finalizerFile)
+				if err != nil {
+					return errors.New(
+						"Error on create finalize.yaml: " + err.Error(),
+					)
+				}
+			}
 		}
 
 		// create build.yaml
