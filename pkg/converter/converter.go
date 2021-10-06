@@ -234,7 +234,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	}
 
 	if pc.IsDep2Skip(gp, false) {
-		DebugC(fmt.Sprintf("[%s] Skipped dependency %s", stack[len(stack)-1], pkg))
+		if len(stack) > 1 {
+			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", stack[len(stack)-1], pkg))
+		} else {
+			InfoC(fmt.Sprintf("[%s] Skipped dependency not in stack.", pkg))
+		}
 		return nil
 	}
 
