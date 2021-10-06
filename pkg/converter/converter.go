@@ -436,6 +436,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			dep_str += ":" + rdep.Slot
 		}
 
+		dep := luet_pkg.NewPackage(rdep.Name, ">=0",
+			[]*luet_pkg.DefaultPackage{},
+			[]*luet_pkg.DefaultPackage{})
+		dep.Category = specs.SanitizeCategory(rdep.Category, rdep.Slot)
+
 		// Check if there is a layer to use for the dependency
 		if pc.UsingLayerForRuntime && pc.Specs.HasBuildLayer(dep_str) {
 			bLayer, _ := pc.Specs.GetBuildLayer(dep_str)
@@ -450,11 +455,6 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			rdeps = pc.AppendIfNotPresent(rdeps, gp)
 			continue
 		}
-
-		dep := luet_pkg.NewPackage(rdep.Name, ">=0",
-			[]*luet_pkg.DefaultPackage{},
-			[]*luet_pkg.DefaultPackage{})
-		dep.Category = specs.SanitizeCategory(rdep.Category, rdep.Slot)
 
 		// Check if it's present the build dep on the tree
 		p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
