@@ -610,7 +610,6 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 			// TODO: check of handle this in a better way
 			valid, err := r.KeywordsIsAdmit(&atom, p)
 			if err != nil {
-				return nil, err
 			}
 
 			if valid {
@@ -618,6 +617,8 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 				if err != nil {
 					return nil, err
 				}
+			} else {
+
 			}
 
 			DebugC(fmt.Sprintf(
@@ -708,18 +709,24 @@ func (r *RepoScanResolver) KeywordsIsAdmit(atom *RepoScanAtom, p *gentoo.GentooP
 		return false, nil
 	}
 
+	// On Funtoo it's possible a condition like this:
+	// KEYWORDS="-* ~amd64"
+	// This means that all keywords are disabled excluded ~amd64.
+	// So, if i disabled -* i can accept the keywords with ~amd64.
+
 	if len(r.DisabledKeywords) > 0 {
 		ak := strings.Split(keywords, " ")
 		for _, k := range ak {
+			// We need to check all keywords every time
 			for _, d := range r.DisabledKeywords {
 				if d == k {
 					ans = false
-					goto end
+				} else if !ans {
+					ans = true
 				}
 			}
 		}
 	}
-end:
 
 	return ans, nil
 }
