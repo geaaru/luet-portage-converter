@@ -138,6 +138,7 @@ var _ = Describe("Reposcan", func() {
 						"DEPEND":                   "sys-devel/gcc virtual/pkgconfig",
 						"original.package.name":    "net-dns/noip-updater",
 						"original.package.version": "2.1.9-r1",
+						"original.package.slot":    "0",
 					},
 				},
 			))
@@ -205,6 +206,7 @@ var _ = Describe("Reposcan", func() {
 						"DEPEND":                   "sys-devel/gcc virtual/pkgconfig",
 						"original.package.name":    "net-dns/noip-updater",
 						"original.package.version": "2.1.9-r1",
+						"original.package.slot":    "0",
 					},
 				},
 			))
