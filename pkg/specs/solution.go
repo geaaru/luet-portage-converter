@@ -58,6 +58,7 @@ func (s *PortageSolution) ToPack(runtime bool) *luet_pkg.DefaultPackage {
 	labels := s.Labels
 	labels["original.package.name"] = s.Package.GetPackageName()
 	labels["original.package.version"] = s.Package.GetPVR()
+	labels["original.package.slot"] = s.Package.Slot
 	labels["emerge.packages"] = emergePackage
 	labels["kit"] = s.Package.Repository
 
