@@ -35,3 +35,5 @@ changelog:
       - '^tests:'
       - '^scripts:'
       - '^contrib'
+      - '^.gitignore'
+      - '^.gorelease'
