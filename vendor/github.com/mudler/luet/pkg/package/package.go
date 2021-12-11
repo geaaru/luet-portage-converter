@@ -21,10 +21,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	fileHelper "github.com/mudler/luet/pkg/helpers/file"
 
 	"github.com/mudler/luet/pkg/helpers/docker"
 	"github.com/mudler/luet/pkg/helpers/match"
@@ -64,11 +67,13 @@ type Package interface {
 	GetName() string
 	SetName(string)
 	GetCategory() string
+	PackageName() string
 
 	GetVersion() string
 	SetVersion(string)
 	RequiresContains(PackageDatabase, Package) (bool, error)
 	Matches(m Package) bool
+	AtomMatches(m Package) bool
 	BumpBuildVersion() error
 
 	AddUse(use string)
@@ -96,10 +101,11 @@ type Package interface {
 	HasLabel(string) bool
 	MatchLabel(*regexp.Regexp) bool
 
-	AddAnnotation(string, string)
-	GetAnnotations() map[string]string
+	AddAnnotation(string, interface{})
+	GetAnnotations() map[string]interface{}
 	HasAnnotation(string) bool
 	MatchAnnotation(*regexp.Regexp) bool
+	GetAnnotationByKey(k string) interface{}
 
 	IsHidden() bool
 	IsSelector() bool
@@ -122,7 +128,16 @@ type Package interface {
 	Mark() Package
 
 	JSON() ([]byte, error)
+
+	GetRepository() string
+	SetRepository(string)
 }
+
+const (
+	PackageMetaSuffix     = "metadata.yaml"
+	PackageCollectionFile = "collection.yaml"
+	PackageDefinitionFile = "definition.yaml"
+)
 
 type Tree interface {
 	GetPackageSet() PackageDatabase
@@ -135,6 +150,18 @@ type Tree interface {
 type Packages []Package
 
 type DefaultPackages []*DefaultPackage
+
+type PackageMap map[string]Package
+
+func (pm PackageMap) String() string {
+	rr := []string{}
+	for _, r := range pm {
+
+		rr = append(rr, r.HumanReadableString())
+
+	}
+	return fmt.Sprint(rr)
+}
 
 func (d DefaultPackages) Hash(salt string) string {
 
@@ -201,11 +228,14 @@ func GetRawPackages(yml []byte) (rawPackages, error) {
 	return rawPackages.Packages, nil
 
 }
-func DefaultPackagesFromYaml(yml []byte) ([]DefaultPackage, error) {
 
-	var unescaped struct {
-		Packages []DefaultPackage `json:"packages"`
-	}
+type Collection struct {
+	Packages []DefaultPackage `json:"packages"`
+}
+
+func DefaultPackagesFromYAML(yml []byte) ([]DefaultPackage, error) {
+
+	var unescaped Collection
 	source, err := yaml.YAMLToJSON(yml)
 	if err != nil {
 		return []DefaultPackage{}, err
@@ -234,7 +264,7 @@ func (t *DefaultPackage) JSON() ([]byte, error) {
 
 // GetMetadataFilePath returns the canonical name of an artifact metadata file
 func (d *DefaultPackage) GetMetadataFilePath() string {
-	return d.GetFingerPrint() + ".metadata.yaml"
+	return fmt.Sprintf("%s.%s", d.GetFingerPrint(), PackageMetaSuffix)
 }
 
 // DefaultPackage represent a standard package definition
@@ -251,7 +281,7 @@ type DefaultPackage struct {
 	Hidden           bool              `json:"hidden,omitempty"`   // Affects YAML field names too.
 
 	// Annotations are used for core features/options
-	Annotations map[string]string `json:"annotations,omitempty"` // Affects YAML field names too
+	Annotations map[string]interface{} `json:"annotations,omitempty"` // Affects YAML field names too
 
 	// Path is set only internally when tree is loaded from disk
 	Path string `json:"path,omitempty"`
@@ -264,6 +294,8 @@ type DefaultPackage struct {
 	Labels map[string]string `json:"labels,omitempty"` // Affects YAML field names too.
 
 	TreeDir string `json:"treedir,omitempty"`
+
+	Repository string `json:"repository,omitempty"`
 }
 
 // State represent the package state
@@ -279,6 +311,9 @@ func NewPackage(name, version string, requires []*DefaultPackage, conflicts []*D
 		Labels:           nil,
 	}
 }
+
+func (p *DefaultPackage) SetRepository(r string) { p.Repository = r }
+func (p *DefaultPackage) GetRepository() string  { return p.Repository }
 
 func (p *DefaultPackage) SetTreeDir(s string) {
 	p.TreeDir = s
@@ -308,6 +343,16 @@ func (p *DefaultPackage) HashFingerprint(salt string) string {
 
 func (p *DefaultPackage) HumanReadableString() string {
 	return fmt.Sprintf("%s/%s-%s", p.Category, p.Name, p.Version)
+}
+
+func (p *DefaultPackage) PackageName() string {
+	if p.Category != "" && p.Name != "" {
+		return fmt.Sprintf("%s/%s", p.Category, p.Name)
+	} else if p.Category != "" {
+		return p.Category
+	} else {
+		return p.Name
+	}
 }
 
 func FromString(s string) Package {
@@ -367,12 +412,16 @@ func (p *DefaultPackage) MatchLabel(r *regexp.Regexp) bool {
 	return match.MapMatchRegex(&p.Labels, r)
 }
 
+func (p DefaultPackage) IsCollection() bool {
+	return fileHelper.Exists(filepath.Join(p.Path, PackageCollectionFile))
+}
+
 func (p *DefaultPackage) HasAnnotation(label string) bool {
-	return match.MapHasKey(&p.Annotations, label)
+	return match.MapIHasKey(&p.Annotations, label)
 }
 
 func (p *DefaultPackage) MatchAnnotation(r *regexp.Regexp) bool {
-	return match.MapMatchRegex(&p.Annotations, r)
+	return match.MapIMatchRegex(&p.Annotations, r)
 }
 
 // AddUse adds a use to a package
@@ -463,17 +512,24 @@ func (p *DefaultPackage) AddLabel(k, v string) {
 	}
 	p.Labels[k] = v
 }
-func (p *DefaultPackage) AddAnnotation(k, v string) {
+func (p *DefaultPackage) AddAnnotation(k string, v interface{}) {
 	if p.Annotations == nil {
-		p.Annotations = make(map[string]string, 0)
+		p.Annotations = make(map[string]interface{}, 0)
 	}
 	p.Annotations[k] = v
 }
 func (p *DefaultPackage) GetLabels() map[string]string {
 	return p.Labels
 }
-func (p *DefaultPackage) GetAnnotations() map[string]string {
+func (p *DefaultPackage) GetAnnotations() map[string]interface{} {
 	return p.Annotations
+}
+func (p *DefaultPackage) GetAnnotationByKey(k string) (ans interface{}) {
+	if p.HasAnnotation(k) {
+		ans = p.Annotations[k]
+	}
+
+	return ans
 }
 func (p *DefaultPackage) GetProvides() []*DefaultPackage {
 	return p.Provides
@@ -503,6 +559,13 @@ func (p *DefaultPackage) Clone() Package {
 }
 func (p *DefaultPackage) Matches(m Package) bool {
 	if p.GetFingerPrint() == m.GetFingerPrint() {
+		return true
+	}
+	return false
+}
+
+func (p *DefaultPackage) AtomMatches(m Package) bool {
+	if p.GetName() == m.GetName() && p.GetCategory() == m.GetCategory() {
 		return true
 	}
 	return false
@@ -689,6 +752,39 @@ func (set Packages) Unique() Packages {
 	return result
 }
 
+func (p *DefaultPackage) GetRuntimePackage() (*DefaultPackage, error) {
+	var r *DefaultPackage
+	if p.IsCollection() {
+		collectionFile := filepath.Join(p.Path, PackageCollectionFile)
+		dat, err := ioutil.ReadFile(collectionFile)
+		if err != nil {
+			return r, errors.Wrapf(err, "failed while reading '%s'", collectionFile)
+		}
+		coll, err := DefaultPackagesFromYAML(dat)
+		if err != nil {
+			return r, errors.Wrapf(err, "failed while parsing YAML '%s'", collectionFile)
+		}
+		for _, c := range coll {
+			if c.Matches(p) {
+				r = &c
+				break
+			}
+		}
+	} else {
+		definitionFile := filepath.Join(p.Path, PackageDefinitionFile)
+		dat, err := ioutil.ReadFile(definitionFile)
+		if err != nil {
+			return r, errors.Wrapf(err, "failed while reading '%s'", definitionFile)
+		}
+		d, err := DefaultPackageFromYaml(dat)
+		if err != nil {
+			return r, errors.Wrapf(err, "failed while parsing YAML '%s'", definitionFile)
+		}
+		r = &d
+	}
+	return r, nil
+}
+
 func (pack *DefaultPackage) buildFormula(definitiondb PackageDatabase, db PackageDatabase, visited map[string]interface{}) ([]bf.Formula, error) {
 	if _, ok := visited[pack.HumanReadableString()]; ok {
 		return nil, nil
@@ -734,37 +830,38 @@ func (pack *DefaultPackage) buildFormula(definitiondb PackageDatabase, db Packag
 				required = requiredDef
 			} else {
 
-				var ALO, priorityConstraints, priorityALO []bf.Formula
+				var ALO []bf.Formula // , priorityConstraints, priorityALO []bf.Formula
 
 				// Try to prio best match
 				// Force the solver to consider first our candidate (if does exists).
 				// Then builds ALO and AMO for the requires.
-				c, candidateErr := definitiondb.FindPackageCandidate(requiredDef)
-				var C bf.Formula
-				if candidateErr == nil {
-					// We have a desired candidate, try to look a solution with that included first
-					for _, o := range packages {
-						encodedB, err := o.Encode(db)
-						if err != nil {
-							return nil, err
-						}
-						B := bf.Var(encodedB)
-						if !o.Matches(c) {
-							priorityConstraints = append(priorityConstraints, bf.Not(B))
-							priorityALO = append(priorityALO, B)
-						}
-					}
-					encodedC, err := c.Encode(db)
-					if err != nil {
-						return nil, err
-					}
-					C = bf.Var(encodedC)
-					// Or the Candidate is true, or all the others might be not true
-					// This forces the CDCL sat implementation to look first at a solution with C=true
-					formulas = append(formulas, bf.Or(bf.Not(A), bf.Or(bf.And(C, bf.Or(priorityConstraints...)), bf.And(bf.Not(C), bf.Or(priorityALO...)))))
-				}
+				// c, candidateErr := definitiondb.FindPackageCandidate(requiredDef)
+				// var C bf.Formula
+				// if candidateErr == nil {
+				// 	// We have a desired candidate, try to look a solution with that included first
+				// 	for _, o := range packages {
+				// 		encodedB, err := o.Encode(db)
+				// 		if err != nil {
+				// 			return nil, err
+				// 		}
+				// 		B := bf.Var(encodedB)
+				// 		if !o.Matches(c) {
+				// 			priorityConstraints = append(priorityConstraints, bf.Not(B))
+				// 			priorityALO = append(priorityALO, B)
+				// 		}
+				// 	}
+				// 	encodedC, err := c.Encode(db)
+				// 	if err != nil {
+				// 		return nil, err
+				// 	}
+				// 	C = bf.Var(encodedC)
+				// 	// Or the Candidate is true, or all the others might be not true
+				// 	// This forces the CDCL sat implementation to look first at a solution with C=true
+				// 	//formulas = append(formulas, bf.Or(bf.Not(A), bf.Or(bf.And(C, bf.Or(priorityConstraints...)), bf.And(bf.Not(C), bf.Or(priorityALO...)))))
+				// 	formulas = append(formulas, bf.Or(C, bf.Or(priorityConstraints...)))
+				// }
 
-				// AMO - At most one
+				// AMO/ALO - At most/least one
 				for _, o := range packages {
 					encodedB, err := o.Encode(db)
 					if err != nil {

@@ -20,7 +20,6 @@ import (
 
 	"github.com/mudler/luet/pkg/compiler/types/compression"
 	"github.com/mudler/luet/pkg/config"
-	"github.com/mudler/luet/pkg/solver"
 )
 
 type Compiler struct {
@@ -43,6 +42,9 @@ type Compiler struct {
 	BackendArgs []string
 
 	BackendType string
+
+	// TemplatesFolder. should default to tree/templates
+	TemplatesFolder []string
 }
 
 func NewDefaultCompiler() *Compiler {
@@ -55,7 +57,7 @@ func NewDefaultCompiler() *Compiler {
 		Concurrency:         runtime.NumCPU(),
 		OnlyDeps:            false,
 		NoDeps:              false,
-		SolverOptions:       config.LuetSolverOptions{Options: solver.Options{Concurrency: 1, Type: solver.SingleCoreSimple}},
+		SolverOptions:       config.LuetSolverOptions{Type: ""},
 	}
 }
 
@@ -83,6 +85,13 @@ func WithOptions(opt *Compiler) func(cfg *Compiler) error {
 func WithBackendType(r string) func(cfg *Compiler) error {
 	return func(cfg *Compiler) error {
 		cfg.BackendType = r
+		return nil
+	}
+}
+
+func WithTemplateFolder(r []string) func(cfg *Compiler) error {
+	return func(cfg *Compiler) error {
+		cfg.TemplatesFolder = r
 		return nil
 	}
 }

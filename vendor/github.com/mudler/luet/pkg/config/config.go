@@ -17,24 +17,23 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
+	fileHelper "github.com/mudler/luet/pkg/helpers/file"
 	pkg "github.com/mudler/luet/pkg/package"
-	solver "github.com/mudler/luet/pkg/solver"
 
+	"github.com/pkg/errors"
 	v "github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 var LuetCfg = NewLuetConfig(v.GetViper())
-var AvailableResolvers = strings.Join([]string{solver.QLearningResolverType}, " ")
 
 type LuetLoggingConfig struct {
 	// Path of the logfile
@@ -46,6 +45,8 @@ type LuetLoggingConfig struct {
 
 	// Log level
 	Level string `mapstructure:"level"`
+	// Enable extra debug logging
+	Paranoid bool `mapstructure:"paranoid"`
 
 	// Enable emoji
 	EnableEmoji bool `mapstructure:"enable_emoji"`
@@ -54,49 +55,29 @@ type LuetLoggingConfig struct {
 }
 
 type LuetGeneralConfig struct {
-	SameOwner       bool `mapstructure:"same_owner"`
-	Concurrency     int  `mapstructure:"concurrency"`
-	Debug           bool `mapstructure:"debug"`
-	ShowBuildOutput bool `mapstructure:"show_build_output"`
-	SpinnerMs       int  `mapstructure:"spinner_ms"`
-	SpinnerCharset  int  `mapstructure:"spinner_charset"`
-	FatalWarns      bool `mapstructure:"fatal_warnings"`
+	SameOwner       bool `yaml:"same_owner,omitempty" mapstructure:"same_owner"`
+	Concurrency     int  `yaml:"concurrency,omitempty" mapstructure:"concurrency"`
+	Debug           bool `yaml:"debug,omitempty" mapstructure:"debug"`
+	ShowBuildOutput bool `yaml:"show_build_output,omitempty" mapstructure:"show_build_output"`
+	SpinnerMs       int  `yaml:"spinner_ms,omitempty" mapstructure:"spinner_ms"`
+	SpinnerCharset  int  `yaml:"spinner_charset,omitempty" mapstructure:"spinner_charset"`
+	FatalWarns      bool `yaml:"fatal_warnings,omitempty" mapstructure:"fatal_warnings"`
+
+	OverwriteDirPerms bool `yaml:"overwrite_dir_perms,omitempty" mapstructure:"overwrite_dir_perms,omitempty"`
 }
 
 type LuetSolverOptions struct {
-	solver.Options
-	Type           string            `mapstructure:"type"`
-	LearnRate      float32           `mapstructure:"rate"`
-	Discount       float32           `mapstructure:"discount"`
-	MaxAttempts    int               `mapstructure:"max_attempts"`
-	Implementation solver.SolverType `mapstructure:"implementation"`
-}
-
-func (opts LuetSolverOptions) ResolverIsSet() bool {
-	switch opts.Type {
-	case solver.QLearningResolverType:
-		return true
-	default:
-		return false
-	}
-}
-
-func (opts LuetSolverOptions) Resolver() solver.PackageResolver {
-	switch opts.Type {
-	case solver.QLearningResolverType:
-		if opts.LearnRate != 0.0 {
-			return solver.NewQLearningResolver(opts.LearnRate, opts.Discount, opts.MaxAttempts, 999999)
-
-		}
-		return solver.SimpleQLearningSolver()
-	}
-
-	return &solver.DummyPackageResolver{}
+	Type           string  `yaml:"type,omitempty" mapstructure:"type"`
+	LearnRate      float32 `yaml:"rate,omitempty" mapstructure:"rate"`
+	Discount       float32 `yaml:"discount,omitempty" mapstructure:"discount"`
+	MaxAttempts    int     `yaml:"max_attempts,omitempty" mapstructure:"max_attempts"`
+	Implementation string  `yaml:"implementation,omitempty" mapstructure:"implementation"`
 }
 
 func (opts *LuetSolverOptions) CompactString() string {
-	return fmt.Sprintf("type: %s rate: %f, discount: %f, attempts: %d, initialobserved: %d",
-		opts.Type, opts.LearnRate, opts.Discount, opts.MaxAttempts, 999999)
+	return fmt.Sprintf(
+		"rate: %f, discount: %f, attempts: %d, initialobserved: %d, implementation: %s",
+		opts.LearnRate, opts.Discount, opts.MaxAttempts, 999999, opts.Implementation)
 }
 
 type LuetSystemConfig struct {
@@ -105,6 +86,16 @@ type LuetSystemConfig struct {
 	Rootfs         string `yaml:"rootfs" mapstructure:"rootfs"`
 	PkgsCachePath  string `yaml:"pkgs_cache_path" mapstructure:"pkgs_cache_path"`
 	TmpDirBase     string `yaml:"tmpdir_base" mapstructure:"tmpdir_base"`
+}
+
+func (s *LuetSystemConfig) SetRootFS(path string) error {
+	p, err := fileHelper.Rel2Abs(path)
+	if err != nil {
+		return err
+	}
+
+	s.Rootfs = p
+	return nil
 }
 
 func (sc *LuetSystemConfig) GetRepoDatabaseDirPath(name string) string {
@@ -166,9 +157,9 @@ type LuetRepository struct {
 	// Serialized options not used in repository configuration
 
 	// Incremented value that identify revision of the repository in a user-friendly way.
-	Revision int `json:"revision,omitempty" yaml:"-,omitempty" mapstructure:"-,omitempty"`
+	Revision int `json:"revision,omitempty" yaml:"revision,omitempty" mapstructure:"-"`
 	// Epoch time in seconds
-	LastUpdate string `json:"last_update,omitempty" yaml:"-,omitempty" mapstructure:"-,omitempty"`
+	LastUpdate string `json:"last_update,omitempty" yaml:"last_update,omitempty" mapstructure:"-"`
 }
 
 func NewLuetRepository(name, t, descr string, urls []string, priority int, enable, cached bool) *LuetRepository {
@@ -208,22 +199,55 @@ func (r *LuetRepository) String() string {
 		r.Name, r.Priority, r.Type, r.Enable, r.Cached)
 }
 
+type LuetKV struct {
+	Key   string `json:"key" yaml:"key" mapstructure:"key"`
+	Value string `json:"value" yaml:"value" mapstructure:"value"`
+}
+
 type LuetConfig struct {
-	Viper *v.Viper
+	Viper *v.Viper `yaml:"-"`
 
-	Logging LuetLoggingConfig `mapstructure:"logging"`
-	General LuetGeneralConfig `mapstructure:"general"`
-	System  LuetSystemConfig  `mapstructure:"system"`
-	Solver  LuetSolverOptions `mapstructure:"solver"`
+	Logging LuetLoggingConfig `yaml:"logging,omitempty" mapstructure:"logging"`
+	General LuetGeneralConfig `yaml:"general,omitempty" mapstructure:"general"`
+	System  LuetSystemConfig  `yaml:"system" mapstructure:"system"`
+	Solver  LuetSolverOptions `yaml:"solver,omitempty" mapstructure:"solver"`
 
-	RepositoriesConfDir  []string         `mapstructure:"repos_confdir"`
-	ConfigProtectConfDir []string         `mapstructure:"config_protect_confdir"`
-	ConfigProtectSkip    bool             `mapstructure:"config_protect_skip"`
-	ConfigFromHost       bool             `mapstructure:"config_from_host"`
-	CacheRepositories    []LuetRepository `mapstructure:"repetitors"`
-	SystemRepositories   []LuetRepository `mapstructure:"repositories"`
+	RepositoriesConfDir  []string         `yaml:"repos_confdir,omitempty" mapstructure:"repos_confdir"`
+	ConfigProtectConfDir []string         `yaml:"config_protect_confdir,omitempty" mapstructure:"config_protect_confdir"`
+	ConfigProtectSkip    bool             `yaml:"config_protect_skip,omitempty" mapstructure:"config_protect_skip"`
+	ConfigFromHost       bool             `yaml:"config_from_host,omitempty" mapstructure:"config_from_host"`
+	CacheRepositories    []LuetRepository `yaml:"repetitors,omitempty" mapstructure:"repetitors"`
+	SystemRepositories   []LuetRepository `yaml:"repositories,omitempty" mapstructure:"repositories"`
 
-	ConfigProtectConfFiles []ConfigProtectConfFile
+	FinalizerEnvs []LuetKV `json:"finalizer_envs,omitempty" yaml:"finalizer_envs,omitempty" mapstructure:"finalizer_envs,omitempty"`
+
+	ConfigProtectConfFiles []ConfigProtectConfFile `yaml:"-" mapstructure:"-"`
+
+	// Subsets config directories for users override.
+	SubsetsConfDir []string          `yaml:"subsets_confdir,omitempty" mapstructure:"subsets_confdir"`
+	SubsetsDefDir  []string          `yaml:"subsets_defdir,omitempty" mapstructure:"subsets_defdir"`
+	Subsets        LuetSubsetsConfig `yaml:"subsets,omitempty" mapstructure:"subsets"`
+
+	SubsetsDefinitions *LuetSubsetsDefinition            `yaml:"-" mapstructure:"-"`
+	SubsetsPkgsDefMap  map[string]*LuetSubsetsDefinition `yaml:"-" mapstructure:"-"`
+	SubsetsCatDefMap   map[string]*LuetSubsetsDefinition `yaml:"-" mapstructure:"-"`
+}
+
+type LuetSubsetsConfig struct {
+	Enabled []string `yaml:"enabled,omitempty" mapstructure:"enabled"`
+}
+
+type LuetSubsetsDefinition struct {
+	Definitions map[string]*LuetSubsetDefinition `yaml:"subsets_def,omitempty" mapstructure:"subsets_def"`
+}
+
+type LuetSubsetDefinition struct {
+	Description string   `yaml:"descr,omitempty" mapstructure:"descr"`
+	Name        string   `yaml:"name,omitempty" mapstructure:"name"`
+	Rules       []string `yaml:"rules,omitempty" mapstructure:"rules"`
+
+	Packages   []string `yaml:"packages,omitempty" mapstructure:"packages"`
+	Categories []string `yaml:"categories,omitempty" mapstructure:"categories"`
 }
 
 func NewLuetConfig(viper *v.Viper) *LuetConfig {
@@ -232,7 +256,13 @@ func NewLuetConfig(viper *v.Viper) *LuetConfig {
 	}
 
 	GenDefault(viper)
-	return &LuetConfig{Viper: viper, ConfigProtectConfFiles: nil}
+	return &LuetConfig{
+		Viper:                  viper,
+		ConfigProtectConfFiles: nil,
+		SubsetsDefinitions:     nil,
+		SubsetsCatDefMap:       make(map[string]*LuetSubsetsDefinition, 0),
+		SubsetsPkgsDefMap:      make(map[string]*LuetSubsetsDefinition, 0),
+	}
 }
 
 func GenDefault(viper *v.Viper) {
@@ -242,6 +272,7 @@ func GenDefault(viper *v.Viper) {
 	viper.SetDefault("logging.json_format", false)
 	viper.SetDefault("logging.enable_emoji", true)
 	viper.SetDefault("logging.color", true)
+	viper.SetDefault("logging.paranoid", false)
 
 	viper.SetDefault("general.concurrency", runtime.NumCPU())
 	viper.SetDefault("general.debug", false)
@@ -249,6 +280,7 @@ func GenDefault(viper *v.Viper) {
 	viper.SetDefault("general.spinner_ms", 100)
 	viper.SetDefault("general.spinner_charset", 22)
 	viper.SetDefault("general.fatal_warnings", false)
+	viper.SetDefault("general.overwrite_dir_perms", false)
 
 	u, err := user.Current()
 	// os/user doesn't work in from scratch environments
@@ -266,11 +298,14 @@ func GenDefault(viper *v.Viper) {
 
 	viper.SetDefault("repos_confdir", []string{"/etc/luet/repos.conf.d"})
 	viper.SetDefault("config_protect_confdir", []string{"/etc/luet/config.protect.d"})
+	viper.SetDefault("subsets_confdir", []string{})
+	viper.SetDefault("subsets_defdir", []string{})
 	viper.SetDefault("config_protect_skip", false)
 	// TODO: Set default to false when we are ready for migration.
 	viper.SetDefault("config_from_host", true)
 	viper.SetDefault("cache_repositories", []string{})
 	viper.SetDefault("system_repositories", []string{})
+	viper.SetDefault("finalizer_envs", make(map[string]string, 0))
 
 	viper.SetDefault("solver.type", "")
 	viper.SetDefault("solver.rate", 0.7)
@@ -292,6 +327,58 @@ func (c *LuetConfig) AddSystemRepository(r LuetRepository) {
 	c.SystemRepositories = append(c.SystemRepositories, r)
 }
 
+func (c *LuetConfig) GetFinalizerEnvsMap() map[string]string {
+	ans := make(map[string]string, 0)
+
+	for _, kv := range c.FinalizerEnvs {
+		ans[kv.Key] = kv.Value
+	}
+	return ans
+}
+
+func (c *LuetConfig) SetFinalizerEnv(k, v string) {
+	keyPresent := false
+	envs := []LuetKV{}
+
+	for _, kv := range c.FinalizerEnvs {
+		if kv.Key == k {
+			keyPresent = true
+			envs = append(envs, LuetKV{Key: kv.Key, Value: v})
+		} else {
+			envs = append(envs, kv)
+		}
+	}
+	if !keyPresent {
+		envs = append(envs, LuetKV{Key: k, Value: v})
+	}
+
+	c.FinalizerEnvs = envs
+}
+
+func (c *LuetConfig) GetFinalizerEnvs() []string {
+	ans := []string{}
+	for _, kv := range c.FinalizerEnvs {
+		ans = append(ans, fmt.Sprintf("%s=%s", kv.Key, kv.Value))
+	}
+	return ans
+}
+
+func (c *LuetConfig) GetFinalizerEnv(k string) (string, error) {
+	keyNotPresent := true
+	ans := ""
+	for _, kv := range c.FinalizerEnvs {
+		if kv.Key == k {
+			keyNotPresent = false
+			ans = kv.Value
+		}
+	}
+
+	if keyNotPresent {
+		return "", errors.New("Finalizer key " + k + " not found")
+	}
+	return ans, nil
+}
+
 func (c *LuetConfig) GetLogging() *LuetLoggingConfig {
 	return &c.Logging
 }
@@ -306,6 +393,10 @@ func (c *LuetConfig) GetSystem() *LuetSystemConfig {
 
 func (c *LuetConfig) GetSolverOptions() *LuetSolverOptions {
 	return &c.Solver
+}
+
+func (c *LuetConfig) YAML() ([]byte, error) {
+	return yaml.Marshal(c)
 }
 
 func (c *LuetConfig) GetConfigProtectConfFiles() []ConfigProtectConfFile {
@@ -336,34 +427,6 @@ func (c *LuetConfig) GetSystemRepository(name string) (*LuetRepository, error) {
 	return ans, nil
 }
 
-func (c *LuetSolverOptions) String() string {
-	ans := fmt.Sprintf(`
-solver:
-  type: %s
-  rate: %f
-  discount: %f
-  max_attempts: %d`, c.Type, c.LearnRate, c.Discount,
-		c.MaxAttempts)
-
-	return ans
-}
-
-func (c *LuetGeneralConfig) String() string {
-	ans := fmt.Sprintf(`
-general:
-  concurrency: %d
-  same_owner: %t
-  debug: %t
-  fatal_warnings: %t
-  show_build_output: %t
-  spinner_ms: %d
-  spinner_charset: %d`, c.Concurrency, c.SameOwner, c.Debug,
-		c.FatalWarns, c.ShowBuildOutput,
-		c.SpinnerMs, c.SpinnerCharset)
-
-	return ans
-}
-
 func (c *LuetGeneralConfig) GetSpinnerMs() time.Duration {
 	duration, err := time.ParseDuration(fmt.Sprintf("%dms", c.SpinnerMs))
 	if err != nil {
@@ -376,35 +439,15 @@ func (c *LuetLoggingConfig) SetLogLevel(s string) {
 	c.Level = s
 }
 
-func (c *LuetLoggingConfig) String() string {
-	ans := fmt.Sprintf(`
-logging:
-  enable_logfile: %t
-  path: %s
-  json_format: %t
-  color: %t
-  enable_emoji: %t
-  level: %s`, c.EnableLogFile, c.Path, c.JsonFormat,
-		c.Color, c.EnableEmoji, c.Level)
-
-	return ans
-}
-
-func (c *LuetSystemConfig) String() string {
-	ans := fmt.Sprintf(`
-system:
-  database_engine: %s
-  database_path: %s
-  pkgs_cache_path: %s
-  tmpdir_base: %s
-  rootfs: %s`,
-		c.DatabaseEngine, c.DatabasePath, c.PkgsCachePath,
-		c.TmpDirBase, c.Rootfs)
-
-	return ans
-}
-
 func (c *LuetSystemConfig) InitTmpDir() error {
+	if !filepath.IsAbs(c.TmpDirBase) {
+		abs, err := fileHelper.Rel2Abs(c.TmpDirBase)
+		if err != nil {
+			return errors.Wrap(err, "while converting relative path to absolute path")
+		}
+		c.TmpDirBase = abs
+	}
+
 	if _, err := os.Stat(c.TmpDirBase); err != nil {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(c.TmpDirBase, os.ModePerm)

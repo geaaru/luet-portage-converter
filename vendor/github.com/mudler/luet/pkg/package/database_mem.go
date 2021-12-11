@@ -61,6 +61,10 @@ func NewInMemoryDatabase(singleton bool) PackageDatabase {
 	return DBInMemoryInstance
 }
 
+func (db *InMemoryDatabase) Close() error {
+	return nil
+}
+
 func (db *InMemoryDatabase) Get(s string) (string, error) {
 	db.Lock()
 	defer db.Unlock()
@@ -143,6 +147,7 @@ func (db *InMemoryDatabase) getRevdeps(p Package, visited map[string]interface{}
 	if err != nil {
 		return res, err
 	}
+
 	for _, pp := range packs {
 		//	db.Lock()
 		list := db.RevDepsDatabase[pp.GetFingerPrint()]
@@ -195,6 +200,14 @@ func (db *InMemoryDatabase) CreatePackage(p Package) (string, error) {
 	return ID, nil
 }
 
+func (db *InMemoryDatabase) updateRevDep(k, v string, b Package) {
+	_, ok := db.RevDepsDatabase[k]
+	if !ok {
+		db.RevDepsDatabase[k] = make(map[string]Package)
+	}
+	db.RevDepsDatabase[k][v] = b.Clone()
+}
+
 func (db *InMemoryDatabase) populateCaches(p Package) {
 	pd, _ := p.(*DefaultPackage)
 
@@ -224,22 +237,21 @@ func (db *InMemoryDatabase) populateCaches(p Package) {
 	if !ok {
 		db.CacheNoVersion[p.GetPackageName()] = make(map[string]interface{})
 	}
-	db.CacheNoVersion[p.GetPackageName()][p.GetVersion()] = nil
+	db.CacheNoVersion[p.GetPackageName()][p.GetVersion()] = pd
+
+	db.Unlock()
 
 	// Updating Revdeps
 	// Given that when we populate the cache we don't have the full db at hand
 	// We cycle over reverse dependency of a package to update their entry if they are matching
 	// the version selector
+	db.Lock()
 	toUpdate, ok := db.RevDepsDatabase[pd.GetPackageName()]
 	if ok {
 		for _, pp := range toUpdate {
 			for _, re := range pp.GetRequires() {
 				if match, _ := pd.VersionMatchSelector(re.GetVersion(), nil); match {
-					_, ok = db.RevDepsDatabase[pd.GetFingerPrint()]
-					if !ok {
-						db.RevDepsDatabase[pd.GetFingerPrint()] = make(map[string]Package)
-					}
-					db.RevDepsDatabase[pd.GetFingerPrint()][pp.GetFingerPrint()] = pp
+					db.updateRevDep(pd.GetFingerPrint(), pp.GetFingerPrint(), pp)
 				}
 			}
 		}
@@ -249,30 +261,12 @@ func (db *InMemoryDatabase) populateCaches(p Package) {
 	for _, re := range pd.GetRequires() {
 		packages, _ := db.FindPackages(re)
 		db.Lock()
-
 		for _, pa := range packages {
-			_, ok := db.RevDepsDatabase[pa.GetFingerPrint()]
-			if !ok {
-				db.RevDepsDatabase[pa.GetFingerPrint()] = make(map[string]Package)
-			}
-			db.RevDepsDatabase[pa.GetFingerPrint()][pd.GetFingerPrint()] = pd
-			_, ok = db.RevDepsDatabase[pa.GetPackageName()]
-			if !ok {
-				db.RevDepsDatabase[pa.GetPackageName()] = make(map[string]Package)
-			}
-			db.RevDepsDatabase[pa.GetPackageName()][pd.GetPackageName()] = pd
+			db.updateRevDep(pa.GetFingerPrint(), pd.GetFingerPrint(), pd)
+			db.updateRevDep(pa.GetPackageName(), pd.GetPackageName(), pd)
 		}
-		_, ok := db.RevDepsDatabase[re.GetFingerPrint()]
-		if !ok {
-			db.RevDepsDatabase[re.GetFingerPrint()] = make(map[string]Package)
-		}
-		db.RevDepsDatabase[re.GetFingerPrint()][pd.GetFingerPrint()] = pd
-		_, ok = db.RevDepsDatabase[re.GetPackageName()]
-		if !ok {
-			db.RevDepsDatabase[re.GetPackageName()] = make(map[string]Package)
-		}
-		db.RevDepsDatabase[re.GetPackageName()][pd.GetPackageName()] = pd
-
+		db.updateRevDep(re.GetFingerPrint(), pd.GetFingerPrint(), pd)
+		db.updateRevDep(re.GetPackageName(), pd.GetPackageName(), pd)
 		db.Unlock()
 	}
 }
@@ -352,19 +346,17 @@ func (db *InMemoryDatabase) FindPackageVersions(p Package) (Packages, error) {
 		p = provided
 	}
 	db.Lock()
+	defer db.Unlock()
 	versions, ok := db.CacheNoVersion[p.GetPackageName()]
-	db.Unlock()
 	if !ok {
 		return nil, errors.New("No versions found for package")
 	}
 	var versionsInWorld []Package
-	for ve, _ := range versions {
-		w, err := db.FindPackage(&DefaultPackage{Name: p.GetName(), Category: p.GetCategory(), Version: ve})
-		if err != nil {
-			return nil, errors.Wrap(err, "Cache mismatch - this shouldn't happen")
-		}
+	for _, i := range versions {
+		w := i.(*DefaultPackage)
 		versionsInWorld = append(versionsInWorld, w)
 	}
+
 	return Packages(versionsInWorld), nil
 }
 
@@ -464,6 +456,8 @@ func (db *InMemoryDatabase) RemovePackageFiles(p Package) error {
 func (db *InMemoryDatabase) RemovePackage(p Package) error {
 	db.Lock()
 	defer db.Unlock()
+
+	delete(db.CacheNoVersion[p.GetPackageName()], p.GetVersion())
 
 	delete(db.Database, p.GetFingerPrint())
 	return nil
