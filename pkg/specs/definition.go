@@ -84,7 +84,8 @@ type PortageConverterArtefact struct {
 	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
 	Mutations    PortageConverterMutations    `json:"mutations,omitempty" yaml:"mutations,omitempty"`
 
-	Finalize Finalizer `json:"finalizer,omitempty" yaml:"finalizer,omitempty"`
+	Finalize    Finalizer              `json:"finalizer,omitempty" yaml:"finalizer,omitempty"`
+	Annotations map[string]interface{} `json:"annotations,omitempty" yaml:"annotations,omitempty"`
 
 	MapReplacementsRuntime   map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
 	MapReplacementsBuildtime map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
@@ -419,9 +420,10 @@ type PortageSolution struct {
 	RuntimeConflicts []gentoo.GentooPackage `json:"runtime-conflicts,omitempty"`
 	BuildConflicts   []gentoo.GentooPackage `json:"build-conflicts,omitempty"`
 
-	Description string            `json:"description,omitempty"`
-	Uri         []string          `json:"uri,omitempty"`
-	Labels      map[string]string `json:"labels,omitempty"`
+	Description string                 `json:"description,omitempty"`
+	Uri         []string               `json:"uri,omitempty"`
+	Labels      map[string]string      `json:"labels,omitempty"`
+	Annotations map[string]interface{} `json:"annotations,omitempty" yaml:"annotations,omitempty"`
 
 	OverrideVersion string `json:"override_version,omitempty"`
 }

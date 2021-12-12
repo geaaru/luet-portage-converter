@@ -26,12 +26,14 @@ func NewPortageConverterArtefact(pkg string) *PortageConverterArtefact {
 		Tree:            "",
 		IgnoreBuildDeps: false,
 		Packages:        []string{pkg},
+		Annotations:     make(map[string]interface{}, 0),
 		OverrideVersion: "",
 	}
 }
 
-func (a *PortageConverterArtefact) GetPackages() []string { return a.Packages }
-func (a *PortageConverterArtefact) GetTree() string       { return a.Tree }
+func (a *PortageConverterArtefact) GetPackages() []string                  { return a.Packages }
+func (a *PortageConverterArtefact) GetTree() string                        { return a.Tree }
+func (a *PortageConverterArtefact) GetAnnotations() map[string]interface{} { return a.Annotations }
 
 func (a *PortageConverterArtefact) HasRuntimeMutations() bool {
 	ans := false

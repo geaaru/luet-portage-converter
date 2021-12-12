@@ -528,6 +528,8 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		solution.OverrideVersion = artefact.GetOverrideVersion()
 	}
 
+	solution.Annotations = artefact.GetAnnotations()
+
 	pc.Cache[cacheKey] = solution
 
 	pc.Solutions = append(pc.Solutions, solution)
