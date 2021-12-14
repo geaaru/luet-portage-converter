@@ -89,6 +89,7 @@ func (s *PortageSolution) ToPack(runtime bool) *luet_pkg.DefaultPackage {
 		Labels:      labels,
 		License:     s.Package.License,
 		Description: s.Description,
+		Annotations: s.Annotations,
 		Uri:         s.Uri,
 	}
 
