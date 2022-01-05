@@ -23,9 +23,6 @@ import (
 	luet_tree "github.com/mudler/luet/pkg/tree"
 )
 
-// Build time and commit information. This code is get from: https://github.com/mudler/luet/
-//
-// ⚠️ WARNING: should only be set by "-ldflags".
 var (
 	BuildTime   string
 	BuildCommit string
@@ -278,68 +275,116 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 	p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(pTarget)
 	// TODO: at the moment we ignore version. Do We want to handle this with Marvin?
-	if p != nil && !pc.Override {
-		// Nothing to do
-		InfoC(fmt.Sprintf("Package %s already in tree.", pkg))
-		return nil
+	if p != nil {
+
+		newVersion := false
+		var originPackage luet_pkg.Package
+		for _, luetPkgTree := range p {
+
+			gpTree, err := gentoo.ParsePackageStr(fmt.Sprintf("%s/%s-%s",
+				gp.Category, gp.Name, luetPkgTree.GetVersion()))
+			if err != nil {
+				Error(fmt.Sprintf("[%s] Error parse existing pkg in tree: %s", pkg, err.Error()))
+				return err
+			}
+
+			gt, err := solution.Package.GreaterThan(gpTree)
+			if err != nil {
+				Error(fmt.Sprintf("[%s] Error on check if package is greater then existing: %s", pkg, err.Error()))
+				return err
+			}
+
+			if gt {
+				newVersion = true
+			} else {
+				newVersion = false
+			}
+
+			originPackage = luetPkgTree
+		}
+
+		if !newVersion && !pc.Override {
+			// Nothing to do
+			InfoC(fmt.Sprintf("Package %s already in tree and updated.", pkg))
+			return nil
+		}
+
+		solution.Upgrade = true
+		solution.PackageUpgraded = originPackage.(*luet_pkg.DefaultPackage)
+		solution.PackageDir = pkgDir
+
 	}
 
 	// TODO: atm I handle build-dep and runtime-dep at the same
 	//       way. I'm not sure if this correct.
 
-	// Check every build dependency
-	var bdeps []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
-	for _, bdep := range solution.BuildDeps {
+	if p == nil || pc.Override {
 
-		DebugC(fmt.Sprintf("[%s] Analyzing buildtime dep %s...", pkg, bdep.GetPackageName()))
+		// Check every build dependency
+		var bdeps []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
+		for _, bdep := range solution.BuildDeps {
 
-		if pc.IsDep2Skip(&bdep, true) {
-			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bdep.GetPackageName()))
-			continue
-		}
+			DebugC(fmt.Sprintf("[%s] Analyzing buildtime dep %s...", pkg, bdep.GetPackageName()))
 
-		dep_str := fmt.Sprintf("%s/%s", bdep.Category, bdep.Name)
-		if bdep.Slot != "0" {
-			dep_str += ":" + bdep.Slot
-		}
-
-		// Check if there is a layer to use for the dependency
-		if pc.Specs.HasBuildLayer(dep_str) {
-			bLayer, _ := pc.Specs.GetBuildLayer(dep_str)
-			gp := gentoo.GentooPackage{
-				Name:     bLayer.Layer.Name,
-				Category: bLayer.Layer.Category,
-				Version:  ">=0",
-				Slot:     "0",
+			if pc.IsDep2Skip(&bdep, true) {
+				DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bdep.GetPackageName()))
+				continue
 			}
-			DebugC(GetAurora().Bold(fmt.Sprintf("[%s] For dep %s found layer %s/%s.", pkg,
-				dep_str, bLayer.Layer.Name, bLayer.Layer.Category)))
-			bdeps = pc.AppendIfNotPresent(bdeps, gp)
-			continue
-		}
 
-		dep := luet_pkg.NewPackage(bdep.Name, ">=0",
-			[]*luet_pkg.DefaultPackage{},
-			[]*luet_pkg.DefaultPackage{})
-		dep.Category = specs.SanitizeCategory(bdep.Category, bdep.Slot)
+			dep_str := fmt.Sprintf("%s/%s", bdep.Category, bdep.Name)
+			if bdep.Slot != "0" {
+				dep_str += ":" + bdep.Slot
+			}
 
-		// Check if it's present the build dep on the tree
-		p, _ := pc.ReciperBuild.GetDatabase().FindPackages(dep)
-		if p == nil {
-
-			// Check if there is a runtime deps/provide for this
-			p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
-			if p == nil {
-				// Now we use the same treePath.
-				err := pc.createSolution(dep_str, treePath, stack, artefact)
-				if err != nil {
-					return err
+			// Check if there is a layer to use for the dependency
+			if pc.Specs.HasBuildLayer(dep_str) {
+				bLayer, _ := pc.Specs.GetBuildLayer(dep_str)
+				gp := gentoo.GentooPackage{
+					Name:     bLayer.Layer.Name,
+					Category: bLayer.Layer.Category,
+					Version:  ">=0",
+					Slot:     "0",
 				}
+				DebugC(GetAurora().Bold(fmt.Sprintf("[%s] For dep %s found layer %s/%s.", pkg,
+					dep_str, bLayer.Layer.Name, bLayer.Layer.Category)))
+				bdeps = pc.AppendIfNotPresent(bdeps, gp)
+				continue
+			}
 
-				bdeps = pc.AppendIfNotPresent(bdeps, bdep)
+			dep := luet_pkg.NewPackage(bdep.Name, ">=0",
+				[]*luet_pkg.DefaultPackage{},
+				[]*luet_pkg.DefaultPackage{})
+			dep.Category = specs.SanitizeCategory(bdep.Category, bdep.Slot)
+
+			// Check if it's present the build dep on the tree
+			p, _ := pc.ReciperBuild.GetDatabase().FindPackages(dep)
+			if p == nil {
+
+				// Check if there is a runtime deps/provide for this
+				p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
+				if p == nil {
+					// Now we use the same treePath.
+					err := pc.createSolution(dep_str, treePath, stack, artefact)
+					if err != nil {
+						return err
+					}
+
+					bdeps = pc.AppendIfNotPresent(bdeps, bdep)
+				} else {
+
+					DebugC(fmt.Sprintf("[%s] For buildtime dep %s is used package %s",
+						pkg, bdep.GetPackageName(), p[0].HumanReadableString()))
+
+					gp := gentoo.GentooPackage{
+						Name:     p[0].GetName(),
+						Category: p[0].GetCategory(),
+						Version:  ">=0",
+						Slot:     "0",
+					}
+					bdeps = pc.AppendIfNotPresent(bdeps, gp)
+				}
 			} else {
-
-				DebugC(fmt.Sprintf("[%s] For buildtime dep %s is used package %s",
+				DebugC(fmt.Sprintf("[%s] For build-time dep %s is used package %s",
 					pkg, bdep.GetPackageName(), p[0].HumanReadableString()))
 
 				gp := gentoo.GentooPackage{
@@ -350,167 +395,156 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 				}
 				bdeps = pc.AppendIfNotPresent(bdeps, gp)
 			}
-		} else {
-			DebugC(fmt.Sprintf("[%s] For build-time dep %s is used package %s",
-				pkg, bdep.GetPackageName(), p[0].HumanReadableString()))
 
-			gp := gentoo.GentooPackage{
-				Name:     p[0].GetName(),
-				Category: p[0].GetCategory(),
-				Version:  ">=0",
-				Slot:     "0",
-			}
-			bdeps = pc.AppendIfNotPresent(bdeps, gp)
 		}
 
-	}
-
-	if len(bdeps) == 0 && pc.Specs.HasBuildLayer(cacheKey) {
-		// Check if the packages is present to a layer
-		bLayer, _ := pc.Specs.GetBuildLayer(cacheKey)
-		gp := gentoo.GentooPackage{
-			Name:     bLayer.Layer.Name,
-			Category: bLayer.Layer.Category,
-			Version:  ">=0",
-			Slot:     "0",
-		}
-		bdeps = pc.AppendIfNotPresent(bdeps, gp)
-
-		DebugC(fmt.Sprintf("[%s] For build-time using only layer %s",
-			pkg, gp.GetPackageName()))
-	}
-
-	solution.BuildDeps = bdeps
-
-	// Check buildtime conflicts
-	var bconflicts []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
-	if !pc.DisableConflicts {
-		for _, bconflict := range solution.BuildConflicts {
-
-			DebugC(fmt.Sprintf("[%s] Analyzing buildtime conflict %s...",
-				pkg, bconflict.GetPackageName()))
-
-			if pc.IsDep2Skip(&bconflict, true) {
-				DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bconflict.GetPackageName()))
-				continue
-			}
-
-			gp := gentoo.GentooPackage{
-				Name:     bconflict.Name,
-				Category: specs.SanitizeCategory(bconflict.Category, bconflict.Slot),
-				Version:  ">=0",
-				Slot:     "0",
-			}
-
-			if bconflict.Condition == gentoo.PkgCondNotLess {
-				gp.Version = fmt.Sprintf("<%s", bconflict.Version)
-			} else if bconflict.Condition == gentoo.PkgCondNotGreater {
-				gp.Version = fmt.Sprintf(">%s", bconflict.Version)
-			}
-			bconflicts = pc.AppendIfNotPresent(bconflicts, gp)
-		}
-	}
-	solution.BuildConflicts = bconflicts
-
-	// Check every runtime deps
-	var rdeps []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
-	for _, rdep := range solution.RuntimeDeps {
-
-		DebugC(fmt.Sprintf("[%s] Analyzing runtime dep %s...", pkg, rdep.GetPackageName()))
-
-		if pc.IsDep2Skip(&rdep, false) {
-			DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rdep.GetPackageName()))
-			continue
-		}
-
-		dep_str := fmt.Sprintf("%s/%s", rdep.Category, rdep.Name)
-		if rdep.Slot != "0" {
-			dep_str += ":" + rdep.Slot
-		}
-
-		dep := luet_pkg.NewPackage(rdep.Name, ">=0",
-			[]*luet_pkg.DefaultPackage{},
-			[]*luet_pkg.DefaultPackage{})
-		dep.Category = specs.SanitizeCategory(rdep.Category, rdep.Slot)
-
-		// Check if there is a layer to use for the dependency
-		if pc.UsingLayerForRuntime && pc.Specs.HasBuildLayer(dep_str) {
-			bLayer, _ := pc.Specs.GetBuildLayer(dep_str)
+		if len(bdeps) == 0 && pc.Specs.HasBuildLayer(cacheKey) {
+			// Check if the packages is present to a layer
+			bLayer, _ := pc.Specs.GetBuildLayer(cacheKey)
 			gp := gentoo.GentooPackage{
 				Name:     bLayer.Layer.Name,
 				Category: bLayer.Layer.Category,
 				Version:  ">=0",
 				Slot:     "0",
 			}
-			DebugC(GetAurora().Bold(fmt.Sprintf("[%s] For runtime dep %s found layer %s/%s.", pkg,
-				dep_str, bLayer.Layer.Name, bLayer.Layer.Category)))
-			rdeps = pc.AppendIfNotPresent(rdeps, gp)
-			continue
+			bdeps = pc.AppendIfNotPresent(bdeps, gp)
+
+			DebugC(fmt.Sprintf("[%s] For build-time using only layer %s",
+				pkg, gp.GetPackageName()))
 		}
 
-		// Check if it's present the build dep on the tree
-		p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
-		if p == nil {
+		solution.BuildDeps = bdeps
+
+		// Check buildtime conflicts
+		var bconflicts []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
+		if !pc.DisableConflicts {
+			for _, bconflict := range solution.BuildConflicts {
+
+				DebugC(fmt.Sprintf("[%s] Analyzing buildtime conflict %s...",
+					pkg, bconflict.GetPackageName()))
+
+				if pc.IsDep2Skip(&bconflict, true) {
+					DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, bconflict.GetPackageName()))
+					continue
+				}
+
+				gp := gentoo.GentooPackage{
+					Name:     bconflict.Name,
+					Category: specs.SanitizeCategory(bconflict.Category, bconflict.Slot),
+					Version:  ">=0",
+					Slot:     "0",
+				}
+
+				if bconflict.Condition == gentoo.PkgCondNotLess {
+					gp.Version = fmt.Sprintf("<%s", bconflict.Version)
+				} else if bconflict.Condition == gentoo.PkgCondNotGreater {
+					gp.Version = fmt.Sprintf(">%s", bconflict.Version)
+				}
+				bconflicts = pc.AppendIfNotPresent(bconflicts, gp)
+			}
+		}
+		solution.BuildConflicts = bconflicts
+
+		// Check every runtime deps
+		var rdeps []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
+		for _, rdep := range solution.RuntimeDeps {
+
+			DebugC(fmt.Sprintf("[%s] Analyzing runtime dep %s...", pkg, rdep.GetPackageName()))
+
+			if pc.IsDep2Skip(&rdep, false) {
+				DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rdep.GetPackageName()))
+				continue
+			}
+
 			dep_str := fmt.Sprintf("%s/%s", rdep.Category, rdep.Name)
 			if rdep.Slot != "0" {
 				dep_str += ":" + rdep.Slot
 			}
-			// Now we use the same treePath.
-			err := pc.createSolution(dep_str, treePath, stack, artefact)
-			if err != nil {
-				return err
-			}
 
-			rdeps = pc.AppendIfNotPresent(rdeps, rdep)
+			dep := luet_pkg.NewPackage(rdep.Name, ">=0",
+				[]*luet_pkg.DefaultPackage{},
+				[]*luet_pkg.DefaultPackage{})
+			dep.Category = specs.SanitizeCategory(rdep.Category, rdep.Slot)
 
-		} else {
-			// TODO: handle package list in a better way
-			DebugC(fmt.Sprintf("[%s] For runtime dep %s is used package %s",
-				pkg, rdep.GetPackageName(), p[0].HumanReadableString()))
-
-			gp := gentoo.GentooPackage{
-				Name:     p[0].GetName(),
-				Category: p[0].GetCategory(),
-				Version:  ">=0",
-				Slot:     "0",
-			}
-			rdeps = pc.AppendIfNotPresent(rdeps, gp)
-		}
-	}
-	solution.RuntimeDeps = rdeps
-
-	// Check runtime conflicts
-	var rconflicts []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
-	if !pc.DisableConflicts {
-		for _, rconflict := range solution.RuntimeConflicts {
-
-			DebugC(fmt.Sprintf("[%s] Analyzing runtime conflict %s...",
-				pkg, rconflict.GetPackageName()))
-
-			if pc.IsDep2Skip(&rconflict, false) {
-				DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rconflict.GetPackageName()))
+			// Check if there is a layer to use for the dependency
+			if pc.UsingLayerForRuntime && pc.Specs.HasBuildLayer(dep_str) {
+				bLayer, _ := pc.Specs.GetBuildLayer(dep_str)
+				gp := gentoo.GentooPackage{
+					Name:     bLayer.Layer.Name,
+					Category: bLayer.Layer.Category,
+					Version:  ">=0",
+					Slot:     "0",
+				}
+				DebugC(GetAurora().Bold(fmt.Sprintf("[%s] For runtime dep %s found layer %s/%s.", pkg,
+					dep_str, bLayer.Layer.Name, bLayer.Layer.Category)))
+				rdeps = pc.AppendIfNotPresent(rdeps, gp)
 				continue
 			}
 
-			gp := gentoo.GentooPackage{
-				Name:     rconflict.Name,
-				Category: specs.SanitizeCategory(rconflict.Category, rconflict.Slot),
-				Version:  ">=0",
-				Slot:     "0",
-			}
+			// Check if it's present the build dep on the tree
+			p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
+			if p == nil {
+				dep_str := fmt.Sprintf("%s/%s", rdep.Category, rdep.Name)
+				if rdep.Slot != "0" {
+					dep_str += ":" + rdep.Slot
+				}
+				// Now we use the same treePath.
+				err := pc.createSolution(dep_str, treePath, stack, artefact)
+				if err != nil {
+					return err
+				}
 
-			if rconflict.Condition == gentoo.PkgCondNotLess {
-				gp.Version = fmt.Sprintf("<%s", rconflict.Version)
-			} else if rconflict.Condition == gentoo.PkgCondNotGreater {
-				gp.Version = fmt.Sprintf(">%s", rconflict.Version)
-			}
+				rdeps = pc.AppendIfNotPresent(rdeps, rdep)
 
-			rconflicts = pc.AppendIfNotPresent(rconflicts, gp)
+			} else {
+				// TODO: handle package list in a better way
+				DebugC(fmt.Sprintf("[%s] For runtime dep %s is used package %s",
+					pkg, rdep.GetPackageName(), p[0].HumanReadableString()))
+
+				gp := gentoo.GentooPackage{
+					Name:     p[0].GetName(),
+					Category: p[0].GetCategory(),
+					Version:  ">=0",
+					Slot:     "0",
+				}
+				rdeps = pc.AppendIfNotPresent(rdeps, gp)
+			}
 		}
-	}
+		solution.RuntimeDeps = rdeps
 
-	solution.RuntimeConflicts = rconflicts
-	solution.PackageDir = pkgDir
+		// Check runtime conflicts
+		var rconflicts []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
+		if !pc.DisableConflicts {
+			for _, rconflict := range solution.RuntimeConflicts {
+
+				DebugC(fmt.Sprintf("[%s] Analyzing runtime conflict %s...",
+					pkg, rconflict.GetPackageName()))
+
+				if pc.IsDep2Skip(&rconflict, false) {
+					DebugC(fmt.Sprintf("[%s] Skipped dependency %s", pkg, rconflict.GetPackageName()))
+					continue
+				}
+
+				gp := gentoo.GentooPackage{
+					Name:     rconflict.Name,
+					Category: specs.SanitizeCategory(rconflict.Category, rconflict.Slot),
+					Version:  ">=0",
+					Slot:     "0",
+				}
+
+				if rconflict.Condition == gentoo.PkgCondNotLess {
+					gp.Version = fmt.Sprintf("<%s", rconflict.Version)
+				} else if rconflict.Condition == gentoo.PkgCondNotGreater {
+					gp.Version = fmt.Sprintf(">%s", rconflict.Version)
+				}
+
+				rconflicts = pc.AppendIfNotPresent(rconflicts, gp)
+			}
+		}
+
+		solution.RuntimeConflicts = rconflicts
+		solution.PackageDir = pkgDir
+	}
 
 	if artefact.HasOverrideVersion(pkg) {
 		solution.OverrideVersion = artefact.GetOverrideVersion()
@@ -664,11 +698,6 @@ func (pc *PortageConverter) Generate() error {
 		InfoC(fmt.Sprintf(
 			":cake: Processing package %s-%s", pkg.Package.GetPackageName(), pkg.Package.GetPVR()))
 
-		err := os.MkdirAll(pkg.PackageDir, 0755)
-		if err != nil {
-			return err
-		}
-
 		defFile := filepath.Join(pkg.PackageDir, "definition.yaml")
 		buildFile := filepath.Join(pkg.PackageDir, "build.yaml")
 		finalizerFile := filepath.Join(pkg.PackageDir, "finalize.yaml")
@@ -676,55 +705,115 @@ func (pc *PortageConverter) Generate() error {
 		// Convert solution to luet package
 		pack := pkg.ToPack(true)
 
-		// Write definition.yaml
-		err = luet_tree.WriteDefinitionFile(pack, defFile)
-		if err != nil {
-			return err
-		}
+		if pkg.Upgrade && !pc.Override {
 
-		// Check if artefact is in map
-		ignoreBuildDeps := false
-		artefact, err := pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageNameWithSlot())
-		if err != nil {
-			if pkg.Package.Slot != "" {
-				artefact, err = pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageName())
+			InfoC(fmt.Sprintf("[%s-%s] package to upgrade", pkg.Package.GetPackageName(),
+				pkg.Package.GetPVR()))
+
+			// Copy annotations and update the keys
+			annotations := pkg.PackageUpgraded.GetAnnotations()
+			if annotations == nil {
+				annotations = make(map[string]interface{}, 1)
 			}
-		}
-		if artefact != nil {
-			ignoreBuildDeps = artefact.IgnoreBuildDeps
 
-			// Check if there is a finalize to write
-			if artefact.Finalize.IsValid() {
-				err = artefact.Finalize.WriteFinalize(finalizerFile)
-				if err != nil {
-					return errors.New(
-						"Error on create finalize.yaml: " + err.Error(),
-					)
-				}
+			for k, v := range pack.GetAnnotations() {
+				annotations[k] = v
 			}
-		}
 
-		// create build.yaml
-		bPack := pkg.ToPack(false)
-		buildPack, _ := buildTmpl.Clone()
-		if !ignoreBuildDeps {
-			buildPack.AddRequires(bPack.PackageRequires)
-		} else {
-			DebugC(fmt.Sprintf(
-				"[%s] :warning: Ignoring all build deps..",
-				pkg.Package.GetPackageName()))
-		}
-		buildPack.AddConflicts(bPack.PackageConflicts)
+			for k, v := range annotations {
+				pkg.PackageUpgraded.AddAnnotation(k, v)
+			}
 
-		err = buildPack.WriteBuildDefinition(buildFile)
-		if err != nil {
-			return err
-		}
+			for k, v := range pack.GetLabels() {
+				pkg.PackageUpgraded.AddLabel(k, v)
+			}
 
-		if pc.WithPortagePkgs {
-			err = pc.createPortagePackage(pkg, pack)
+			pkg.PackageUpgraded.SetVersion(pack.GetVersion())
+
+			pack = pkg.PackageUpgraded
+			pack.SetPath("")
+
+			// Write definition.yaml
+			err = luet_tree.WriteDefinitionFile(pack, defFile)
 			if err != nil {
 				return err
+			}
+
+			// Check if artefact is in map
+			artefact, err := pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageNameWithSlot())
+			if err != nil {
+				if pkg.Package.Slot != "" {
+					artefact, err = pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageName())
+				}
+			}
+			if artefact != nil {
+				// Check if there is a finalize to write
+				if artefact.Finalize.IsValid() {
+					err = artefact.Finalize.WriteFinalize(finalizerFile)
+					if err != nil {
+						return errors.New(
+							"Error on create finalize.yaml: " + err.Error(),
+						)
+					}
+				}
+			}
+
+		} else {
+			err := os.MkdirAll(pkg.PackageDir, 0755)
+			if err != nil {
+				return err
+			}
+
+			// Write definition.yaml
+			err = luet_tree.WriteDefinitionFile(pack, defFile)
+			if err != nil {
+				return err
+			}
+
+			// Check if artefact is in map
+			ignoreBuildDeps := false
+			artefact, err := pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageNameWithSlot())
+			if err != nil {
+				if pkg.Package.Slot != "" {
+					artefact, err = pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageName())
+				}
+			}
+			if artefact != nil {
+				ignoreBuildDeps = artefact.IgnoreBuildDeps
+
+				// Check if there is a finalize to write
+				if artefact.Finalize.IsValid() {
+					err = artefact.Finalize.WriteFinalize(finalizerFile)
+					if err != nil {
+						return errors.New(
+							"Error on create finalize.yaml: " + err.Error(),
+						)
+					}
+				}
+			}
+
+			// create build.yaml
+			bPack := pkg.ToPack(false)
+			buildPack, _ := buildTmpl.Clone()
+			if !ignoreBuildDeps {
+				buildPack.AddRequires(bPack.PackageRequires)
+			} else {
+				DebugC(fmt.Sprintf(
+					"[%s] :warning: Ignoring all build deps..",
+					pkg.Package.GetPackageName()))
+			}
+			buildPack.AddConflicts(bPack.PackageConflicts)
+
+			err = buildPack.WriteBuildDefinition(buildFile)
+			if err != nil {
+				return err
+			}
+
+			if pc.WithPortagePkgs {
+				err = pc.createPortagePackage(pkg, pack)
+				if err != nil {
+					return err
+				}
 			}
 		}
 

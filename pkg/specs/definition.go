@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 
 	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	luet_pkg "github.com/mudler/luet/pkg/package"
 
 	"gopkg.in/yaml.v2"
 )
@@ -412,5 +413,7 @@ type PortageSolution struct {
 	Labels      map[string]string      `json:"labels,omitempty"`
 	Annotations map[string]interface{} `json:"annotations,omitempty" yaml:"annotations,omitempty"`
 
-	OverrideVersion string `json:"override_version,omitempty"`
+	OverrideVersion string                   `json:"override_version,omitempty"`
+	Upgrade         bool                     `json:"upgrade,omitempty"`
+	PackageUpgraded *luet_pkg.DefaultPackage `json:"-",omitempty"`
 }
