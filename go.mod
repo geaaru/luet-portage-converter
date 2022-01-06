@@ -15,10 +15,10 @@ replace github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-
 replace github.com/docker/docker => github.com/Luet-lab/moby v17.12.0-ce-rc1.0.20200605210607-749178b8f80d+incompatible
 
 require (
-	github.com/MottainaiCI/lxd-compose v0.15.0
+	github.com/MottainaiCI/lxd-compose v0.16.1
 	github.com/Sabayon/pkgs-checker v0.10.5
 	github.com/mudler/luet v0.0.0-00010101000000-000000000000
-	github.com/onsi/ginkgo v1.16.5
+	github.com/onsi/ginkgo/v2 v2.0.0
 	github.com/onsi/gomega v1.17.0
 	github.com/spf13/cobra v1.2.1
 	gopkg.in/yaml.v2 v2.4.0
