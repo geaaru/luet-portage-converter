@@ -11,7 +11,7 @@ import (
 
 	. "github.com/Luet-lab/luet-portage-converter/pkg/converter"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
