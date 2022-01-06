@@ -2,7 +2,7 @@ module github.com/Luet-lab/luet-portage-converter
 
 go 1.16
 
-replace github.com/mudler/luet => github.com/geaaru/luet v0.22.1-geaaru
+replace github.com/mudler/luet => github.com/geaaru/luet v0.22.2-geaaru
 
 replace github.com/containerd/containerd => github.com/containerd/containerd v1.3.1-0.20200227195959-4d242818bf55
 

@@ -423,6 +423,8 @@ github.com/geaaru/luet v0.21.2-geaaru h1:rixk8He9kb3Yr/EduG5Yo9/STkQkuG4+2q55MOY
 github.com/geaaru/luet v0.21.2-geaaru/go.mod h1:S1aPu6kLRgZkH1jPOiAqzlaGJEesGiGXvzigNTdUCVg=
 github.com/geaaru/luet v0.22.1-geaaru h1:15GTfhTcf75SKvLkWj0oTCeivhco6336hAXupAIQ83g=
 github.com/geaaru/luet v0.22.1-geaaru/go.mod h1:SyPnq0L1T5TN8UoSr+4GyAmwdhx3/d+fbb1hSfMIERY=
+github.com/geaaru/luet v0.22.2-geaaru h1:0+7iEzld9Va9fc02RZ3RpJUvttPV4sXYyvIInW44ebk=
+github.com/geaaru/luet v0.22.2-geaaru/go.mod h1:VrEWgt87C+xe5NIpbu06GE00w9jbQlTNLA4cmxDlRmg=
 github.com/geaaru/pkgs-checker v0.11.0 h1:ma/fD3llJL++nG67gpm3r+X50wDLjVrOpGpWpm1FtzA=
 github.com/geaaru/pkgs-checker v0.11.0/go.mod h1:A1b5ziC+FWvaI9WRVojz+2PveAYFNTyQNxq/41TTVw8=
 github.com/geaaru/tar-formers v0.4.0 h1:A+XWaqaepu/7FiwJXS76fjq5kOyGvnWs1iZQrBe4M+0=
