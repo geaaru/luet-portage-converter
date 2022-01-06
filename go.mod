@@ -2,7 +2,7 @@ module github.com/Luet-lab/luet-portage-converter
 
 go 1.16
 
-replace github.com/mudler/luet => github.com/geaaru/luet v0.21.2-geaaru
+replace github.com/mudler/luet => github.com/geaaru/luet v0.22.1-geaaru
 
 replace github.com/containerd/containerd => github.com/containerd/containerd v1.3.1-0.20200227195959-4d242818bf55
 
@@ -16,7 +16,7 @@ replace github.com/docker/docker => github.com/Luet-lab/moby v17.12.0-ce-rc1.0.2
 
 require (
 	github.com/MottainaiCI/lxd-compose v0.16.1
-	github.com/Sabayon/pkgs-checker v0.10.5
+	github.com/geaaru/pkgs-checker v0.11.0
 	github.com/mudler/luet v0.0.0-00010101000000-000000000000
 	github.com/onsi/ginkgo/v2 v2.0.0
 	github.com/onsi/gomega v1.17.0

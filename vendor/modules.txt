@@ -40,7 +40,6 @@ github.com/Microsoft/hcsshim/osversion
 ## explicit
 github.com/MottainaiCI/lxd-compose/pkg/helpers
 # github.com/Sabayon/pkgs-checker v0.10.5
-## explicit
 github.com/Sabayon/pkgs-checker/pkg/gentoo
 # github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 github.com/asaskevich/govalidator
@@ -188,6 +187,9 @@ github.com/ecooper/qlearning
 github.com/fatih/color
 # github.com/fsnotify/fsnotify v1.5.1
 github.com/fsnotify/fsnotify
+# github.com/geaaru/pkgs-checker v0.11.0
+## explicit
+github.com/geaaru/pkgs-checker/pkg/gentoo
 # github.com/geaaru/tar-formers v0.4.0
 github.com/geaaru/tar-formers/pkg/executor
 github.com/geaaru/tar-formers/pkg/logger
@@ -407,7 +409,7 @@ github.com/modern-go/reflect2
 github.com/morikuni/aec
 # github.com/mudler/go-pluggable v0.0.0-20210513155700-54c6443073af
 github.com/mudler/go-pluggable
-# github.com/mudler/luet v0.0.0-00010101000000-000000000000 => github.com/geaaru/luet v0.21.2-geaaru
+# github.com/mudler/luet v0.0.0-00010101000000-000000000000 => github.com/geaaru/luet v0.22.1-geaaru
 ## explicit
 github.com/mudler/luet/pkg/bus
 github.com/mudler/luet/pkg/compiler/types/compression
@@ -831,7 +833,7 @@ k8s.io/utils/pointer
 sigs.k8s.io/structured-merge-diff/v4/value
 # sigs.k8s.io/yaml v1.2.0
 sigs.k8s.io/yaml
-# github.com/mudler/luet => github.com/geaaru/luet v0.21.2-geaaru
+# github.com/mudler/luet => github.com/geaaru/luet v0.22.1-geaaru
 # github.com/containerd/containerd => github.com/containerd/containerd v1.3.1-0.20200227195959-4d242818bf55
 # github.com/hashicorp/go-immutable-radix => github.com/tonistiigi/go-immutable-radix v0.0.0-20170803185627-826af9ccf0fe
 # github.com/jaguilar/vt100 => github.com/tonistiigi/vt100 v0.0.0-20190402012908-ad4c4a574305

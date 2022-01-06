@@ -33,6 +33,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	LuetVersion = "0.22.1"
+)
+
 var LuetCfg = NewLuetConfig(v.GetViper())
 
 type LuetLoggingConfig struct {
@@ -62,6 +66,9 @@ type LuetGeneralConfig struct {
 	SpinnerMs       int  `yaml:"spinner_ms,omitempty" mapstructure:"spinner_ms"`
 	SpinnerCharset  int  `yaml:"spinner_charset,omitempty" mapstructure:"spinner_charset"`
 	FatalWarns      bool `yaml:"fatal_warnings,omitempty" mapstructure:"fatal_warnings"`
+
+	ClientTimeout    int `yaml:"client_timeout,omitempty" mapstructure:"client_timeout,omitempty"`
+	ClientMultiFetch int `yaml:"client_multifetch,omitempty" mapstructure:"client_multifetch,omitempty"`
 
 	OverwriteDirPerms bool `yaml:"overwrite_dir_perms,omitempty" mapstructure:"overwrite_dir_perms,omitempty"`
 }
@@ -116,6 +123,11 @@ func (sc *LuetSystemConfig) GetSystemRepoDatabaseDirPath() string {
 		panic(err)
 	}
 	return dbpath
+}
+
+func (sc *LuetSystemConfig) GetSystemReposDirPath() string {
+	ans := filepath.Join(sc.Rootfs, sc.DatabasePath, "repos")
+	return ans
 }
 
 func (sc *LuetSystemConfig) GetSystemPkgsCacheDirPath() (ans string) {
@@ -281,6 +293,8 @@ func GenDefault(viper *v.Viper) {
 	viper.SetDefault("general.spinner_charset", 22)
 	viper.SetDefault("general.fatal_warnings", false)
 	viper.SetDefault("general.overwrite_dir_perms", false)
+	viper.SetDefault("general.client_timeout", 3600)
+	viper.SetDefault("general.client_multifetch", 2)
 
 	u, err := user.Current()
 	// os/user doesn't work in from scratch environments
