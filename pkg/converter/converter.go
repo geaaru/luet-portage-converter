@@ -16,7 +16,7 @@ import (
 	"github.com/Luet-lab/luet-portage-converter/pkg/reposcan"
 	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
 
-	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 	luet_config "github.com/mudler/luet/pkg/config"
 	. "github.com/mudler/luet/pkg/logger"
 	luet_pkg "github.com/mudler/luet/pkg/package"

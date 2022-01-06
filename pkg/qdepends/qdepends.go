@@ -14,7 +14,7 @@ import (
 	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
 	helpers "github.com/MottainaiCI/lxd-compose/pkg/helpers"
 
-	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 )
 
 type QDependsResolver struct{}

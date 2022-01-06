@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	_gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	_gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 	. "github.com/mudler/luet/pkg/logger"
 )
 

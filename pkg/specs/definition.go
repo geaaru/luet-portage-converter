@@ -11,7 +11,7 @@ import (
 	"path"
 	"path/filepath"
 
-	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 	luet_pkg "github.com/mudler/luet/pkg/package"
 
 	"gopkg.in/yaml.v2"

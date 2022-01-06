@@ -11,7 +11,7 @@ import (
 	. "github.com/Luet-lab/luet-portage-converter/pkg/reposcan"
 	specs "github.com/Luet-lab/luet-portage-converter/pkg/specs"
 
-	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 	luet_pkg "github.com/mudler/luet/pkg/package"
 
 	. "github.com/onsi/ginkgo/v2"

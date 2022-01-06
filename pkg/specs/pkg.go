@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 )
 
 func (p *PortageConverterPkg) GetPackageName() string {

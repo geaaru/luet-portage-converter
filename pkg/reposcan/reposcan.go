@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
-	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 
 	"gopkg.in/yaml.v2"
 )

@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	gentoo "github.com/Sabayon/pkgs-checker/pkg/gentoo"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 	luet_pkg "github.com/mudler/luet/pkg/package"
 )
 
