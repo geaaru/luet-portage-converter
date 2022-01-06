@@ -47,6 +47,7 @@ type PortageConverter struct {
 	DisableStage4        bool
 	DisableConflicts     bool
 	UsingLayerForRuntime bool
+	ContinueWithError    bool
 	DisabledUseFlags     []string
 	TreePaths            []string
 	FilteredPackages     []string
@@ -63,6 +64,7 @@ func NewPortageConverter(targetDir, backend string) *PortageConverter {
 		Backend:              backend,
 		Override:             false,
 		IgnoreMissingDeps:    false,
+		ContinueWithError:    false,
 		DisableConflicts:     false,
 		UsingLayerForRuntime: false,
 		DisabledUseFlags:     []string{},
@@ -295,6 +297,9 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			}
 
 			if gt {
+				InfoC(fmt.Sprintf("[%s-%s] package to upgrade (%s)", solution.Package.GetPackageName(),
+					solution.Package.GetPVR(), gpTree.GetPVR()))
+
 				newVersion = true
 			} else {
 				newVersion = false
@@ -623,6 +628,7 @@ func (pc *PortageConverter) InitConverter(showBanner bool) error {
 		resolver.SetDepsWithSlot(pc.Specs.ReposcanRequiresWithSlot)
 		resolver.SetDisabledUseFlags(pc.Specs.ReposcanDisabledUseFlags)
 		resolver.SetDisabledKeywords(pc.Specs.ReposcanDisabledKeywords)
+		resolver.SetContinueWithError(pc.ContinueWithError)
 		if showBanner {
 			InfoC(fmt.Sprintf("Using dependency with slot on category: %v",
 				resolver.GetDepsWithSlot()))

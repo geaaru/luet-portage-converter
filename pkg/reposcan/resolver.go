@@ -25,6 +25,7 @@ type RepoScanResolver struct {
 	MapConstraints    map[string]([]gentoo.GentooPackage)
 	Map               map[string]([]RepoScanAtom)
 	IgnoreMissingDeps bool
+	ContinueWithError bool
 	DepsWithSlot      bool
 	DisabledUseFlags  []string
 	DisabledKeywords  []string
@@ -39,8 +40,12 @@ func NewRepoScanResolver() *RepoScanResolver {
 		Map:               make(map[string][]RepoScanAtom, 0),
 		IgnoreMissingDeps: false,
 		DepsWithSlot:      true,
+		ContinueWithError: true,
 	}
 }
+
+func (r *RepoScanResolver) SetContinueWithError(v bool) { r.ContinueWithError = v }
+func (r *RepoScanResolver) GetContinueWithError() bool  { return r.ContinueWithError }
 
 func (r *RepoScanResolver) SetIgnoreMissingDeps(v bool)    { r.IgnoreMissingDeps = v }
 func (r *RepoScanResolver) IsIgnoreMissingDeps() bool      { return r.IgnoreMissingDeps }
@@ -118,6 +123,7 @@ func (r *RepoScanResolver) LoadJsonFiles(verbose bool) error {
 
 func (r *RepoScanResolver) BuildMap() error {
 	for idx, _ := range r.Sources {
+
 		for pkg, atom := range r.Sources[idx].Atoms {
 
 			if atom.Status != "" {
@@ -127,8 +133,10 @@ func (r *RepoScanResolver) BuildMap() error {
 
 			p := atom.CatPkg
 			if val, ok := r.Map[p]; ok {
+
+				atomref := r.Sources[idx].Atoms[pkg]
 				// POST: entry found
-				r.Map[p] = append(val, r.Sources[idx].Atoms[pkg])
+				r.Map[p] = append(val, atomref)
 
 			} else {
 				atomref := r.Sources[idx].Atoms[pkg]
@@ -691,6 +699,11 @@ func (r *RepoScanResolver) KeywordsIsAdmit(atom *RepoScanAtom, p *gentoo.GentooP
 
 	keywords := atom.GetMetadataValue("KEYWORDS")
 	if keywords == "" {
+		if r.ContinueWithError {
+			Warning(fmt.Sprintf(
+				"[%s] Continue also if KEYWORDS is empty.", atom.Atom))
+			return true, nil
+		}
 		DebugC(fmt.Sprintf(
 			"[%s] Skip version without keywords %s or disabled.", atom.Atom, p.GetPF()))
 		return false, nil

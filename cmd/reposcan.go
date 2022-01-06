@@ -43,6 +43,7 @@ func newReposcanResolveCommand() *cobra.Command {
 			jsonOutput, _ := cmd.Flags().GetBool("json")
 			backend, _ := cmd.Flags().GetString("backend")
 			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
+			continueWithError, _ := cmd.Flags().GetBool("continue-with-error")
 			pkg, _ := cmd.Flags().GetString("pkg")
 
 			converter := converter.NewPortageConverter(to, backend)
@@ -52,6 +53,7 @@ func newReposcanResolveCommand() *cobra.Command {
 			converter.DisableStage2 = stage2
 			converter.DisableStage3 = stage3
 			converter.DisableStage4 = !stage4
+			converter.ContinueWithError = continueWithError
 
 			if debug {
 				LuetCfg.GetGeneral().Debug = debug
@@ -140,6 +142,7 @@ func newReposcanResolveCommand() *cobra.Command {
 	cmd.Flags().String("to", "", "Targer tree where bump new specs.")
 	cmd.Flags().Bool("override", false, "Override existing specs if already present.")
 	cmd.Flags().Bool("json", false, "JSON output.")
+	cmd.Flags().Bool("continue-with-error", false, "Continue processing with errors (for example: no KEYWORDS defined).")
 	cmd.Flags().StringP("pkg", "p", "", "Define the package to analyze.")
 	cmd.PersistentFlags().Bool("with-portage-pkg", false, "Generate portage packages for every required package.")
 

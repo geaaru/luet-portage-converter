@@ -40,6 +40,7 @@ func newGenerateCommand() *cobra.Command {
 			debug, _ := cmd.Flags().GetBool("debug")
 			backend, _ := cmd.Flags().GetString("backend")
 			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
+			continueWithError, _ := cmd.Flags().GetBool("continue-with-error")
 			pkgs, _ := cmd.Flags().GetStringArray("pkg")
 			withPortagePkgs, _ := cmd.Flags().GetBool("with-portage-pkg")
 			disableConflicts, _ := cmd.Flags().GetBool("disable-conflicts")
@@ -55,6 +56,7 @@ func newGenerateCommand() *cobra.Command {
 			converter.DisableStage4 = !stage4
 			converter.DisableConflicts = disableConflicts
 			converter.UsingLayerForRuntime = layer4Rdepends
+			converter.ContinueWithError = continueWithError
 
 			if debug {
 				LuetCfg.GetGeneral().Debug = debug
@@ -106,6 +108,7 @@ func newGenerateCommand() *cobra.Command {
 	cmd.Flags().Bool("with-portage-pkg", false, "Generate portage packages for every required package.")
 	cmd.Flags().Bool("disable-conflicts", false, "Disable elaboration of runtime and buildtime conflicts.")
 	cmd.Flags().Bool("layer4rdepends", false, "Check layer for runtime deps and skip generation.")
+	cmd.Flags().Bool("continue-with-error", false, "Continue processing with errors (for example: no KEYWORDS defined).")
 
 	return cmd
 }
