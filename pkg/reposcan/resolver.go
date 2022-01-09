@@ -447,7 +447,7 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 				continue
 			}
 
-			atom, err := r.GetLastPackage(sdep.Dep.GetPackageName())
+			atom, err := r.GetLastPackage(sdep.Dep.GetPackageNameWithSlot())
 			if err == nil {
 
 				gp, err := atom.ToGentooPackage()
@@ -475,7 +475,7 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 	if gdep.Dep != nil {
 
 		// Check if current deps is available.
-		atom, err := r.GetLastPackage(gdep.Dep.GetPackageName())
+		atom, err := r.GetLastPackage(gdep.Dep.GetPackageNameWithSlot())
 		if err == nil {
 
 			gp, err := atom.ToGentooPackage()
