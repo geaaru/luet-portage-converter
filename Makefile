@@ -3,8 +3,8 @@ DESTDIR ?=
 EXTNAME := $(shell basename $(shell pwd))
 
 # go tool nm ./luet | grep Commit
-override LDFLAGS += -X "github.com/Luet-lab/luet-portage-converter/pkg/converter.BuildTime=$(shell date -u '+%Y-%m-%d %I:%M:%S %Z')"
-override LDFLAGS += -X "github.com/Luet-lab/luet-portage-converter/pkg/converter.BuildCommit=$(shell git rev-parse HEAD)"
+override LDFLAGS += -X "github.com/geaaru/luet-portage-converter/pkg/converter.BuildTime=$(shell date -u '+%Y-%m-%d %I:%M:%S %Z')"
+override LDFLAGS += -X "github.com/geaaru/luet-portage-converter/pkg/converter.BuildCommit=$(shell git rev-parse HEAD)"
 
 all: build install
 
