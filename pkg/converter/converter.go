@@ -300,13 +300,21 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 				InfoC(fmt.Sprintf("[%s-%s] package to upgrade (%s)", solution.Package.GetPackageName(),
 					solution.Package.GetPVR(), gpTree.GetPVR()))
 
-				newVersion = true
+				originaPkgVersion, _ := luetPkgTree.GetLabels()["original.package.version"]
+
+				// Ensure that is related to the package suffix not available
+				// on luet version
+				if originaPkgVersion == "" || originaPkgVersion != solution.Package.GetPVR() {
+					newVersion = true
+				}
 			} else {
 				newVersion = false
 			}
 
 			originPackage = luetPkgTree
 		}
+
+		solution.PackageUpgraded = originPackage.(*luet_pkg.DefaultPackage)
 
 		if !newVersion && !pc.Override {
 			// Nothing to do
@@ -315,7 +323,6 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		}
 
 		solution.Upgrade = true
-		solution.PackageUpgraded = originPackage.(*luet_pkg.DefaultPackage)
 		solution.PackageDir = pkgDir
 
 	}
@@ -712,6 +719,11 @@ func (pc *PortageConverter) Generate() error {
 		pack := pkg.ToPack(true)
 
 		if pkg.Upgrade && !pc.Override {
+
+			// The package could be in another package dir
+			defFile = filepath.Join(pkg.PackageUpgraded.GetPath(), "definition.yaml")
+			buildFile = filepath.Join(pkg.PackageUpgraded.GetPath(), "build.yaml")
+			finalizerFile = filepath.Join(pkg.PackageUpgraded.GetPath(), "finalize.yaml")
 
 			InfoC(fmt.Sprintf("[%s-%s] package to upgrade", pkg.Package.GetPackageName(),
 				pkg.Package.GetPVR()))
