@@ -33,6 +33,10 @@ func (pc *PortageConverter) Stage3() error {
 
 	for _, pkg := range pc.Solutions {
 
+		if pkg.Upgrade && !pc.Override {
+			continue
+		}
+
 		pack := pkg.ToPack(true)
 		updateBuildDeps := false
 		updateRuntimeDeps := false

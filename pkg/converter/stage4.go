@@ -49,6 +49,10 @@ func (pc *PortageConverter) Stage4() error {
 
 	for idx, pkg := range pc.Solutions {
 
+		if pkg.Upgrade && !pc.Override {
+			continue
+		}
+
 		levels = NewStage4LevelsWithSize(1)
 		worker.Levels = levels
 
