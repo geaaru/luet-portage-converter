@@ -44,6 +44,10 @@ func NewGentooDependency(pkg, use string) (*GentooDependency, error) {
 			return nil, err
 		}
 
+		// TODO: Fix support of slot with :=
+		//       Drop it for now.
+		ans.Dep.Slot = strings.ReplaceAll(ans.Dep.Slot, "=", "")
+
 		// TODO: Fix this on parsing phase for handle correctly ${PV}
 		if strings.HasSuffix(ans.Dep.Name, "-") {
 			ans.Dep.Name = ans.Dep.Name[:len(ans.Dep.Name)-1]
