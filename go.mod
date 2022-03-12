@@ -18,8 +18,9 @@ require (
 	github.com/MottainaiCI/lxd-compose v0.16.1
 	github.com/geaaru/pkgs-checker v0.11.0
 	github.com/mudler/luet v0.0.0-00010101000000-000000000000
-	github.com/onsi/ginkgo/v2 v2.0.0
+	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.17.0
 	github.com/spf13/cobra v1.2.1
+	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
