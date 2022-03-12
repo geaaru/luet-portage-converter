@@ -39,6 +39,8 @@ github.com/Microsoft/hcsshim/osversion
 # github.com/MottainaiCI/lxd-compose v0.16.1
 ## explicit
 github.com/MottainaiCI/lxd-compose/pkg/helpers
+# github.com/MottainaiCI/simplestreams-builder v0.1.1
+## explicit
 # github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 github.com/asaskevich/govalidator
 # github.com/asdine/storm v0.0.0-20190418133842-e0f77eada154
@@ -52,7 +54,7 @@ github.com/asdine/storm/q
 github.com/beorn7/perks/quantile
 # github.com/briandowns/spinner v1.12.1-0.20201220203425-e201aaea0a31
 github.com/briandowns/spinner
-# github.com/cespare/xxhash/v2 v2.1.1
+# github.com/cespare/xxhash/v2 v2.1.2
 github.com/cespare/xxhash/v2
 # github.com/chuckpreslar/emission v0.0.0-20170206194824-a7ddd980baf9
 github.com/chuckpreslar/emission
@@ -181,11 +183,11 @@ github.com/docker/go-metrics
 github.com/docker/go-units
 # github.com/ecooper/qlearning v0.0.0-20160612200101-3075011a69fd
 github.com/ecooper/qlearning
-# github.com/fatih/color v1.12.0
+# github.com/fatih/color v1.13.0
 github.com/fatih/color
 # github.com/fsnotify/fsnotify v1.5.1
 github.com/fsnotify/fsnotify
-# github.com/geaaru/pkgs-checker v0.11.0
+# github.com/geaaru/pkgs-checker v0.12.3
 ## explicit
 github.com/geaaru/pkgs-checker/pkg/gentoo
 # github.com/geaaru/tar-formers v0.4.0
@@ -265,11 +267,12 @@ github.com/googleapis/gnostic/openapiv2
 github.com/gorilla/mux
 # github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc
-# github.com/hashicorp/go-immutable-radix v1.0.0 => github.com/tonistiigi/go-immutable-radix v0.0.0-20170803185627-826af9ccf0fe
+# github.com/hashicorp/go-immutable-radix v1.3.1 => github.com/tonistiigi/go-immutable-radix v0.0.0-20170803185627-826af9ccf0fe
 github.com/hashicorp/go-immutable-radix
-# github.com/hashicorp/go-version v1.3.0
+# github.com/hashicorp/go-version v1.4.0
+## explicit
 github.com/hashicorp/go-version
-# github.com/hashicorp/golang-lru v0.5.3
+# github.com/hashicorp/golang-lru v0.5.4
 github.com/hashicorp/golang-lru/simplelru
 # github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl
@@ -290,7 +293,7 @@ github.com/imdario/mergo
 github.com/inconshreveable/mousetrap
 # github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
 github.com/jinzhu/copier
-# github.com/json-iterator/go v1.1.11
+# github.com/json-iterator/go v1.1.12
 github.com/json-iterator/go
 # github.com/knqyf263/go-deb-version v0.0.0-20190517075300-09fca494f03d
 github.com/knqyf263/go-deb-version
@@ -298,12 +301,15 @@ github.com/knqyf263/go-deb-version
 github.com/kyokomi/emoji
 # github.com/logrusorgru/aurora v2.0.3+incompatible
 github.com/logrusorgru/aurora
-# github.com/magiconair/properties v1.8.5
+# github.com/magiconair/properties v1.8.6
+## explicit
 github.com/magiconair/properties
-# github.com/mattn/go-colorable v0.1.11
+# github.com/mattn/go-colorable v0.1.12
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.14
 github.com/mattn/go-isatty
+# github.com/mattn/go-sqlite3 v1.14.12
+## explicit
 # github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/miekg/pkcs11 v1.0.2
@@ -314,7 +320,7 @@ github.com/mitchellh/copystructure
 github.com/mitchellh/hashstructure
 # github.com/mitchellh/hashstructure/v2 v2.0.1
 github.com/mitchellh/hashstructure/v2
-# github.com/mitchellh/mapstructure v1.4.2
+# github.com/mitchellh/mapstructure v1.4.3
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v1.0.2
 github.com/mitchellh/reflectwalk
@@ -401,7 +407,7 @@ github.com/moby/sys/mount
 github.com/moby/sys/mountinfo
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 github.com/modern-go/concurrent
-# github.com/modern-go/reflect2 v1.0.1
+# github.com/modern-go/reflect2 v1.0.2
 github.com/modern-go/reflect2
 # github.com/morikuni/aec v1.0.0
 github.com/morikuni/aec
@@ -492,19 +498,20 @@ github.com/prometheus/procfs/internal/util
 github.com/shopspring/decimal
 # github.com/sirupsen/logrus v1.8.1
 github.com/sirupsen/logrus
-# github.com/spf13/afero v1.6.0
+# github.com/spf13/afero v1.8.2
+## explicit
 github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/spf13/cast v1.4.1
 github.com/spf13/cast
-# github.com/spf13/cobra v1.2.1
+# github.com/spf13/cobra v1.4.0
 ## explicit
 github.com/spf13/cobra
 # github.com/spf13/jwalterweatherman v1.1.0
 github.com/spf13/jwalterweatherman
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# github.com/spf13/viper v1.9.0
+# github.com/spf13/viper v1.10.1
 github.com/spf13/viper
 github.com/spf13/viper/internal/encoding
 github.com/spf13/viper/internal/encoding/hcl
@@ -557,7 +564,7 @@ go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
-# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+# golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/ed25519
@@ -579,7 +586,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
+# golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
 # golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
@@ -625,9 +632,9 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20211101144312-62acf1d99145
+# google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.41.0
+# google.golang.org/grpc v1.43.0
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
@@ -639,6 +646,7 @@ google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/codes
 google.golang.org/grpc/connectivity
 google.golang.org/grpc/credentials
+google.golang.org/grpc/credentials/insecure
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
@@ -666,7 +674,6 @@ google.golang.org/grpc/internal/status
 google.golang.org/grpc/internal/syscall
 google.golang.org/grpc/internal/transport
 google.golang.org/grpc/internal/transport/networktype
-google.golang.org/grpc/internal/xds/env
 google.golang.org/grpc/keepalive
 google.golang.org/grpc/metadata
 google.golang.org/grpc/peer
@@ -708,7 +715,8 @@ google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/inf.v0 v0.9.1
 gopkg.in/inf.v0
-# gopkg.in/ini.v1 v1.63.2
+# gopkg.in/ini.v1 v1.66.4
+## explicit
 gopkg.in/ini.v1
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit

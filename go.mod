@@ -16,12 +16,18 @@ replace github.com/docker/docker => github.com/Luet-lab/moby v17.12.0-ce-rc1.0.2
 
 require (
 	github.com/MottainaiCI/lxd-compose v0.16.1
-	github.com/geaaru/pkgs-checker v0.11.0
+	github.com/MottainaiCI/simplestreams-builder v0.1.1 // indirect
+	github.com/geaaru/pkgs-checker v0.12.3
+	github.com/hashicorp/go-version v1.4.0 // indirect
+	github.com/magiconair/properties v1.8.6 // indirect
+	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/mudler/luet v0.0.0-00010101000000-000000000000
 	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.18.1
-	github.com/spf13/cobra v1.2.1
+	github.com/spf13/afero v1.8.2 // indirect
+	github.com/spf13/cobra v1.4.0
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 // indirect
+	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
