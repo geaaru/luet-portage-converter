@@ -16,11 +16,9 @@ replace github.com/docker/docker => github.com/Luet-lab/moby v17.12.0-ce-rc1.0.2
 
 require (
 	github.com/MottainaiCI/lxd-compose v0.16.1
-	github.com/MottainaiCI/simplestreams-builder v0.1.1 // indirect
 	github.com/geaaru/pkgs-checker v0.12.3
 	github.com/hashicorp/go-version v1.4.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
-	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/mudler/luet v0.0.0-00010101000000-000000000000
 	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.18.1
@@ -66,6 +64,7 @@ require (
 	github.com/ecooper/qlearning v0.0.0-20160612200101-3075011a69fd // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/fsouza/go-dockerclient v1.6.6 // indirect
 	github.com/geaaru/tar-formers v0.4.0 // indirect
 	github.com/genuinetools/img v0.5.11 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
