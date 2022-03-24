@@ -12,19 +12,28 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17.x
+
+      - name: Get Golang Version
+        id: goversion
+        run: |
+          echo "GOVERSION=$(go env GOVERSION)" >> $GITHUB_ENV
+
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: setup-docker
-        uses: docker-practice/actions-setup-docker@0.0.1
+
       - name: Install deps
         run: |
             sudo -E env "PATH=$PATH" make deps
+
       - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           install-only: true
+
       - name: Build test
         run: sudo -E env "PATH=$PATH" make goreleaser-snapshot
+        env:
+          GOVERSION: ${{ env.GOVERSION }}
 
       - name: Tests
         run: |
