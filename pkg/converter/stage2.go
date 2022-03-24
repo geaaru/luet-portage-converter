@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
+	"github.com/geaaru/luet-portage-converter/pkg/specs"
 
-	. "github.com/mudler/luet/pkg/logger"
-	luet_pkg "github.com/mudler/luet/pkg/package"
-	luet_tree "github.com/mudler/luet/pkg/tree"
+	. "github.com/geaaru/luet/pkg/logger"
+	luet_pkg "github.com/geaaru/luet/pkg/package"
+	luet_tree "github.com/geaaru/luet/pkg/tree"
 )
 
 func (pc *PortageConverter) applyRuntimeMutations(pkg *luet_pkg.DefaultPackage, art *specs.PortageConverterArtefact) {

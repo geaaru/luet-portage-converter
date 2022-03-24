@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	_gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
-	. "github.com/mudler/luet/pkg/logger"
+	. "github.com/geaaru/luet/pkg/logger"
 )
 
 type GentooDependency struct {

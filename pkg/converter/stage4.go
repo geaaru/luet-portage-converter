@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	cfg "github.com/mudler/luet/pkg/config"
-	. "github.com/mudler/luet/pkg/logger"
-	luet_pkg "github.com/mudler/luet/pkg/package"
-	luet_tree "github.com/mudler/luet/pkg/tree"
+	cfg "github.com/geaaru/luet/pkg/config"
+	. "github.com/geaaru/luet/pkg/logger"
+	luet_pkg "github.com/geaaru/luet/pkg/package"
+	luet_tree "github.com/geaaru/luet/pkg/tree"
 )
 
 type Stage4Worker struct {

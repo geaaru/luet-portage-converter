@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
-	"github.com/Luet-lab/luet-portage-converter/cmd"
+	"github.com/geaaru/luet-portage-converter/cmd"
 )
 
 func main() {

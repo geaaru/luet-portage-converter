@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
-	luet_pkg "github.com/mudler/luet/pkg/package"
+	luet_pkg "github.com/geaaru/luet/pkg/package"
 )
 
 func (s *PortageSolution) SetLabel(k, v string) {

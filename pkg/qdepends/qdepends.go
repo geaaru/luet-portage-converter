@@ -11,7 +11,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
+	"github.com/geaaru/luet-portage-converter/pkg/specs"
 	helpers "github.com/MottainaiCI/lxd-compose/pkg/helpers"
 
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"

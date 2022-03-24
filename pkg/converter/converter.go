@@ -12,15 +12,15 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Luet-lab/luet-portage-converter/pkg/qdepends"
-	"github.com/Luet-lab/luet-portage-converter/pkg/reposcan"
-	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
+	"github.com/geaaru/luet-portage-converter/pkg/qdepends"
+	"github.com/geaaru/luet-portage-converter/pkg/reposcan"
+	"github.com/geaaru/luet-portage-converter/pkg/specs"
 
+	luet_config "github.com/geaaru/luet/pkg/config"
+	. "github.com/geaaru/luet/pkg/logger"
+	luet_pkg "github.com/geaaru/luet/pkg/package"
+	luet_tree "github.com/geaaru/luet/pkg/tree"
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
-	luet_config "github.com/mudler/luet/pkg/config"
-	. "github.com/mudler/luet/pkg/logger"
-	luet_pkg "github.com/mudler/luet/pkg/package"
-	luet_tree "github.com/mudler/luet/pkg/tree"
 )
 
 var (
@@ -42,6 +42,7 @@ type PortageConverter struct {
 	WithPortagePkgs      bool
 	Override             bool
 	IgnoreMissingDeps    bool
+	IgnoreWrongPackages  bool
 	DisableStage2        bool
 	DisableStage3        bool
 	DisableStage4        bool
@@ -64,6 +65,7 @@ func NewPortageConverter(targetDir, backend string) *PortageConverter {
 		Backend:              backend,
 		Override:             false,
 		IgnoreMissingDeps:    false,
+		IgnoreWrongPackages:  false,
 		ContinueWithError:    false,
 		DisableConflicts:     false,
 		UsingLayerForRuntime: false,
@@ -231,7 +233,12 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 	solution, err := pc.Resolver.Resolve(pkg, opts)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error on resolve %s: %s", pkg, err.Error()))
+		if pc.IgnoreWrongPackages {
+			Warning(fmt.Sprintf("Error on resolve %s: %s. Ignoring it.", pkg, err.Error()))
+			return nil
+		} else {
+			return errors.New(fmt.Sprintf("Error on resolve %s: %s", pkg, err.Error()))
+		}
 	}
 
 	DebugC(fmt.Sprintf("[%s] rconflicts %d rdeps %d bconflicts %d bdpes %d",

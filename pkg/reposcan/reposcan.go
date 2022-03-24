@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
+	"github.com/geaaru/luet-portage-converter/pkg/specs"
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 
 	"gopkg.in/yaml.v2"

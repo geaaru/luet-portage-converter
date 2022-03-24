@@ -6,9 +6,9 @@ package converter_test
 
 import (
 	//"fmt"
-	luet_pkg "github.com/mudler/luet/pkg/package"
+	luet_pkg "github.com/geaaru/luet/pkg/package"
 
-	. "github.com/Luet-lab/luet-portage-converter/pkg/converter"
+	. "github.com/geaaru/luet-portage-converter/pkg/converter"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

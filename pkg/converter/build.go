@@ -9,9 +9,9 @@ import (
 	"errors"
 	"io/ioutil"
 
-	compilerspec "github.com/mudler/luet/pkg/compiler/types/spec"
-	pkg "github.com/mudler/luet/pkg/package"
-	st "github.com/mudler/luet/pkg/spectooling"
+	compilerspec "github.com/geaaru/luet/pkg/compiler/types/spec"
+	pkg "github.com/geaaru/luet/pkg/package"
+	st "github.com/geaaru/luet/pkg/spectooling"
 
 	"gopkg.in/yaml.v2"
 )

@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Luet-lab/luet-portage-converter/pkg/converter"
+	"github.com/geaaru/luet-portage-converter/pkg/converter"
 
-	. "github.com/mudler/luet/pkg/config"
-	. "github.com/mudler/luet/pkg/logger"
+	. "github.com/geaaru/luet/pkg/config"
+	. "github.com/geaaru/luet/pkg/logger"
 
 	"github.com/spf13/cobra"
 )
@@ -40,6 +40,7 @@ func newGenerateCommand() *cobra.Command {
 			debug, _ := cmd.Flags().GetBool("debug")
 			backend, _ := cmd.Flags().GetString("backend")
 			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
+			ignoreWrongPackages, _ := cmd.Flags().GetBool("ignore-wrong-packages")
 			continueWithError, _ := cmd.Flags().GetBool("continue-with-error")
 			pkgs, _ := cmd.Flags().GetStringArray("pkg")
 			withPortagePkgs, _ := cmd.Flags().GetBool("with-portage-pkg")
@@ -57,6 +58,7 @@ func newGenerateCommand() *cobra.Command {
 			converter.DisableConflicts = disableConflicts
 			converter.UsingLayerForRuntime = layer4Rdepends
 			converter.ContinueWithError = continueWithError
+			converter.IgnoreWrongPackages = ignoreWrongPackages
 
 			if debug {
 				LuetCfg.GetGeneral().Debug = debug
@@ -109,6 +111,7 @@ func newGenerateCommand() *cobra.Command {
 	cmd.Flags().Bool("disable-conflicts", false, "Disable elaboration of runtime and buildtime conflicts.")
 	cmd.Flags().Bool("layer4rdepends", false, "Check layer for runtime deps and skip generation.")
 	cmd.Flags().Bool("continue-with-error", false, "Continue processing with errors (for example: no KEYWORDS defined).")
+	cmd.Flags().Bool("ignore-wrong-packages", false, "Continue processing when a package is not resolved.")
 
 	return cmd
 }

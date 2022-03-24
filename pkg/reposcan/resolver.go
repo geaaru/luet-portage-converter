@@ -13,9 +13,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
+	"github.com/geaaru/luet-portage-converter/pkg/specs"
+	. "github.com/geaaru/luet/pkg/logger"
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
-	. "github.com/mudler/luet/pkg/logger"
 )
 
 type RepoScanResolver struct {
@@ -122,16 +122,19 @@ func (r *RepoScanResolver) LoadJsonFiles(verbose bool) error {
 }
 
 func (r *RepoScanResolver) BuildMap() error {
+	//fmt.Println("Build MAP ")
 	for idx, _ := range r.Sources {
 
 		for pkg, atom := range r.Sources[idx].Atoms {
 
+			p := atom.CatPkg
+
 			if atom.Status != "" {
+				Warning(fmt.Sprintf(":warn Skipping pkg %s with wrong status.", pkg))
 				// Skip broken atoms
 				continue
 			}
 
-			p := atom.CatPkg
 			if val, ok := r.Map[p]; ok {
 
 				atomref := r.Sources[idx].Atoms[pkg]
@@ -641,7 +644,7 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 			return nil, err
 		}
 
-		valid, err := gp.Admit(availableGp)
+		valid, err := r.PackageIsAdmit(gp, availableGp)
 		if err != nil {
 			return nil, err
 		}

@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Luet-lab/luet-portage-converter/pkg/converter"
-	"github.com/Luet-lab/luet-portage-converter/pkg/specs"
+	"github.com/geaaru/luet-portage-converter/pkg/converter"
+	"github.com/geaaru/luet-portage-converter/pkg/specs"
 
-	. "github.com/mudler/luet/pkg/config"
-	. "github.com/mudler/luet/pkg/logger"
+	. "github.com/geaaru/luet/pkg/config"
+	. "github.com/geaaru/luet/pkg/logger"
 
 	"github.com/spf13/cobra"
 )

@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"path/filepath"
 
-	. "github.com/mudler/luet/pkg/logger"
-	luet_pkg "github.com/mudler/luet/pkg/package"
-	luet_tree "github.com/mudler/luet/pkg/tree"
+	. "github.com/geaaru/luet/pkg/logger"
+	luet_pkg "github.com/geaaru/luet/pkg/package"
+	luet_tree "github.com/geaaru/luet/pkg/tree"
 )
 
 func (pc *PortageConverter) Stage3() error {

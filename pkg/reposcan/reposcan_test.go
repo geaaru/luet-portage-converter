@@ -8,11 +8,11 @@ import (
 	"errors"
 	"fmt"
 
-	. "github.com/Luet-lab/luet-portage-converter/pkg/reposcan"
-	specs "github.com/Luet-lab/luet-portage-converter/pkg/specs"
+	. "github.com/geaaru/luet-portage-converter/pkg/reposcan"
+	specs "github.com/geaaru/luet-portage-converter/pkg/specs"
 
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
-	luet_pkg "github.com/mudler/luet/pkg/package"
+	luet_pkg "github.com/geaaru/luet/pkg/package"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
