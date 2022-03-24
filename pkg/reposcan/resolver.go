@@ -309,41 +309,41 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 				return err
 			}
 
-			if atom.HasMetadataKey("BDEPEND") {
-				bdepends := atom.GetMetadataValue("BDEPEND")
-				solution.SetLabel("BDEPEND", bdepends)
+		}
 
-				deps, err := ParseDependencies(bdepends)
-				if err != nil {
-					Warning(fmt.Sprintf("[%s] BDEPEND: Error on parsing '%s': %s", atom.Atom, bdepends, err.Error()))
-					Warning("Using relations directly.")
+	}
 
-					bdeps, err = atom.GetBuildtimeDeps()
-					if err != nil {
-						return err
-					}
-				} else {
+	if atom.HasMetadataKey("BDEPEND") {
+		bdepends := atom.GetMetadataValue("BDEPEND")
+		solution.SetLabel("BDEPEND", bdepends)
 
-					// Retrieve the use flags
-					useFlags := deps.GetUseFlags()
-					r.assignUseFlags(solution, useFlags, opts)
+		deps, err := ParseDependencies(bdepends)
+		if err != nil {
+			Warning(fmt.Sprintf("[%s] BDEPEND: Error on parsing '%s': %s", atom.Atom, bdepends, err.Error()))
+			Warning("Using relations directly.")
 
-					d, c, err := r.elaborateDepsAndUseFlags(deps, opts)
-					if err != nil {
-						return err
-					}
+			bdeps, err = atom.GetBuildtimeDeps()
+			if err != nil {
+				return err
+			}
+		} else {
 
-					if len(d) > 0 {
-						bdeps = append(bdeps, d...)
-					}
+			// Retrieve the use flags
+			useFlags := deps.GetUseFlags()
+			r.assignUseFlags(solution, useFlags, opts)
 
-					if len(c) > 0 {
-						conflicts = append(conflicts, c...)
-					}
-				}
-
+			d, c, err := r.elaborateDepsAndUseFlags(deps, opts)
+			if err != nil {
+				return err
 			}
 
+			if len(d) > 0 {
+				bdeps = append(bdeps, d...)
+			}
+
+			if len(c) > 0 {
+				conflicts = append(conflicts, c...)
+			}
 		}
 
 	}
