@@ -24,7 +24,8 @@ func (a *PortageConverterArtefact) GetAnnotations() map[string]interface{} { ret
 
 func (a *PortageConverterArtefact) HasRuntimeMutations() bool {
 	ans := false
-	if len(a.Mutations.RuntimeDeps.Packages) > 0 || len(a.Mutations.Uses) > 0 {
+	if len(a.Mutations.RuntimeDeps.Packages) > 0 || len(a.Mutations.Uses) > 0 ||
+		len(a.Mutations.Provides) > 0 || len(a.Mutations.Conflicts) > 0 {
 		ans = true
 	}
 	return ans

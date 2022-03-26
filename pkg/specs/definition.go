@@ -11,8 +11,8 @@ import (
 	"path"
 	"path/filepath"
 
-	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 	luet_pkg "github.com/geaaru/luet/pkg/package"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 
 	"gopkg.in/yaml.v2"
 )
@@ -60,6 +60,7 @@ type PortageConverterSkips struct {
 type PortageConverterPkg struct {
 	Name     string `json:"name" yaml:"name"`
 	Category string `json:"category" yaml:"category"`
+	Version  string `json:"version" yaml:"version"`
 }
 
 type PortageConverterArtefact struct {
@@ -90,6 +91,8 @@ type PortageConverterMutations struct {
 	RuntimeDeps   PortageConverterMutationDeps `json:"runtime_deps,omitempty" yaml:"runtime_deps,omitempty"`
 	BuildTimeDeps PortageConverterMutationDeps `json:"buildtime_deps,omitempty" yaml:"buildtime_deps,omitempty"`
 	Uses          []string                     `json:"uses,omitempty" yaml:"uses,omitempty"`
+	Provides      []PortageConverterPkg        `json:"provides,omitempty" yaml:"provides,omitempty"`
+	Conflicts     []PortageConverterPkg        `json:"conflicts,omitempty" yaml:"conflicts,omitempty"`
 }
 
 type PortageConverterMutationDeps struct {

@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
+	Copyright © 2021-2022 Funtoo Macaroni OS Linux
 	See AUTHORS and LICENSE for the license details and contributors.
 */
 package converter
@@ -17,15 +17,20 @@ import (
 )
 
 func (pc *PortageConverter) applyRuntimeMutations(pkg *luet_pkg.DefaultPackage, art *specs.PortageConverterArtefact) {
+	v := ""
 
 	if len(art.Mutations.RuntimeDeps.Packages) > 0 {
-
 		rdeps := pkg.GetRequires()
 		for _, p := range art.Mutations.RuntimeDeps.Packages {
+			v = p.Version
+			if v == "" {
+				v = ">=0"
+			}
+
 			rdeps = append(rdeps, &luet_pkg.DefaultPackage{
 				Name:     p.Name,
 				Category: p.Category,
-				Version:  ">=0",
+				Version:  v,
 			})
 		}
 
@@ -36,16 +41,54 @@ func (pc *PortageConverter) applyRuntimeMutations(pkg *luet_pkg.DefaultPackage, 
 		pkg.UseFlags = append(pkg.UseFlags, art.Mutations.Uses...)
 	}
 
+	if len(art.Mutations.Provides) > 0 {
+		provides := pkg.GetProvides()
+		for _, p := range art.Mutations.Provides {
+			v = p.Version
+			if v == "" {
+				v = ">=0"
+			}
+
+			provides = append(provides, &luet_pkg.DefaultPackage{
+				Name:     p.Name,
+				Category: p.Category,
+				Version:  v,
+			})
+		}
+		pkg.SetProvides(provides)
+	}
+
+	if len(art.Mutations.Conflicts) > 0 {
+		conflicts := pkg.GetConflicts()
+		for _, p := range art.Mutations.Conflicts {
+			v = p.Version
+			if v == "" {
+				v = ">=0"
+			}
+
+			conflicts = append(conflicts, &luet_pkg.DefaultPackage{
+				Name:     p.Name,
+				Category: p.Category,
+				Version:  v,
+			})
+		}
+		pkg.Conflicts(conflicts)
+	}
 }
 
 func (pc *PortageConverter) applyBuildtimeMutations(pkg *LuetCompilationSpecSanitized, art *specs.PortageConverterArtefact) {
 	if len(art.Mutations.BuildTimeDeps.Packages) > 0 {
 		bdeps := []*luet_pkg.DefaultPackage{}
+		v := ""
 		for _, p := range art.Mutations.BuildTimeDeps.Packages {
+			v = p.Version
+			if v == "" {
+				v = ">=0"
+			}
 			bdeps = append(bdeps, &luet_pkg.DefaultPackage{
 				Name:     p.Name,
 				Category: p.Category,
-				Version:  ">=0",
+				Version:  v,
 			})
 		}
 		pkg.AddRequires(bdeps)
