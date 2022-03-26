@@ -566,6 +566,9 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	}
 
 	if artefact.HasOverrideVersion(pkg) {
+		DebugC(fmt.Sprintf("[%s] Override version with %s.",
+			pkg, artefact.GetOverrideVersion()))
+
 		solution.OverrideVersion = artefact.GetOverrideVersion()
 	}
 
