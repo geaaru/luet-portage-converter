@@ -34,7 +34,8 @@ type PortageConverterSpecs struct {
 
 	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
 
-	BuildLayers []PortageConverterBuildLayer `json:"build_layers,omitempty" yaml:"build_layers,omitempty"`
+	BuildLayers   []PortageConverterBuildLayer `json:"build_layers,omitempty" yaml:"build_layers,omitempty"`
+	IncludeLayers []string                     `json:"include_layers,omitempty" yaml:"include_layers,omitempty"`
 
 	MapArtefacts             map[string]*PortageConverterArtefact       `json:"-" yaml:"-"`
 	MapReplacementsRuntime   map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
@@ -141,6 +142,14 @@ func IncludeFromYaml(data []byte) (*PortageConverterInclude, error) {
 	return ans, nil
 }
 
+func IncludeLayerFromYaml(data []byte) (*PortageConverterBuildLayer, error) {
+	ans := &PortageConverterBuildLayer{}
+	if err := yaml.Unmarshal(data, ans); err != nil {
+		return nil, err
+	}
+	return ans, nil
+}
+
 func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 
 	if file == "" {
@@ -217,6 +226,37 @@ func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 		// Convert in abs path
 		ans.BuildPortageTmplFile = filepath.Join(absPath, ans.BuildPortageTmplFile)
 	}
+
+	if len(ans.IncludeLayers) > 0 {
+
+		for _, include := range ans.IncludeLayers {
+
+			if include[0:1] != "/" {
+				include = filepath.Join(absPath, include)
+			}
+
+			content, err := ioutil.ReadFile(include)
+			if err != nil {
+				return nil, errors.New(fmt.Sprintf("Error on read file %s: %s",
+					include, err.Error()))
+			}
+
+			data, err := IncludeLayerFromYaml(content)
+			if err != nil {
+				return nil, errors.New(fmt.Sprintf("Error on parse file %s: %s",
+					include, err.Error()))
+			}
+
+			if data.Layer.Category == "" || data.Layer.Name == "" || len(data.Packages) == 0 {
+				return nil, errors.New(fmt.Sprintf("Invalid layer file %s: %s",
+					include, err.Error()))
+			}
+
+			ans.BuildLayers = append(ans.BuildLayers, *data)
+		}
+
+	}
+
 	return ans, nil
 }
 
