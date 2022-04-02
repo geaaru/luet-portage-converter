@@ -248,8 +248,8 @@ func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 			}
 
 			if data.Layer.Category == "" || data.Layer.Name == "" || len(data.Packages) == 0 {
-				return nil, errors.New(fmt.Sprintf("Invalid layer file %s: %s",
-					include, err.Error()))
+				return nil, errors.New(fmt.Sprintf("Invalid layer file %s.",
+					include))
 			}
 
 			ans.BuildLayers = append(ans.BuildLayers, *data)
