@@ -37,6 +37,8 @@ type PortageConverterSpecs struct {
 	BuildLayers   []PortageConverterBuildLayer `json:"build_layers,omitempty" yaml:"build_layers,omitempty"`
 	IncludeLayers []string                     `json:"include_layers,omitempty" yaml:"include_layers,omitempty"`
 
+	Annotations map[string]interface{} `json:"global_annotations,omitempty" yaml:"global_annotations,omitempty"`
+
 	MapArtefacts             map[string]*PortageConverterArtefact       `json:"-" yaml:"-"`
 	MapReplacementsRuntime   map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
 	MapReplacementsBuildtime map[string]*PortageConverterReplacePackage `json:"-" yaml:"-"`
@@ -432,6 +434,10 @@ func (s *PortageConverterSpecs) AddReposcanSource(source string) {
 
 func (s *PortageConverterSpecs) AddReposcanDisabledUseFlags(uses []string) {
 	s.ReposcanDisabledUseFlags = append(s.ReposcanDisabledUseFlags, uses...)
+}
+
+func (s *PortageConverterSpecs) GetGlobalAnnotations() *map[string]interface{} {
+	return &s.Annotations
 }
 
 type PortageResolver interface {

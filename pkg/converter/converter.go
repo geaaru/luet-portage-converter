@@ -280,7 +280,10 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	pTarget := luet_pkg.NewPackage(solution.Package.Name, ">=0",
 		[]*luet_pkg.DefaultPackage{},
 		[]*luet_pkg.DefaultPackage{})
-	pTarget.Category = specs.SanitizeCategory(solution.Package.Category, solution.Package.Slot)
+	pTarget.Category = specs.SanitizeCategory(
+		solution.Package.Category,
+		solution.Package.Slot,
+	)
 
 	p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(pTarget)
 	// PRE: we currently consider that a package is present only one time with a single
@@ -573,7 +576,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		solution.OverrideVersion = artefact.GetOverrideVersion()
 	}
 
-	solution.Annotations = artefact.GetAnnotations()
+	if len(artefact.GetAnnotations()) > 0 {
+		solution.Annotations = artefact.GetAnnotations()
+	} else {
+		solution.Annotations = *pc.Specs.GetGlobalAnnotations()
+	}
 
 	pc.Cache[cacheKey] = solution
 
