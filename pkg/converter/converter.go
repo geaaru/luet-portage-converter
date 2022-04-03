@@ -283,7 +283,8 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	pTarget.Category = specs.SanitizeCategory(solution.Package.Category, solution.Package.Slot)
 
 	p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(pTarget)
-	// TODO: at the moment we ignore version. Do We want to handle this with Marvin?
+	// PRE: we currently consider that a package is present only one time with a single
+	//      version.
 	if p != nil {
 
 		newVersion := false
@@ -297,7 +298,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 				return err
 			}
 
-			gt, err := solution.Package.GreaterThan(gpTree)
+			gt, err := solution.Package.GreaterThanOrEqual(gpTree)
 			if err != nil {
 				Error(fmt.Sprintf("[%s] Error on check if package is greater then existing: %s", pkg, err.Error()))
 				return err
@@ -756,6 +757,18 @@ func (pc *PortageConverter) Generate() error {
 				pkg.PackageUpgraded.AddLabel(k, v)
 			}
 
+			gpTree, _ := gentoo.ParsePackageStr(fmt.Sprintf("%s/%s-%s",
+				pkg.PackageUpgraded.Category, pkg.PackageUpgraded.Name,
+				pkg.PackageUpgraded.GetVersion()))
+
+			if gpTree.Version == pack.GetVersion() {
+				// Bump a new build version from the existing version.
+				pack.SetVersion(pkg.PackageUpgraded.GetVersion())
+				err = pack.BumpBuildVersion()
+				if err != nil {
+					return err
+				}
+			}
 			pkg.PackageUpgraded.SetVersion(pack.GetVersion())
 
 			pack = pkg.PackageUpgraded
