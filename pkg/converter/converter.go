@@ -319,6 +319,12 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 					newVersion = true
 				}
 			} else {
+				DebugC(fmt.Sprintf("[%s-%s] package already updated: %s %v",
+					solution.Package.GetPackageName(),
+					solution.Package.GetPVR(),
+					gpTree.GetPVR(),
+					gt,
+				))
 				newVersion = false
 			}
 

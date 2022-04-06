@@ -608,15 +608,27 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 			// TODO: check of handle this in a better way
 			valid, err := r.KeywordsIsAdmit(&atom, p)
 			if err != nil {
+				DebugC(fmt.Sprintf(
+					"[%s/%s-%s] Check %s/%s:%s@%s: Invalid keyword.",
+					atom.Category, atom.Package, atom.Revision,
+					p.Category, p.GetPF(), p.Slot, p.Repository))
 			}
 
 			if valid {
 				valid, err = r.PackageIsAdmit(gp, p)
 				if err != nil {
+					DebugC(fmt.Sprintf(
+						"[%s/%s-%s] %s/%s:%s@%s: Invalid %s.",
+						atom.Category, atom.Package, atom.Revision,
+						p.Category, p.GetPF(), p.Slot, p.Repository, err.Error()))
+
 					return nil, err
 				}
 			} else {
-
+				DebugC(fmt.Sprintf(
+					"[%s/%s-%s] %s/%s:%s@%s: Not valid.",
+					atom.Category, atom.Package, atom.Revision,
+					p.Category, p.GetPF(), p.Slot, p.Repository))
 			}
 
 			DebugC(fmt.Sprintf(
