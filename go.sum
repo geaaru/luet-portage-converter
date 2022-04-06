@@ -424,6 +424,8 @@ github.com/geaaru/luet v0.22.5-geaaru.0.20220324185834-661d11939d16 h1:owGGDowJA
 github.com/geaaru/luet v0.22.5-geaaru.0.20220324185834-661d11939d16/go.mod h1:qJvMotFk5Z0XjFR3OEF6UBxFsjQ2qn5XfXmbIx0KGtI=
 github.com/geaaru/pkgs-checker v0.12.3 h1:Uocpuw6MjxwQBQ3lz1GeIJZzaATbOv8AVdRMwhiJH0U=
 github.com/geaaru/pkgs-checker v0.12.3/go.mod h1:lZAG+VLTynVg3XCgq/9i6bNd3e/gJpN2LSCmKtHON6Y=
+github.com/geaaru/pkgs-checker v0.13.0 h1:0gZ53d1acbwoXbj9Pm+raiQDMGdPi4nCDFjBWMj9iI4=
+github.com/geaaru/pkgs-checker v0.13.0/go.mod h1:kJftjfWPOnKytgt4zDO9DrLdCAYBIP0fhgtuP/SFKug=
 github.com/geaaru/tar-formers v0.4.0 h1:A+XWaqaepu/7FiwJXS76fjq5kOyGvnWs1iZQrBe4M+0=
 github.com/geaaru/tar-formers v0.4.0/go.mod h1:mtgOFp8q6gVeccfVUNT0P5n2s3ab3FGjfCG5hwcwdbw=
 github.com/genuinetools/img v0.5.11 h1:qIP3nVgRYbXmtSNMjmcdx+TBzWjZS03AdqTNBf6QtGY=
@@ -956,6 +958,8 @@ github.com/mattn/go-sqlite3 v1.14.4/go.mod h1:WVKg1VTActs4Qso6iwGbiFih2UIHo0ENGw
 github.com/mattn/go-sqlite3 v1.14.6/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/mattn/go-sqlite3 v1.14.7/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/mattn/go-sqlite3 v1.14.8/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
+github.com/mattn/go-sqlite3 v1.14.12 h1:TJ1bhYJPV44phC+IMu1u2K/i5RriLTPe+yc68XDJ1Z0=
+github.com/mattn/go-sqlite3 v1.14.12/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=
 github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 h1:I0XW9+e1XWDxdcEniV4rQAIOPUGDq67JSCiRCgGCZLI=
 github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369/go.mod h1:BSXmuO+STAnVfrANrmjBb36TMTDstsz7MSK+HVaYKv4=
@@ -1750,6 +1754,8 @@ golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20220114195835-da31bd327af9/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 h1:y/woIyUBFbpQGKS0u1aHF/40WUDnek3fPOyD08H5Vng=
 golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220405210540-1e041c57c461 h1:kHVeDEnfKn3T238CvrUcz6KeEsFHVaKh4kMTt6Wsysg=
+golang.org/x/sys v0.0.0-20220405210540-1e041c57c461/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=

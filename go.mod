@@ -15,7 +15,7 @@ replace github.com/docker/docker => github.com/Luet-lab/moby v17.12.0-ce-rc1.0.2
 require (
 	github.com/MottainaiCI/lxd-compose v0.16.1
 	github.com/geaaru/luet v0.22.5-geaaru.0.20220324185834-661d11939d16
-	github.com/geaaru/pkgs-checker v0.12.3
+	github.com/geaaru/pkgs-checker v0.13.0
 	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.18.1
 	github.com/spf13/cobra v1.4.0
@@ -27,7 +27,7 @@ require (
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 // indirect
+	golang.org/x/sys v0.0.0-20220405210540-1e041c57c461 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 )
 
@@ -115,6 +115,7 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/miekg/pkcs11 v1.0.2 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
