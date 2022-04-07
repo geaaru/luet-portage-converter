@@ -6,6 +6,7 @@ package converter
 
 import (
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 
 	. "github.com/geaaru/luet/pkg/logger"
@@ -264,7 +265,17 @@ func (pc *PortageConverter) Stage3() error {
 
 			defFile := filepath.Join(pkg.PackageDir, "definition.yaml")
 			// Convert solution to luet package
-			pack := pkg.ToPack(true)
+
+			// Read current definition file
+			dat, err := ioutil.ReadFile(defFile)
+			if err != nil {
+				return err
+			}
+			p, err := luet_pkg.DefaultPackageFromYaml(dat)
+			if err != nil {
+				return err
+			}
+			pack = &p
 			pack.Requires(resolvedRuntimeDeps)
 			pack.Conflicts(resolvedRuntimeConflicts)
 
