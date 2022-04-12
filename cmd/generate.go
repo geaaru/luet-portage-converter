@@ -42,6 +42,7 @@ func newGenerateCommand() *cobra.Command {
 			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
 			ignoreWrongPackages, _ := cmd.Flags().GetBool("ignore-wrong-packages")
 			continueWithError, _ := cmd.Flags().GetBool("continue-with-error")
+			checkUpdate4Deps, _ := cmd.Flags().GetBool("check-update4deps")
 			pkgs, _ := cmd.Flags().GetStringArray("pkg")
 			withPortagePkgs, _ := cmd.Flags().GetBool("with-portage-pkg")
 			disableConflicts, _ := cmd.Flags().GetBool("disable-conflicts")
@@ -59,6 +60,7 @@ func newGenerateCommand() *cobra.Command {
 			converter.UsingLayerForRuntime = layer4Rdepends
 			converter.ContinueWithError = continueWithError
 			converter.IgnoreWrongPackages = ignoreWrongPackages
+			converter.CheckUpdate4Deps = checkUpdate4Deps
 
 			if debug {
 				LuetCfg.GetGeneral().Debug = debug
@@ -112,6 +114,6 @@ func newGenerateCommand() *cobra.Command {
 	cmd.Flags().Bool("layer4rdepends", false, "Check layer for runtime deps and skip generation.")
 	cmd.Flags().Bool("continue-with-error", false, "Continue processing with errors (for example: no KEYWORDS defined).")
 	cmd.Flags().Bool("ignore-wrong-packages", false, "Continue processing when a package is not resolved.")
-
+	cmd.Flags().Bool("check-update4deps", false, "Verify if there are update for package dependencies too.")
 	return cmd
 }

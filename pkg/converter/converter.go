@@ -49,6 +49,7 @@ type PortageConverter struct {
 	DisableConflicts     bool
 	UsingLayerForRuntime bool
 	ContinueWithError    bool
+	CheckUpdate4Deps     bool
 	DisabledUseFlags     []string
 	TreePaths            []string
 	FilteredPackages     []string
@@ -68,6 +69,7 @@ func NewPortageConverter(targetDir, backend string) *PortageConverter {
 		IgnoreWrongPackages:  false,
 		ContinueWithError:    false,
 		DisableConflicts:     false,
+		CheckUpdate4Deps:     false,
 		UsingLayerForRuntime: false,
 		DisabledUseFlags:     []string{},
 		TreePaths:            []string{},
@@ -193,6 +195,7 @@ func (pc *PortageConverter) AppendIfNotPresent(list []gentoo.GentooPackage, pkg 
 }
 
 func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string, artefact specs.PortageConverterArtefact) error {
+	newVersion := false
 
 	// Check if it's present artefact from map
 	art, err := pc.Specs.GetArtefactByPackage(pkg)
@@ -290,7 +293,6 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	//      version.
 	if p != nil {
 
-		newVersion := false
 		var originPackage luet_pkg.Package
 		for _, luetPkgTree := range p {
 
@@ -334,9 +336,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		solution.PackageUpgraded = originPackage.(*luet_pkg.DefaultPackage)
 
 		if !newVersion && !pc.Override {
-			// Nothing to do
-			InfoC(fmt.Sprintf("Package %s already in tree and updated.", pkg))
-			return nil
+			if !pc.CheckUpdate4Deps || len(stack) > 1 {
+				// Nothing to do
+				InfoC(fmt.Sprintf("Package %s already in tree and updated.", pkg))
+				return nil
+			}
 		}
 
 		solution.Upgrade = true
@@ -347,7 +351,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 	// TODO: atm I handle build-dep and runtime-dep at the same
 	//       way. I'm not sure if this correct.
 
-	if p == nil || pc.Override {
+	if p == nil || pc.Override || pc.CheckUpdate4Deps {
 
 		// Check every build dependency
 		var bdeps []gentoo.GentooPackage = make([]gentoo.GentooPackage, 0)
@@ -387,7 +391,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 			// Check if it's present the build dep on the tree
 			p, _ := pc.ReciperBuild.GetDatabase().FindPackages(dep)
-			if p == nil {
+			if pc.CheckUpdate4Deps || p == nil {
 
 				// Check if there is a runtime deps/provide for this
 				p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
@@ -512,7 +516,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 			// Check if it's present the build dep on the tree
 			p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
-			if p == nil {
+			if pc.CheckUpdate4Deps || p == nil {
 				dep_str := fmt.Sprintf("%s/%s", rdep.Category, rdep.Name)
 				if rdep.Slot != "0" {
 					dep_str += ":" + rdep.Slot
@@ -590,7 +594,9 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 	pc.Cache[cacheKey] = solution
 
-	pc.Solutions = append(pc.Solutions, solution)
+	if !solution.Upgrade || (solution.Upgrade && newVersion) {
+		pc.Solutions = append(pc.Solutions, solution)
+	}
 
 	return nil
 }
