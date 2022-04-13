@@ -327,7 +327,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 					gpTree.GetPVR(),
 					gt,
 				))
-				newVersion = false
+				if pc.Override {
+					newVersion = true
+				} else {
+					newVersion = false
+				}
 			}
 
 			originPackage = luetPkgTree
@@ -346,6 +350,8 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		solution.Upgrade = true
 		solution.PackageDir = pkgDir
 
+	} else {
+		newVersion = true
 	}
 
 	// TODO: atm I handle build-dep and runtime-dep at the same
