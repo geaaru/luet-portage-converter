@@ -600,7 +600,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 	pc.Cache[cacheKey] = solution
 
-	if !solution.Upgrade || (solution.Upgrade && newVersion) {
+	if !solution.Upgrade || (solution.Upgrade && newVersion) || pc.Override {
 		pc.Solutions = append(pc.Solutions, solution)
 	}
 
