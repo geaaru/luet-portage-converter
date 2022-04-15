@@ -129,18 +129,27 @@ func (pc *PortageConverter) Stage3() error {
 						return err
 					}
 
-					for _, d3 := range d2pkgs[0].GetRequires() {
-						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
-							alreadyInjected = true
+					if len(d2pkgs) > 0 {
 
-							DebugC(fmt.Sprintf("[%s/%s-%s] Dropping buildtime dep %s/%s available in %s/%s",
-								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
-								dep.GetCategory(), dep.GetName(),
-								d2.GetCategory(), d2.GetName(),
-							))
-							buildtimeDepsRemoved++
-							goto next_dep
+						for _, d3 := range d2pkgs[0].GetRequires() {
+							if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
+								alreadyInjected = true
+
+								DebugC(fmt.Sprintf("[%s/%s-%s] Dropping buildtime dep %s/%s available in %s/%s",
+									pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+									dep.GetCategory(), dep.GetName(),
+									d2.GetCategory(), d2.GetName(),
+								))
+								buildtimeDepsRemoved++
+								goto next_dep
+							}
 						}
+					} else {
+						Warning(fmt.Sprintf(
+							"[%s/%s-%s] No dependencies find for dep %s/%s - %s/%s",
+							pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+							dep.GetCategory(), dep.GetName(),
+							d2.GetCategory(), d2.GetName()))
 					}
 
 				}
@@ -223,20 +232,29 @@ func (pc *PortageConverter) Stage3() error {
 						return err
 					}
 
-					for _, d3 := range d2pkgs[0].GetRequires() {
-						if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
-							alreadyInjected = true
+					if len(d2pkgs) > 0 {
 
-							DebugC(fmt.Sprintf("[%s/%s-%s] Dropping runtime dep %s/%s available in %s/%s",
-								pack.GetCategory(), pack.GetName(), pack.GetVersion(),
-								dep.GetCategory(), dep.GetName(),
-								d2.GetCategory(), d2.GetName(),
-							))
-							runtimeDepsRemoved++
-							goto next_rdep
+						for _, d3 := range d2pkgs[0].GetRequires() {
+							if d3.GetName() == dep.GetName() && d3.GetCategory() == dep.GetCategory() {
+								alreadyInjected = true
+
+								DebugC(fmt.Sprintf("[%s/%s-%s] Dropping runtime dep %s/%s available in %s/%s",
+									pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+									dep.GetCategory(), dep.GetName(),
+									d2.GetCategory(), d2.GetName(),
+								))
+								runtimeDepsRemoved++
+								goto next_rdep
+							}
 						}
-					}
 
+					} else {
+						Warning(fmt.Sprintf(
+							"[%s/%s-%s] No dependencies find for dep %s/%s - %s/%s",
+							pack.GetCategory(), pack.GetName(), pack.GetVersion(),
+							dep.GetCategory(), dep.GetName(),
+							d2.GetCategory(), d2.GetName()))
+					}
 				}
 
 			next_rdep:
