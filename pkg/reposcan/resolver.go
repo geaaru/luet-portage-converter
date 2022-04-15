@@ -403,8 +403,14 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 	conflicts := []gentoo.GentooPackage{}
 
 	if gdep.Use != "" {
+		not := gdep.UseCondition == gentoo.PkgCondNot
+
+		toIgnore := r.IsDisableUseFlag(gdep.Use) || !opts.IsAdmitUseFlag(gdep.Use)
+		if not {
+			toIgnore = opts.IsAdmitUseFlag(gdep.Use)
+		}
 		// POST: is a use flag GentooDependency
-		if r.IsDisableUseFlag(gdep.Use) || !opts.IsAdmitUseFlag(gdep.Use) {
+		if toIgnore {
 			DebugC(
 				GetAurora().Bold(
 					fmt.Sprintf("Found dep with use flag %s. Ignoring it.",
@@ -440,8 +446,14 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 				continue
 			}
 
+			not := sdep.UseCondition == gentoo.PkgCondNot
+
+			toIgnore := r.IsDisableUseFlag(sdep.Use) || !opts.IsAdmitUseFlag(sdep.Use)
+			if not {
+				toIgnore = opts.IsAdmitUseFlag(sdep.Use)
+			}
 			// POST: is a use flag GentooDependency
-			if r.IsDisableUseFlag(sdep.Use) || !opts.IsAdmitUseFlag(sdep.Use) {
+			if toIgnore {
 				DebugC(
 					GetAurora().Bold(
 						fmt.Sprintf("Found sub dep with use flag %s. Ignoring it.",
