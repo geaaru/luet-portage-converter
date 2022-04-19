@@ -22,7 +22,7 @@ const (
 
 Portage/Overlay converter for Luet specs.`
 
-	version = "0.10.4"
+	version = "0.10.5"
 )
 
 func initConfig() error {
