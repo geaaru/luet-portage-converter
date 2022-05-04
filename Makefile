@@ -21,7 +21,7 @@ deps:
 	# Installing dependencies...
 	GO111MODULE=off go get golang.org/x/lint/golint
 	GO111MODULE=off go get golang.org/x/tools/cmd/cover
-	GO111MODULE=on go get github.com/onsi/ginkgo/v2/ginkgo
+	GO111MODULE=on go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
 	GO111MODULE=off go get github.com/onsi/gomega/...
 	ginkgo version
 
