@@ -6,8 +6,8 @@ require (
 	github.com/MottainaiCI/lxd-compose v0.18.2
 	github.com/geaaru/luet v0.24.0-geaaru
 	github.com/geaaru/pkgs-checker v0.13.0
-	github.com/onsi/ginkgo/v2 v2.1.3
-	github.com/onsi/gomega v1.18.1
+	github.com/onsi/ginkgo/v2 v2.1.4
+	github.com/onsi/gomega v1.19.0
 	github.com/spf13/cobra v1.4.0
 	gopkg.in/yaml.v2 v2.4.0
 )
