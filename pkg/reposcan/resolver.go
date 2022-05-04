@@ -748,10 +748,16 @@ func (r *RepoScanResolver) KeywordsIsAdmit(atom *RepoScanAtom, p *gentoo.GentooP
 			for _, d := range r.DisabledKeywords {
 				if d == k {
 					ans = false
+					break
 				} else if !ans {
 					ans = true
 				}
 			}
+		}
+
+		if !ans {
+			DebugC(fmt.Sprintf(
+				"[%s] Version %s disabled for keywords %s", atom.Atom, p.GetPF(), keywords))
 		}
 	}
 
