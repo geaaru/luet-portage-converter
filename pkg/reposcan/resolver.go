@@ -668,9 +668,21 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 			return nil, err
 		}
 
-		valid, err := r.PackageIsAdmit(gp, availableGp)
+		// TODO: check of handle this in a better way
+		valid, err := r.KeywordsIsAdmit(&atoms[0], availableGp)
 		if err != nil {
-			return nil, err
+			DebugC(fmt.Sprintf(
+				"[%s/%s-%s] Check %s/%s:%s@%s: Invalid keyword.",
+				atoms[0].Category, atoms[0].Package, atoms[0].Revision,
+				availableGp.Category, availableGp.GetPF(), availableGp.Slot,
+				availableGp.Repository))
+		}
+
+		if valid {
+			valid, err = r.PackageIsAdmit(gp, availableGp)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if !valid {
@@ -735,6 +747,8 @@ func (r *RepoScanResolver) KeywordsIsAdmit(atom *RepoScanAtom, p *gentoo.GentooP
 			"[%s] Skip version without keywords %s or disabled.", atom.Atom, p.GetPF()))
 		return false, nil
 	}
+
+	DebugC(fmt.Sprintf("[%s] Found KEYWORDS %s", atom.Atom, keywords))
 
 	// On Funtoo it's possible a condition like this:
 	// KEYWORDS="-* ~amd64"
