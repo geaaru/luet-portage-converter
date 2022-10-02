@@ -162,6 +162,7 @@ func (r *RepoScanResolver) BuildMap() error {
 			} else {
 				r.MapConstraints[gp.GetPackageName()] = []gentoo.GentooPackage{*gp}
 			}
+
 		}
 	}
 
@@ -214,11 +215,13 @@ func (r *RepoScanResolver) Resolve(pkg string, opts specs.PortageResolverOpts) (
 		ans.SetLabel("IUSE", atom.GetMetadataValue("IUSE"))
 	}
 
+	DebugC(fmt.Sprintf("[%s] Retrieve Runtime Dependencies...", atom.Atom))
 	err = r.retrieveRuntimeDeps(atom, last, ans, &opts)
 	if err != nil {
 		return nil, err
 	}
 
+	DebugC(fmt.Sprintf("[%s] Retrieve Buildtime Dependencies...", atom.Atom))
 	err = r.retrieveBuildtimeDeps(atom, last, ans, &opts)
 	if err != nil {
 		return nil, err
@@ -290,6 +293,8 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 		depend := atom.GetMetadataValue("DEPEND")
 		solution.SetLabel("DEPEND", depend)
 
+		DebugC(fmt.Sprintf("[%s] DEPEND %s", atom.Atom, depend))
+
 		deps, err := ParseDependencies(depend)
 		if err != nil {
 			Warning(fmt.Sprintf("[%s] DEPEND Error on parsing '%s': %s", atom.Atom, depend, err.Error()))
@@ -316,6 +321,8 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 	if atom.HasMetadataKey("BDEPEND") {
 		bdepends := atom.GetMetadataValue("BDEPEND")
 		solution.SetLabel("BDEPEND", bdepends)
+
+		DebugC(fmt.Sprintf("[%s] BDEPEND %s", atom.Atom, bdepends))
 
 		deps, err := ParseDependencies(bdepends)
 		if err != nil {
