@@ -30,14 +30,22 @@ import (
 
 	"github.com/pkg/errors"
 	v "github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (
-	LuetVersion = "0.24.0"
+	LuetVersion     = "0.29.2"
+	LuetEnvPrefix   = "LUET"
+	LuetForkVersion = "geaaru"
 )
 
-var LuetCfg = NewLuetConfig(v.GetViper())
+var (
+	BuildTime      string
+	BuildCommit    string
+	BuildGoVersion string
+)
+
+var LuetCfg *LuetConfig = NewLuetConfig(nil)
 
 type LuetLoggingConfig struct {
 	// Path of the logfile
@@ -116,8 +124,7 @@ func (sc *LuetSystemConfig) GetRepoDatabaseDirPath(name string) string {
 }
 
 func (sc *LuetSystemConfig) GetSystemRepoDatabaseDirPath() string {
-	dbpath := filepath.Join(sc.Rootfs,
-		sc.DatabasePath)
+	dbpath := filepath.Join(sc.Rootfs, sc.DatabasePath)
 	err := os.MkdirAll(dbpath, os.ModePerm)
 	if err != nil {
 		panic(err)
@@ -206,6 +213,16 @@ func NewEmptyLuetRepository() *LuetRepository {
 	}
 }
 
+func (r *LuetRepository) Clone() *LuetRepository {
+	ans := NewLuetRepository(r.Name, r.Type, r.Description, r.Urls, r.Priority, r.Enable, r.Cached)
+	ans.Verify = r.Verify
+	ans.Revision = r.Revision
+	ans.LastUpdate = r.LastUpdate
+	ans.Authentication = r.Authentication
+
+	return ans
+}
+
 func (r *LuetRepository) String() string {
 	return fmt.Sprintf("[%s] prio: %d, type: %s, enable: %t, cached: %t",
 		r.Name, r.Priority, r.Type, r.Enable, r.Cached)
@@ -219,10 +236,11 @@ type LuetKV struct {
 type LuetConfig struct {
 	Viper *v.Viper `yaml:"-"`
 
-	Logging LuetLoggingConfig `yaml:"logging,omitempty" mapstructure:"logging"`
-	General LuetGeneralConfig `yaml:"general,omitempty" mapstructure:"general"`
-	System  LuetSystemConfig  `yaml:"system" mapstructure:"system"`
-	Solver  LuetSolverOptions `yaml:"solver,omitempty" mapstructure:"solver"`
+	Logging  LuetLoggingConfig  `yaml:"logging,omitempty" mapstructure:"logging"`
+	General  LuetGeneralConfig  `yaml:"general,omitempty" mapstructure:"general"`
+	System   LuetSystemConfig   `yaml:"system" mapstructure:"system"`
+	Solver   LuetSolverOptions  `yaml:"solver,omitempty" mapstructure:"solver"`
+	TarFlows LuetTarflowsConfig `yaml:"tar_flows,omitempty" mapstructure:"tar_flows,omitempty"`
 
 	RepositoriesConfDir  []string         `yaml:"repos_confdir,omitempty" mapstructure:"repos_confdir"`
 	ConfigProtectConfDir []string         `yaml:"config_protect_confdir,omitempty" mapstructure:"config_protect_confdir"`
@@ -243,6 +261,12 @@ type LuetConfig struct {
 	SubsetsDefinitions *LuetSubsetsDefinition            `yaml:"-" mapstructure:"-"`
 	SubsetsPkgsDefMap  map[string]*LuetSubsetsDefinition `yaml:"-" mapstructure:"-"`
 	SubsetsCatDefMap   map[string]*LuetSubsetsDefinition `yaml:"-" mapstructure:"-"`
+}
+
+type LuetTarflowsConfig struct {
+	CopyBufferSize int   `yaml:"copy_buffer_size,omitempty" mapstructure:"copy_buffer_size,omitempty"`
+	MaxOpenFiles   int64 `yaml:"max_openfiles,omitempty" mapstructure:"max_openfiles,omitempty"`
+	Mutex4Dirs     bool  `yaml:"mutex4dir,omitempty" mapstructure:"mutex4dir,omitempty"`
 }
 
 type LuetSubsetsConfig struct {
@@ -325,6 +349,10 @@ func GenDefault(viper *v.Viper) {
 	viper.SetDefault("solver.rate", 0.7)
 	viper.SetDefault("solver.discount", 1.0)
 	viper.SetDefault("solver.max_attempts", 9000)
+
+	viper.SetDefault("tar_flows.mutex4dir", true)
+	viper.SetDefault("tar_flows.max_openfiles", 100)
+	viper.SetDefault("tar_flows.copy_buffer_size", 32)
 }
 
 func (c *LuetConfig) GetSystemDB() pkg.PackageDatabase {
@@ -337,8 +365,8 @@ func (c *LuetConfig) GetSystemDB() pkg.PackageDatabase {
 	}
 }
 
-func (c *LuetConfig) AddSystemRepository(r LuetRepository) {
-	c.SystemRepositories = append(c.SystemRepositories, r)
+func (c *LuetConfig) AddSystemRepository(r *LuetRepository) {
+	c.SystemRepositories = append(c.SystemRepositories, *r)
 }
 
 func (c *LuetConfig) GetFinalizerEnvsMap() map[string]string {
@@ -403,6 +431,10 @@ func (c *LuetConfig) GetGeneral() *LuetGeneralConfig {
 
 func (c *LuetConfig) GetSystem() *LuetSystemConfig {
 	return &c.System
+}
+
+func (c *LuetConfig) GetTarFlows() *LuetTarflowsConfig {
+	return &c.TarFlows
 }
 
 func (c *LuetConfig) GetSolverOptions() *LuetSolverOptions {

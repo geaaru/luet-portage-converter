@@ -33,6 +33,11 @@ import (
 
 //var BoltInstance PackageDatabase
 
+const (
+	boltdbCollFiles     = "files"
+	boltdbCollFinalizer = "finalizers"
+)
+
 type BoltDatabase struct {
 	sync.Mutex
 	Path             string
@@ -55,6 +60,40 @@ func (db *BoltDatabase) Clone(to PackageDatabase) error {
 
 func (db *BoltDatabase) Copy() (PackageDatabase, error) {
 	return copy(db)
+}
+
+func (db *BoltDatabase) RebuildIndexes() error {
+	bolt, err := db.open()
+	if err != nil {
+		return err
+	}
+
+	// Rebuild DefaultPackage index
+	bolt.ReIndex(&DefaultPackage{})
+
+	// Reindex a new collections goes in SIGSEGV.
+	// The workaround is to add always a temporary object
+	// before reindex and remove it.
+	p := &DefaultPackage{
+		Category: "maintenance",
+		Name:     "macaronifinalizer",
+		Version:  "1.0",
+	}
+	pf := &PackageFinalizer{
+		PackageFingerprint: p.GetFingerPrint(),
+		Shell:              []string{"/bin/bash", "-c"},
+		Install:            []string{},
+		Uninstall:          []string{},
+	}
+	finalizers := bolt.From(boltdbCollFinalizer)
+	finalizers.Save(pf)
+	finalizers.DeleteStruct(pf)
+	finalizers.ReIndex(&PackageFinalizer{})
+
+	files := bolt.From(boltdbCollFiles)
+	files.ReIndex(&PackageFile{})
+
+	return nil
 }
 
 func (db *BoltDatabase) Close() error {
@@ -144,7 +183,10 @@ func (db *BoltDatabase) FindPackage(tofind Package) (Package, error) {
 		return nil, err
 	}
 
-	err = bolt.Select(q.Eq("Name", tofind.GetName()), q.Eq("Category", tofind.GetCategory()), q.Eq("Version", tofind.GetVersion())).Limit(1).First(p)
+	err = bolt.Select(
+		q.Eq("Name", tofind.GetName()),
+		q.Eq("Category", tofind.GetCategory()),
+		q.Eq("Version", tofind.GetVersion())).Limit(1).First(p)
 	if err != nil {
 		return nil, err
 	}
@@ -293,13 +335,58 @@ func (db *BoltDatabase) Clean() error {
 	return os.RemoveAll(db.Path)
 }
 
+func (db *BoltDatabase) GetPackageFinalizer(p Package) (*PackageFinalizer, error) {
+	bolt, err := db.open()
+	if err != nil {
+		return nil, errors.Wrap(err, "Error opening boltdb "+db.Path)
+	}
+
+	finalizers := bolt.From(boltdbCollFinalizer)
+	var pf PackageFinalizer
+	err = finalizers.One("PackageFingerprint", p.GetFingerPrint(), &pf)
+	if err != nil {
+		if err.Error() == "not found" {
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "While finding finalizer")
+	}
+	return &pf, nil
+}
+func (db *BoltDatabase) SetPackageFinalizer(p *PackageFinalizer) error {
+	bolt, err := db.open()
+	if err != nil {
+		return errors.Wrap(err, "Error opening boltdb "+db.Path)
+	}
+
+	finalizers := bolt.From(boltdbCollFinalizer)
+	return finalizers.Save(p)
+}
+
+func (db *BoltDatabase) RemovePackageFinalizer(p Package) error {
+	bolt, err := db.open()
+	if err != nil {
+		return errors.Wrap(err, "Error opening boltdb "+db.Path)
+	}
+
+	finalizer := bolt.From(boltdbCollFinalizer)
+	var pf PackageFinalizer
+	err = finalizer.One("PackageFingerprint", p.GetFingerPrint(), &pf)
+	if err != nil {
+		if err.Error() == "not found" {
+			return nil
+		}
+		return errors.Wrap(err, "While finding finalizer")
+	}
+	return finalizer.DeleteStruct(&pf)
+}
+
 func (db *BoltDatabase) GetPackageFiles(p Package) ([]string, error) {
 	bolt, err := db.open()
 	if err != nil {
 		return []string{}, errors.Wrap(err, "Error opening boltdb "+db.Path)
 	}
 
-	files := bolt.From("files")
+	files := bolt.From(boltdbCollFiles)
 	var pf PackageFile
 	err = files.One("PackageFingerprint", p.GetFingerPrint(), &pf)
 	if err != nil {
@@ -313,7 +400,7 @@ func (db *BoltDatabase) SetPackageFiles(p *PackageFile) error {
 		return errors.Wrap(err, "Error opening boltdb "+db.Path)
 	}
 
-	files := bolt.From("files")
+	files := bolt.From(boltdbCollFiles)
 	return files.Save(p)
 }
 func (db *BoltDatabase) RemovePackageFiles(p Package) error {
@@ -322,7 +409,7 @@ func (db *BoltDatabase) RemovePackageFiles(p Package) error {
 		return errors.Wrap(err, "Error opening boltdb "+db.Path)
 	}
 
-	files := bolt.From("files")
+	files := bolt.From(boltdbCollFiles)
 	var pf PackageFile
 	err = files.One("PackageFingerprint", p.GetFingerPrint(), &pf)
 	if err != nil {

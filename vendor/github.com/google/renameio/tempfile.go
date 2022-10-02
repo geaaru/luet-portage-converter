@@ -85,8 +85,6 @@ type PendingFile struct {
 
 // Cleanup is a no-op if CloseAtomicallyReplace succeeded, and otherwise closes
 // and removes the temporary file.
-//
-// This method is not safe for concurrent use by multiple goroutines.
 func (t *PendingFile) Cleanup() error {
 	if t.done {
 		return nil
@@ -107,8 +105,6 @@ func (t *PendingFile) Cleanup() error {
 // the destination file with it, i.e., a concurrent open(2) call will either
 // open the file previously located at the destination path (if any), or the
 // just written file, but the file will always be present.
-//
-// This method is not safe for concurrent use by multiple goroutines.
 func (t *PendingFile) CloseAtomicallyReplace() error {
 	// Even on an ordered file system (e.g. ext4 with data=ordered) or file
 	// systems with write barriers, we cannot skip the fsync(2) call as per
