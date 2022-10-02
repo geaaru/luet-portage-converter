@@ -14,8 +14,9 @@ builds:
 
     ldflags:
       - >-
-        -s -w -X github.com/Luet-lab/luet-portage-converter/cmd.BuildTime={{.Date}}
-        -X github.com/Luet-lab/luet-portage-converter/cmd.BuildCommit={{.Commit}}
+        -s -w
+        -X github.com/geaaru/luet-portage-converter/cmd.BuildTime={{.Date}}
+        -X github.com/geaaru/luet-portage-converter/cmd.BuildCommit={{.Commit}}
 
 archives:
   - format: binary
