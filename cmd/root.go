@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
+	Copyright © 2021-2022 Funtoo Macaroni OS Linux
 	See AUTHORS and LICENSE for the license details and contributors.
 */
 
@@ -74,6 +74,7 @@ func Execute() {
 	rootCmd.AddCommand(
 		newGenerateCommand(),
 		newReposcanResolveCommand(),
+		newSyncCommand(),
 	)
 
 	if err := rootCmd.Execute(); err != nil {
