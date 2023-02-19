@@ -211,7 +211,7 @@ func syncPackage(p *gentoo.PortageMetaData, aManager *installer.ArtifactsManager
 					idx+1, n, p.GetPackageNameWithSlot(),
 					p.GetPVR())))
 			} else {
-				err := aManager.RegisterPackage(art, nil)
+				err := aManager.RegisterPackage(art, nil, true)
 				if err != nil {
 					return err
 				}
