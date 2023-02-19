@@ -85,8 +85,8 @@ github.com/cavaliercoder/grab/bps
 # github.com/cespare/xxhash/v2 v2.2.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
-# github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
-## explicit
+# github.com/chzyer/readline v1.5.0
+## explicit; go 1.15
 # github.com/containerd/cgroups v1.0.4
 ## explicit; go 1.17
 github.com/containerd/cgroups/stats/v1
@@ -281,6 +281,7 @@ github.com/go-openapi/swag
 github.com/go-stack/stack
 # github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0
 ## explicit; go 1.13
+github.com/go-task/slim-sprig
 # github.com/gobwas/glob v0.2.3
 ## explicit
 github.com/gobwas/glob
@@ -352,8 +353,9 @@ github.com/google/go-containerregistry/pkg/v1/types
 ## explicit; go 1.12
 github.com/google/gofuzz
 github.com/google/gofuzz/bytesource
-# github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1
-## explicit; go 1.14
+# github.com/google/pprof v0.0.0-20230207041349-798e818bf904
+## explicit; go 1.19
+github.com/google/pprof/profile
 # github.com/google/renameio v1.0.1
 ## explicit; go 1.13
 github.com/google/renameio
@@ -392,8 +394,8 @@ github.com/heroku/docker-registry-client/registry
 # github.com/huandu/xstrings v1.4.0
 ## explicit; go 1.12
 github.com/huandu/xstrings
-# github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639
-## explicit
+# github.com/ianlancetaylor/demangle v0.0.0-20220319035150-800ac71e25c2
+## explicit; go 1.12
 # github.com/icza/dyno v0.0.0-20220812133438-f0b6f8a18845
 ## explicit; go 1.13
 # github.com/imdario/mergo v0.3.13
@@ -523,11 +525,21 @@ github.com/mudler/topsort
 github.com/munnerz/goautoneg
 # github.com/olekukonko/tablewriter v0.0.5
 ## explicit; go 1.12
-# github.com/onsi/ginkgo/v2 v2.4.0
+# github.com/onsi/ginkgo/v2 v2.8.3
 ## explicit; go 1.18
 github.com/onsi/ginkgo/v2
 github.com/onsi/ginkgo/v2/config
 github.com/onsi/ginkgo/v2/formatter
+github.com/onsi/ginkgo/v2/ginkgo
+github.com/onsi/ginkgo/v2/ginkgo/build
+github.com/onsi/ginkgo/v2/ginkgo/command
+github.com/onsi/ginkgo/v2/ginkgo/generators
+github.com/onsi/ginkgo/v2/ginkgo/internal
+github.com/onsi/ginkgo/v2/ginkgo/labels
+github.com/onsi/ginkgo/v2/ginkgo/outline
+github.com/onsi/ginkgo/v2/ginkgo/run
+github.com/onsi/ginkgo/v2/ginkgo/unfocus
+github.com/onsi/ginkgo/v2/ginkgo/watch
 github.com/onsi/ginkgo/v2/internal
 github.com/onsi/ginkgo/v2/internal/global
 github.com/onsi/ginkgo/v2/internal/interrupt_handler
@@ -535,7 +547,7 @@ github.com/onsi/ginkgo/v2/internal/parallel_support
 github.com/onsi/ginkgo/v2/internal/testingtproxy
 github.com/onsi/ginkgo/v2/reporters
 github.com/onsi/ginkgo/v2/types
-# github.com/onsi/gomega v1.23.0
+# github.com/onsi/gomega v1.27.0
 ## explicit; go 1.18
 github.com/onsi/gomega
 github.com/onsi/gomega/format
@@ -804,6 +816,8 @@ golang.org/x/text/unicode/norm
 golang.org/x/time/rate
 # golang.org/x/tools v0.6.0
 ## explicit; go 1.18
+golang.org/x/tools/go/ast/inspector
+golang.org/x/tools/internal/typeparams
 # google.golang.org/appengine v1.6.7
 ## explicit; go 1.11
 google.golang.org/appengine/internal

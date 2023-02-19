@@ -6,8 +6,8 @@ require (
 	github.com/MottainaiCI/lxd-compose v0.25.0
 	github.com/geaaru/luet v0.29.4-geaaru
 	github.com/geaaru/pkgs-checker v0.13.0
-	github.com/onsi/ginkgo/v2 v2.4.0
-	github.com/onsi/gomega v1.23.0
+	github.com/onsi/ginkgo/v2 v2.8.3
+	github.com/onsi/gomega v1.27.0
 	github.com/spf13/cobra v1.6.1
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -31,7 +31,7 @@ require (
 	github.com/briandowns/spinner v1.12.1-0.20201220203425-e201aaea0a31 // indirect
 	github.com/cavaliercoder/grab v1.0.1-0.20201108051000-98a5bfe305ec // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+	github.com/chzyer/readline v1.5.0 // indirect
 	github.com/containerd/cgroups v1.0.4 // indirect
 	github.com/containerd/containerd v1.6.15 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
@@ -76,7 +76,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-containerregistry v0.5.1 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
+	github.com/google/pprof v0.0.0-20230207041349-798e818bf904 // indirect
 	github.com/google/renameio v1.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
@@ -88,7 +88,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/heroku/docker-registry-client v0.0.0-20181004091502-47ecf50fd8d4 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
-	github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639 // indirect
+	github.com/ianlancetaylor/demangle v0.0.0-20220319035150-800ac71e25c2 // indirect
 	github.com/icza/dyno v0.0.0-20220812133438-f0b6f8a18845 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
