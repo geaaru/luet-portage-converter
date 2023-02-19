@@ -45,7 +45,7 @@ func GetAurora() Aurora {
 func Ask() bool {
 	var input string
 
-	Info("Do you want to continue with this operation? [y/N]: ")
+	Msg("info", true, false, "Do you want to continue with this operation? [y/N]: ")
 	_, err := fmt.Scanln(&input)
 	if err != nil {
 		return false
@@ -177,6 +177,13 @@ func level2AtomicLevel(level string) zap.AtomicLevel {
 	default:
 		return zap.NewAtomicLevelAt(zap.DebugLevel)
 	}
+}
+
+func Emojize(msg string) string {
+	if LuetCfg.GetLogging().EnableEmoji {
+		return emoji.Sprint(msg)
+	}
+	return msg
 }
 
 func Msg(level string, withoutColor, ln bool, msg ...interface{}) {

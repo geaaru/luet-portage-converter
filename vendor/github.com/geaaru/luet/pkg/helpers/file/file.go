@@ -18,6 +18,7 @@ package file
 import (
 	"fmt"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -70,13 +71,14 @@ func OrderFiles(target string, files []string) ([]string, []string, []string) {
 
 	for _, f := range files {
 		completePath := filepath.Join(target, f)
-		fi, err := os.Stat(completePath)
+		fi, err := os.Lstat(completePath)
 		if err != nil {
 			notPresent = append(notPresent, f)
 			continue
 		}
 
-		if fi.IsDir() {
+		if fi.IsDir() && (fi.Mode()&fs.ModeSymlink == 0) {
+			// POST: found a directory that is not a link to another directory.
 			dirs = append(dirs, f)
 		} else {
 			newFiles = append(newFiles, f)

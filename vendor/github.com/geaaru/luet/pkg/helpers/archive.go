@@ -65,10 +65,35 @@ func UntarProtect(src, dst string, sameOwner, overwriteDirPerms bool, protectedF
 	spec.EnableMutex = LuetCfg.GetTarFlows().Mutex4Dirs
 	spec.MaxOpenFiles = LuetCfg.GetTarFlows().MaxOpenFiles
 	spec.BufferSize = LuetCfg.GetTarFlows().CopyBufferSize
+	spec.Validate = LuetCfg.GetTarFlows().Validate
 
 	return UntarProtectSpec(
 		src, dst, protectedFiles, modifier, spec,
 	)
+}
+
+func prepareTarformers(in io.Reader, modifier tarf.TarFileHandlerFunc,
+	spec *tarf_specs.SpecFile, protectedFiles []string) *tarf.TarFormers {
+	tarformers := tarf.NewTarFormers(tarf.GetOptimusPrime().Config)
+	tarformers.SetReader(in)
+
+	if modifier != nil && len(protectedFiles) > 0 {
+		tarformers.SetFileHandler(modifier)
+
+		spec.TriggeredFiles = protectedFiles
+	}
+
+	return tarformers
+}
+
+func UntarProtectSpecCompress(dst string, protectedFiles []string,
+	modifier tarf.TarFileHandlerFunc, spec *tarf_specs.SpecFile,
+	compressStream io.Reader) error {
+
+	tarformers := prepareTarformers(compressStream,
+		modifier, spec, protectedFiles)
+
+	return tarformers.RunTask(spec, dst)
 }
 
 func UntarProtectSpec(src, dst string, protectedFiles []string, modifier tarf.TarFileHandlerFunc, spec *tarf_specs.SpecFile) error {
@@ -78,14 +103,7 @@ func UntarProtectSpec(src, dst string, protectedFiles []string, modifier tarf.Ta
 	}
 	defer in.Close()
 
-	tarformers := tarf.NewTarFormers(tarf.GetOptimusPrime().Config)
-	tarformers.SetReader(in)
-
-	if modifier != nil && len(protectedFiles) > 0 {
-		tarformers.SetFileHandler(modifier)
-
-		spec.TriggeredFiles = protectedFiles
-	}
+	tarformers := prepareTarformers(in, modifier, spec, protectedFiles)
 
 	return tarformers.RunTask(spec, dst)
 }

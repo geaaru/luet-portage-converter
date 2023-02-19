@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2022 Macaroni OS Linux
+Copyright © 2021-2023 Macaroni OS Linux
 See AUTHORS and LICENSE for the license details and contributors.
 */
 package config
@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	LuetVersion     = "0.29.4"
+	LuetVersion     = "0.33.0"
 	LuetEnvPrefix   = "LUET"
 	LuetForkVersion = "geaaru"
 )
@@ -109,6 +109,12 @@ func (sc *LuetSystemConfig) GetRepoDatabaseDirPath(name string) string {
 		panic(err)
 	}
 	return dbpath
+}
+
+func (c *LuetConfig) GetLockFilePath(lockfile string) string {
+	// NOTE: Also when config_from_host is true I prefer
+	//       using the rootfs directory for locks.
+	return filepath.Join(c.System.Rootfs, "/var/lock/", lockfile)
 }
 
 func (sc *LuetSystemConfig) GetSystemRepoDatabaseDirPath() string {
@@ -198,7 +204,7 @@ func NewEmptyLuetRepository() *LuetRepository {
 		TreePath:       "",
 		MetaPath:       "",
 		Enable:         false,
-		Cached:         false,
+		Cached:         true,
 		Authentication: make(map[string]string, 0),
 	}
 }
@@ -238,6 +244,7 @@ type LuetConfig struct {
 
 	RepositoriesConfDir  []string         `yaml:"repos_confdir,omitempty" mapstructure:"repos_confdir"`
 	ConfigProtectConfDir []string         `yaml:"config_protect_confdir,omitempty" mapstructure:"config_protect_confdir"`
+	PackagesMaskDir      []string         `yaml:"packages_maskdir,omitempty" mapstructure:"packages_maskdir,omitempty"`
 	ConfigProtectSkip    bool             `yaml:"config_protect_skip,omitempty" mapstructure:"config_protect_skip"`
 	ConfigFromHost       bool             `yaml:"config_from_host,omitempty" mapstructure:"config_from_host"`
 	CacheRepositories    []LuetRepository `yaml:"repetitors,omitempty" mapstructure:"repetitors"`
@@ -261,6 +268,7 @@ type LuetTarflowsConfig struct {
 	CopyBufferSize int   `yaml:"copy_buffer_size,omitempty" mapstructure:"copy_buffer_size,omitempty"`
 	MaxOpenFiles   int64 `yaml:"max_openfiles,omitempty" mapstructure:"max_openfiles,omitempty"`
 	Mutex4Dirs     bool  `yaml:"mutex4dir,omitempty" mapstructure:"mutex4dir,omitempty"`
+	Validate       bool  `yaml:"validate,omitempty" mapstructure:"validate,omitempty"`
 }
 
 type LuetSubsetsConfig struct {
@@ -330,6 +338,7 @@ func GenDefault(viper *v.Viper) {
 
 	viper.SetDefault("repos_confdir", []string{"/etc/luet/repos.conf.d"})
 	viper.SetDefault("config_protect_confdir", []string{"/etc/luet/config.protect.d"})
+	viper.SetDefault("packages_maskdir", []string{"/etc/luet/mask.d"})
 	viper.SetDefault("subsets_confdir", []string{})
 	viper.SetDefault("subsets_defdir", []string{})
 	viper.SetDefault("config_protect_skip", false)
@@ -347,6 +356,7 @@ func GenDefault(viper *v.Viper) {
 	viper.SetDefault("tar_flows.mutex4dir", true)
 	viper.SetDefault("tar_flows.max_openfiles", 100)
 	viper.SetDefault("tar_flows.copy_buffer_size", 32)
+	viper.SetDefault("tar_flows.validate", false)
 }
 
 func (c *LuetConfig) GetSystemDB() pkg.PackageDatabase {

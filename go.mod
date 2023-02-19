@@ -4,8 +4,8 @@ go 1.18
 
 require (
 	github.com/MottainaiCI/lxd-compose v0.25.0
-	github.com/geaaru/luet v0.29.4-geaaru
-	github.com/geaaru/pkgs-checker v0.13.0
+	github.com/geaaru/luet v0.33.0-geaaru
+	github.com/geaaru/pkgs-checker v0.13.1
 	github.com/onsi/ginkgo/v2 v2.8.3
 	github.com/onsi/gomega v1.27.0
 	github.com/spf13/cobra v1.6.1
@@ -33,7 +33,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chzyer/readline v1.5.0 // indirect
 	github.com/containerd/cgroups v1.0.4 // indirect
-	github.com/containerd/containerd v1.6.15 // indirect
+	github.com/containerd/containerd v1.6.18 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.4.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
@@ -56,7 +56,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/fsouza/go-dockerclient v1.6.4 // indirect
 	github.com/fvbommel/sortorder v1.0.2 // indirect
-	github.com/geaaru/tar-formers v0.5.0 // indirect
+	github.com/geaaru/tar-formers v0.6.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-macaroon-bakery/macaroon-bakery/v3 v3.0.1 // indirect
@@ -69,6 +69,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -84,7 +85,7 @@ require (
 	github.com/gosexy/gettext v0.0.0-20160830220431-74466a0a0c4a // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/hashicorp/go-version v1.4.0 // indirect
+	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/heroku/docker-registry-client v0.0.0-20181004091502-47ecf50fd8d4 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
@@ -154,7 +155,7 @@ require (
 	github.com/rogpeppe/fastuuid v1.2.0 // indirect
 	github.com/rootless-containers/proto v0.1.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/schollz/progressbar/v3 v3.8.5 // indirect
+	github.com/schollz/progressbar/v3 v3.13.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/afero v1.9.3 // indirect
@@ -169,8 +170,8 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
-	go.etcd.io/bbolt v1.3.6 // indirect
-	go.mongodb.org/mongo-driver v1.1.2 // indirect
+	go.etcd.io/bbolt v1.3.7 // indirect
+	go.mongodb.org/mongo-driver v1.11.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
