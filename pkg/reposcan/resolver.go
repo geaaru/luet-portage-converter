@@ -1,6 +1,6 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
-	See AUTHORS and LICENSE for the license details and contributors.
+Copyright © 2021 Funtoo Macaroni OS Linux
+See AUTHORS and LICENSE for the license details and contributors.
 */
 package reposcan
 
@@ -240,6 +240,8 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 		rdepend := atom.GetMetadataValue("RDEPEND")
 		solution.SetLabel("RDEPEND", rdepend)
 
+		DebugC(fmt.Sprintf("[%s] RDEPEND %s", atom.Atom, rdepend))
+
 		deps, err := ParseDependencies(rdepend)
 		if err != nil {
 			Warning(fmt.Sprintf("[%s] RDEPEND Error on parsing '%s': %s", atom.Atom, rdepend, err.Error()))
@@ -250,6 +252,7 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 				return err
 			}
 		} else {
+
 			rdeps, conflicts, err = r.elaborateDepsAndUseFlags(deps, opts)
 			if err != nil {
 				return err
