@@ -612,6 +612,10 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 	if strings.Index(pkg, ":") < 0 {
 		gp.Slot = ""
 	}
+	// Ignore sub slot
+	if strings.Contains(gp.Slot, "/") {
+		gp.Slot = gp.Slot[0:strings.Index(gp.Slot, "/")]
+	}
 
 	atoms, ok := r.Map[gp.GetPackageName()]
 	if !ok {
@@ -654,8 +658,8 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 			}
 
 			DebugC(fmt.Sprintf(
-				"[%s/%s:%s] Check %s/%s:%s@%s: admitted - %v",
-				gp.Category, gp.GetPF(), gp.Slot,
+				"[%s/%s:%s] Check (%s) %s/%s:%s@%s: admitted - %v",
+				gp.Category, gp.GetPF(), gp.Slot, pkg,
 				p.Category, p.GetPF(), p.Slot, p.Repository, valid))
 
 			if valid {
@@ -736,6 +740,9 @@ func (r *RepoScanResolver) PackageIsAdmit(target, atom *gentoo.GentooPackage) (b
 			}
 
 			valid = admitted
+		} else {
+			DebugC(fmt.Sprintf("[%s] Package not admitted by constraints",
+				atom.GetPF()))
 		}
 
 	}
@@ -784,6 +791,8 @@ func (r *RepoScanResolver) KeywordsIsAdmit(atom *RepoScanAtom, p *gentoo.GentooP
 				"[%s] Version %s disabled for keywords %s", atom.Atom, p.GetPF(), keywords))
 		}
 	}
+
+	DebugC(fmt.Sprintf("[%s] KEYWORDS admit %v", atom.Atom, ans))
 
 	return ans, nil
 }
