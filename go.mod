@@ -3,7 +3,7 @@ module github.com/geaaru/luet-portage-converter
 go 1.18
 
 require (
-	github.com/MottainaiCI/lxd-compose v0.25.0
+	github.com/MottainaiCI/lxd-compose v0.26.1
 	github.com/geaaru/luet v0.33.0-geaaru
 	github.com/geaaru/pkgs-checker v0.13.1
 	github.com/onsi/ginkgo/v2 v2.8.3
@@ -49,6 +49,7 @@ require (
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
+	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/ecooper/qlearning v0.0.0-20160612200101-3075011a69fd // indirect
 	github.com/emicklei/go-restful/v3 v3.10.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
@@ -56,7 +57,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/fsouza/go-dockerclient v1.6.4 // indirect
 	github.com/fvbommel/sortorder v1.0.2 // indirect
-	github.com/geaaru/tar-formers v0.6.0 // indirect
+	github.com/geaaru/tar-formers v0.8.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-macaroon-bakery/macaroon-bakery/v3 v3.0.1 // indirect
@@ -103,13 +104,13 @@ require (
 	github.com/juju/webbrowser v1.0.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
-	github.com/klauspost/compress v1.15.15 // indirect
-	github.com/klauspost/pgzip v1.2.1 // indirect
+	github.com/klauspost/compress v1.16.0 // indirect
+	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/knqyf263/go-deb-version v0.0.0-20190517075300-09fca494f03d // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kyokomi/emoji v2.2.4+incompatible // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
-	github.com/lxc/lxd v0.0.0-20230217231028-f25446c8ac87 // indirect
+	github.com/lxc/lxd v0.0.0-20230225065959-ff5e2e24c809 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/marcsauter/single v0.0.0-20181104081128-f8bf46f26ec0 // indirect
@@ -150,7 +151,7 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
-	github.com/rivo/uniseg v0.4.3 // indirect
+	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/fastuuid v1.2.0 // indirect
 	github.com/rootless-containers/proto v0.1.0 // indirect
@@ -158,13 +159,14 @@ require (
 	github.com/schollz/progressbar/v3 v3.13.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
-	github.com/spf13/afero v1.9.3 // indirect
+	github.com/spf13/afero v1.9.4 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.15.0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/theupdateframework/notary v0.7.0 // indirect
+	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/cli v1.22.5 // indirect
 	github.com/vbatts/go-mtree v0.4.4 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
@@ -204,8 +206,8 @@ require (
 	k8s.io/apimachinery v0.26.1 // indirect
 	k8s.io/client-go v0.26.1 // indirect
 	k8s.io/klog/v2 v2.90.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20230217203603-ff9a8e8fa21d // indirect
-	k8s.io/utils v0.0.0-20230209194617-a36077c30491 // indirect
+	k8s.io/kube-openapi v0.0.0-20230224204730-66828de6f33b // indirect
+	k8s.io/utils v0.0.0-20230220204549-a5ecb0141aa5 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
