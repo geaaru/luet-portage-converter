@@ -9,13 +9,9 @@ github.com/BurntSushi/toml/internal
 # github.com/Masterminds/goutils v1.1.1
 ## explicit
 github.com/Masterminds/goutils
-# github.com/Masterminds/semver v1.5.0
-## explicit
 # github.com/Masterminds/semver/v3 v3.2.0
 ## explicit; go 1.18
 github.com/Masterminds/semver/v3
-# github.com/Masterminds/sprig v2.22.0+incompatible
-## explicit
 # github.com/Masterminds/sprig/v3 v3.2.3
 ## explicit; go 1.13
 github.com/Masterminds/sprig/v3
@@ -54,10 +50,6 @@ github.com/Microsoft/hcsshim/pkg/ociwclayer
 # github.com/MottainaiCI/lxd-compose v0.26.1
 ## explicit; go 1.18
 github.com/MottainaiCI/lxd-compose/pkg/helpers
-# github.com/PuerkitoBio/purell v1.2.0
-## explicit; go 1.19
-# github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
-## explicit
 # github.com/apex/log v1.9.0
 ## explicit; go 1.12
 github.com/apex/log
@@ -85,8 +77,6 @@ github.com/cavaliercoder/grab/bps
 # github.com/cespare/xxhash/v2 v2.2.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
-# github.com/chzyer/readline v1.5.0
-## explicit; go 1.15
 # github.com/containerd/cgroups v1.0.4
 ## explicit; go 1.17
 github.com/containerd/cgroups/stats/v1
@@ -197,8 +187,6 @@ github.com/docker/go-units
 # github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
 ## explicit
 github.com/docker/libtrust
-# github.com/dsnet/compress v0.0.1
-## explicit; go 1.9
 # github.com/ecooper/qlearning v0.0.0-20160612200101-3075011a69fd
 ## explicit
 github.com/ecooper/qlearning
@@ -209,16 +197,12 @@ github.com/emicklei/go-restful/v3/log
 # github.com/fatih/color v1.13.0
 ## explicit; go 1.13
 github.com/fatih/color
-# github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
-## explicit; go 1.14
 # github.com/fsnotify/fsnotify v1.6.0
 ## explicit; go 1.16
 github.com/fsnotify/fsnotify
 # github.com/fsouza/go-dockerclient v1.6.4
 ## explicit; go 1.12
 github.com/fsouza/go-dockerclient
-# github.com/fvbommel/sortorder v1.0.2
-## explicit; go 1.13
 # github.com/geaaru/luet v0.33.0-geaaru
 ## explicit; go 1.18
 github.com/geaaru/luet/pkg/box
@@ -261,10 +245,6 @@ github.com/ghodss/yaml
 ## explicit; go 1.16
 github.com/go-logr/logr
 github.com/go-logr/logr/funcr
-# github.com/go-macaroon-bakery/macaroon-bakery/v3 v3.0.1
-## explicit; go 1.17
-# github.com/go-macaroon-bakery/macaroonpb v1.0.0
-## explicit; go 1.16
 # github.com/go-openapi/errors v0.19.2
 ## explicit
 github.com/go-openapi/errors
@@ -281,8 +261,6 @@ github.com/go-openapi/strfmt
 # github.com/go-openapi/swag v0.22.3
 ## explicit; go 1.18
 github.com/go-openapi/swag
-# github.com/go-stack/stack v1.8.0
-## explicit
 # github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0
 ## explicit; go 1.13
 github.com/go-task/slim-sprig
@@ -296,8 +274,6 @@ github.com/gobwas/glob/syntax/ast
 github.com/gobwas/glob/syntax/lexer
 github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/util/strings
-# github.com/gofrs/flock v0.8.1
-## explicit
 # github.com/gogo/protobuf v1.3.2
 ## explicit; go 1.15
 github.com/gogo/protobuf/gogoproto
@@ -371,14 +347,6 @@ github.com/google/uuid
 # github.com/gorilla/mux v1.8.0
 ## explicit; go 1.12
 github.com/gorilla/mux
-# github.com/gorilla/websocket v1.5.0
-## explicit; go 1.12
-# github.com/gosexy/gettext v0.0.0-20160830220431-74466a0a0c4a
-## explicit
-# github.com/hashicorp/errwrap v1.1.0
-## explicit
-# github.com/hashicorp/go-multierror v1.1.1
-## explicit; go 1.13
 # github.com/hashicorp/go-version v1.6.0
 ## explicit
 github.com/hashicorp/go-version
@@ -400,10 +368,6 @@ github.com/heroku/docker-registry-client/registry
 # github.com/huandu/xstrings v1.4.0
 ## explicit; go 1.12
 github.com/huandu/xstrings
-# github.com/ianlancetaylor/demangle v0.0.0-20220319035150-800ac71e25c2
-## explicit; go 1.12
-# github.com/icza/dyno v0.0.0-20220812133438-f0b6f8a18845
-## explicit; go 1.13
 # github.com/imdario/mergo v0.3.13
 ## explicit; go 1.13
 github.com/imdario/mergo
@@ -423,18 +387,6 @@ github.com/josharian/intern
 # github.com/json-iterator/go v1.1.12
 ## explicit; go 1.12
 github.com/json-iterator/go
-# github.com/juju/go4 v0.0.0-20160222163258-40d72ab9641a
-## explicit
-# github.com/juju/persistent-cookiejar v1.0.0
-## explicit
-# github.com/juju/schema v1.0.1
-## explicit; go 1.11
-# github.com/juju/webbrowser v1.0.0
-## explicit; go 1.11
-# github.com/julienschmidt/httprouter v1.3.0
-## explicit; go 1.7
-# github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-## explicit
 # github.com/klauspost/compress v1.16.0
 ## explicit; go 1.18
 github.com/klauspost/compress
@@ -451,16 +403,12 @@ github.com/klauspost/pgzip
 # github.com/knqyf263/go-deb-version v0.0.0-20190517075300-09fca494f03d
 ## explicit
 github.com/knqyf263/go-deb-version
-# github.com/kr/fs v0.1.0
-## explicit
 # github.com/kyokomi/emoji v2.2.4+incompatible
 ## explicit
 github.com/kyokomi/emoji
 # github.com/logrusorgru/aurora v2.0.3+incompatible
 ## explicit
 github.com/logrusorgru/aurora
-# github.com/lxc/lxd v0.0.0-20230225065959-ff5e2e24c809
-## explicit; go 1.18
 # github.com/magiconair/properties v1.8.7
 ## explicit; go 1.19
 github.com/magiconair/properties
@@ -469,8 +417,6 @@ github.com/magiconair/properties
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
-# github.com/marcsauter/single v0.0.0-20181104081128-f8bf46f26ec0
-## explicit
 # github.com/mattn/go-colorable v0.1.13
 ## explicit; go 1.15
 github.com/mattn/go-colorable
@@ -529,8 +475,6 @@ github.com/mudler/topsort
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 ## explicit
 github.com/munnerz/goautoneg
-# github.com/olekukonko/tablewriter v0.0.5
-## explicit; go 1.12
 # github.com/onsi/ginkgo/v2 v2.8.3
 ## explicit; go 1.18
 github.com/onsi/ginkgo/v2
@@ -597,10 +541,6 @@ github.com/opencontainers/runtime-spec/specs-go
 # github.com/otiai10/copy v1.2.1-0.20200916181228-26f84a0b1578
 ## explicit; go 1.12
 github.com/otiai10/copy
-# github.com/pborman/uuid v1.2.1
-## explicit
-# github.com/pelletier/go-toml v1.9.5
-## explicit; go 1.12
 # github.com/pelletier/go-toml/v2 v2.0.6
 ## explicit; go 1.16
 github.com/pelletier/go-toml/v2
@@ -614,10 +554,8 @@ github.com/philopon/go-toposort
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
-# github.com/pkg/sftp v1.13.5
-## explicit; go 1.15
-# github.com/pkg/xattr v0.4.9
-## explicit; go 1.14
+# github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
+## explicit
 # github.com/prometheus/client_golang v1.14.0
 ## explicit; go 1.17
 github.com/prometheus/client_golang/prometheus
@@ -639,10 +577,6 @@ github.com/prometheus/procfs/internal/util
 # github.com/rivo/uniseg v0.4.4
 ## explicit; go 1.18
 github.com/rivo/uniseg
-# github.com/robfig/cron/v3 v3.0.1
-## explicit; go 1.12
-# github.com/rogpeppe/fastuuid v1.2.0
-## explicit; go 1.12
 # github.com/rootless-containers/proto v0.1.0
 ## explicit
 github.com/rootless-containers/proto/go-proto
@@ -705,8 +639,6 @@ github.com/theupdateframework/notary/tuf/data
 github.com/theupdateframework/notary/tuf/signed
 github.com/theupdateframework/notary/tuf/utils
 github.com/theupdateframework/notary/tuf/validation
-# github.com/ulikunitz/xz v0.5.11
-## explicit; go 1.12
 # github.com/urfave/cli v1.22.5
 ## explicit; go 1.11
 github.com/urfave/cli
@@ -875,22 +807,12 @@ google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
-# gopkg.in/errgo.v1 v1.0.1
-## explicit
-# gopkg.in/httprequest.v1 v1.2.1
-## explicit; go 1.15
 # gopkg.in/inf.v0 v0.9.1
 ## explicit
 gopkg.in/inf.v0
 # gopkg.in/ini.v1 v1.67.0
 ## explicit
 gopkg.in/ini.v1
-# gopkg.in/juju/environschema.v1 v1.0.1
-## explicit; go 1.12
-# gopkg.in/macaroon.v2 v2.1.0
-## explicit
-# gopkg.in/retry.v1 v1.0.3
-## explicit; go 1.12
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit; go 1.15
 gopkg.in/yaml.v2
