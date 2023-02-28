@@ -44,6 +44,15 @@ func (ap *ArtifactsPack) ToMap() *ArtifactsMap {
 	return ans
 }
 
+func (ap *ArtifactsPack) IsPresent(p *PackageArtifact) bool {
+	for _, a := range ap.Artifacts {
+		if a.GetPackage().PackageName() == p.GetPackage().PackageName() {
+			return true
+		}
+	}
+	return false
+}
+
 func (am *ArtifactsMap) MatchVersion(p *PackageArtifact) (*PackageArtifact, error) {
 	var ans *PackageArtifact = nil
 	var key string
@@ -121,6 +130,22 @@ func (am *ArtifactsMap) GetArtifactsByKey(k string) ([]*PackageArtifact, error) 
 		return nil, fmt.Errorf("Package %s not found on map", k)
 	}
 	return val, nil
+}
+
+func (am *ArtifactsMap) GetProvides(p string) []*PackageArtifact {
+	ans := []*PackageArtifact{}
+
+	for k, arts := range am.Artifacts {
+		for _, a := range arts {
+			dp := a.GetPackage()
+			if dp.GetProvidePackage(p) != nil {
+				ans, _ = am.Artifacts[k]
+				break
+			}
+		}
+	}
+
+	return ans
 }
 
 func (am *ArtifactsMap) GetSortedArtifactsByKey(k string) ([]*PackageArtifact, error) {

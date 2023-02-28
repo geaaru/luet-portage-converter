@@ -359,6 +359,12 @@ func (w *WagonRepository) ExplodeMetadata() error {
 					catalog.Index[idx].CompileSpec.Package.PackageRequires = dp.PackageRequires
 				}
 
+				// Update annotations
+				if len(dp.Annotations) > 0 || len(dp.Annotations) != len(catalog.Index[idx].Runtime.Annotations) {
+					catalog.Index[idx].Runtime.Annotations = dp.Annotations
+					catalog.Index[idx].CompileSpec.Package.Annotations = dp.Annotations
+				}
+
 			} else if catalog.Index[idx].CompileSpec != nil && catalog.Index[idx].CompileSpec.Package != nil {
 
 				if len(dp.Provides) != len(catalog.Index[idx].CompileSpec.Package.Provides) || len(dp.Provides) > 0 {
@@ -367,6 +373,13 @@ func (w *WagonRepository) ExplodeMetadata() error {
 
 				if len(dp.PackageRequires) > 0 || len(dp.PackageRequires) != len(catalog.Index[idx].CompileSpec.Package.PackageRequires) {
 					catalog.Index[idx].CompileSpec.Package.PackageRequires = dp.PackageRequires
+				}
+
+				// Update annotations
+				if dp.Annotations != nil && catalog.Index[idx].CompileSpec.Package.Annotations != nil {
+					if len(dp.Annotations) > 0 || len(dp.Annotations) != len(catalog.Index[idx].CompileSpec.Package.Annotations) {
+						catalog.Index[idx].CompileSpec.Package.Annotations = dp.Annotations
+					}
 				}
 			}
 
