@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021-2022 Funtoo Macaroni OS Linux
+	Copyright © 2021-2023 Funtoo Macaroni OS Linux
 	See AUTHORS and LICENSE for the license details and contributors.
 */
 
@@ -18,11 +18,11 @@ import (
 )
 
 const (
-	cliName = `Copyright (c) 2020-2022 - Daniele Rondina
+	cliName = `Copyright (c) 2020-2023 - Daniele Rondina
 
 Portage/Overlay converter for Luet specs.`
 
-	version = "0.11.0"
+	version = "0.11.1"
 )
 
 func initConfig() error {
