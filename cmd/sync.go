@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2022 Funtoo Macaroni OS Linux
+Copyright © 2021-2023 Funtoo Macaroni OS Linux
 See AUTHORS and LICENSE for the license details and contributors.
 */
 package cmd
@@ -9,11 +9,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/geaaru/luet-portage-converter/pkg/reposcan"
 	"github.com/geaaru/luet-portage-converter/pkg/specs"
+	"github.com/pkg/errors"
 
 	"github.com/geaaru/luet/pkg/config"
 	. "github.com/geaaru/luet/pkg/logger"
 	luet_pkg "github.com/geaaru/luet/pkg/package"
+	pkg "github.com/geaaru/luet/pkg/package"
 	artifact "github.com/geaaru/luet/pkg/v2/compiler/types/artifact"
 	installer "github.com/geaaru/luet/pkg/v2/installer"
 	"github.com/geaaru/pkgs-checker/pkg/gentoo"
@@ -23,10 +26,71 @@ import (
 type PortageSyncOpts struct {
 	OnlyNew bool
 	DryRun  bool
+	Force   bool
 }
 
-func populateArtifcat(p *gentoo.PortageMetaData, a *artifact.PackageArtifact) {
+type PortageSyncTask struct {
+	Opts      *PortageSyncOpts
+	DbPkgsDir string
+	Packages  map[string][]*gentoo.PortageMetaData
+	Manager   *installer.ArtifactsManager
+}
 
+func parseRdepend(rdepend string, a *artifact.PackageArtifact,
+	task *PortageSyncTask) error {
+
+	if rdepend == "" {
+		// Nothing to do
+		return nil
+	}
+
+	deps, err := reposcan.ParseDependenciesMultiline(rdepend)
+	if err != nil {
+		return err
+	}
+
+	// For every dep I check if is present on local db.
+	for _, d := range deps.Dependencies {
+		// Check if the dependencies exists
+
+		category := specs.SanitizeCategory(d.Dep.Category, d.Dep.Slot)
+		version := ">=0"
+		conflict := false
+		switch d.Dep.Condition {
+		case gentoo.PkgCondNot:
+			conflict = true
+		case gentoo.PkgCondNotLess:
+			version = "<" + d.Dep.Version
+			conflict = true
+		case gentoo.PkgCondNotGreater:
+			version = ">" + d.Dep.Version
+			conflict = true
+		}
+
+		dp := pkg.NewPackageWithCat(category, d.Dep.Name, version,
+			[]*pkg.DefaultPackage{}, []*pkg.DefaultPackage{})
+
+		if conflict {
+			a.Runtime.PackageConflicts = append(a.Runtime.PackageConflicts, dp)
+			Debug(fmt.Sprintf("[%s] Add conflict with %s.",
+				a.Runtime.PackageName(), dp.HumanReadableString()))
+		} else {
+			// Add the dependencies only if it's available on filesystem
+			key := fmt.Sprintf("%s/%s", d.Dep.Category, d.Dep.Name)
+			if _, ok := task.Packages[key]; ok {
+				a.Runtime.PackageRequires = append(a.Runtime.PackageRequires, dp)
+				Debug(fmt.Sprintf("[%s] Depends on %s.",
+					a.Runtime.PackageName(), dp.HumanReadableString()))
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func populateArtifact(p *gentoo.PortageMetaData, a *artifact.PackageArtifact,
+	task *PortageSyncTask) error {
 	files := []string{}
 
 	// TODO: Check if this is correct ignoring directories
@@ -106,6 +170,12 @@ func populateArtifcat(p *gentoo.PortageMetaData, a *artifact.PackageArtifact) {
 	if p.BDEPEND != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/BDEPEND", p.Category, p.GetPF()))
 	}
+	if p.PDEPEND != "" {
+		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/PDEPEND", p.Category, p.GetPF()))
+	}
+	if p.BINPKGMD5 != "" {
+		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/BINPKGMD5", p.Category, p.GetPF()))
+	}
 
 	a.Files = files
 
@@ -121,6 +191,7 @@ func populateArtifcat(p *gentoo.PortageMetaData, a *artifact.PackageArtifact) {
 		License:        p.License,
 		BuildTimestamp: p.BUILD_TIME,
 		Hidden:         false,
+		Repository:     "scm",
 	}
 
 	rules := make(map[string][]string, 0)
@@ -136,10 +207,11 @@ func populateArtifcat(p *gentoo.PortageMetaData, a *artifact.PackageArtifact) {
 	a.Runtime.Labels["original.package.slot"] = p.Slot
 	a.Runtime.Labels["emerge.packages"] = p.GetPackageNameWithSlot()
 	a.Runtime.Labels["kit"] = p.Repository
+
+	return parseRdepend(p.RDEPEND, a, task)
 }
 
-func syncPackage(p *gentoo.PortageMetaData, aManager *installer.ArtifactsManager,
-	opts *PortageSyncOpts,
+func syncPackage(p *gentoo.PortageMetaData, task *PortageSyncTask,
 	idx, n int) error {
 
 	// TOSEE: We ignore subslot atm.
@@ -157,7 +229,7 @@ func syncPackage(p *gentoo.PortageMetaData, aManager *installer.ArtifactsManager
 		Version:  ">=0",
 	}
 
-	pkgs, err := aManager.Database.FindPackages(luetP)
+	pkgs, err := task.Manager.Database.FindPackages(luetP)
 	if err != nil {
 		return err
 	}
@@ -169,13 +241,12 @@ func syncPackage(p *gentoo.PortageMetaData, aManager *installer.ArtifactsManager
 			originalPackageVersion := ipkg.GetLabels()["original.package.version"]
 
 			if originalPackageVersion != p.GetPVR() {
-				if opts.OnlyNew {
+				if task.Opts.OnlyNew {
 					Debug(fmt.Sprintf(
 						"[%4d/%4d] [%s] Found version %s on luet and %s on portage. Ignoring.",
 						idx+1, n, p.GetPackageNameWithSlot(),
 						originalPackageVersion,
 						p.GetPVR()))
-					// TODO: check this again when will support multiple version.
 					notFound = false
 				} else {
 					Info(fmt.Sprintf(
@@ -191,6 +262,19 @@ func syncPackage(p *gentoo.PortageMetaData, aManager *installer.ArtifactsManager
 	}
 
 	if notFound {
+
+		// Create the Package Artifact of the Portage package.
+		art := artifact.NewPackageArtifact(
+			fmt.Sprintf("/var/db/pkg/%s", p.GetPackageName()),
+		)
+		err := populateArtifact(p, art, task)
+		if err != nil {
+			Warning(fmt.Sprintf(
+				"[%4d/%4d] [%s] Error on process data: %s",
+				idx+1, n, p.GetPackageNameWithSlot(), err.Error()))
+			return err
+		}
+
 		if len(pkgs) == 0 {
 			// POST: the package is not available in the luet database.
 
@@ -199,19 +283,47 @@ func syncPackage(p *gentoo.PortageMetaData, aManager *installer.ArtifactsManager
 				idx+1, n, p.GetPackageNameWithSlot(),
 				p.GetPVR())))
 
-			// Create the Package Artifact of the Portage package.
-			art := artifact.NewPackageArtifact(
-				fmt.Sprintf("/var/db/pkg/%s", p.GetPackageName()),
-			)
-			populateArtifcat(p, art)
-
-			if opts.DryRun {
+			if task.Opts.DryRun {
 				InfoC(GetAurora().Bold(fmt.Sprintf(
 					"[%4d/%4d] [%s] %s candidated for sync :heavy_check_mark:",
 					idx+1, n, p.GetPackageNameWithSlot(),
 					p.GetPVR())))
 			} else {
-				err := aManager.RegisterPackage(art, nil, true)
+				err := task.Manager.RegisterPackage(art, nil, true)
+				if err != nil {
+					return err
+				}
+
+				InfoC(GetAurora().Bold(fmt.Sprintf(
+					"[%4d/%4d] [%s] %s added :heavy_check_mark:",
+					idx+1, n, p.GetPackageNameWithSlot(),
+					p.GetPVR())))
+			}
+		} else {
+			// POST: Package to sync
+			if task.Opts.DryRun {
+				InfoC(GetAurora().Bold(fmt.Sprintf(
+					"[%4d/%4d] [%s] %s candidated for align version to luet version :heavy_check_mark:",
+					idx+1, n, p.GetPackageNameWithSlot(),
+					p.GetPVR())))
+			} else {
+
+				// Delete existing package without remove filesystem files.
+				err := task.Manager.Database.RemovePackageFiles(art.Runtime)
+				if err != nil {
+					return err
+				}
+
+				err = task.Manager.Database.RemovePackageFinalizer(art.Runtime)
+				if err != nil && !task.Opts.Force {
+					return errors.New("Failed removing package finalizer from database")
+				}
+				err = task.Manager.Database.RemovePackage(art.Runtime)
+				if err != nil && !task.Opts.Force {
+					return errors.New("Failed removing package from database")
+				}
+
+				err = task.Manager.RegisterPackage(art, nil, true)
 				if err != nil {
 					return err
 				}
@@ -238,6 +350,7 @@ func newSyncCommand() *cobra.Command {
 
 			debug, _ := cmd.Flags().GetBool("debug")
 			onlyNew, _ := cmd.Flags().GetBool("only-new")
+			force, _ := cmd.Flags().GetBool("force")
 			dryRun, _ := cmd.Flags().GetBool("dry-run")
 			dbPkgsDir, _ := cmd.Flags().GetString("db-pkgs-dir-path")
 			verbose, _ := cmd.Flags().GetBool("verbose")
@@ -277,6 +390,14 @@ func newSyncCommand() *cobra.Command {
 			syncOpts := &PortageSyncOpts{
 				OnlyNew: onlyNew,
 				DryRun:  dryRun,
+				Force:   force,
+			}
+
+			// Create sync task
+			task := &PortageSyncTask{
+				Opts:      syncOpts,
+				DbPkgsDir: dbPkgsDir,
+				Packages:  make(map[string][]*gentoo.PortageMetaData, 0),
 			}
 
 			// Retrieve the list of packages from portage db dir
@@ -286,16 +407,26 @@ func newSyncCommand() *cobra.Command {
 				os.Exit(1)
 			}
 
-			// Initialize luet artifact manager
-			aManager := installer.NewArtifactsManager(config.LuetCfg)
-			defer aManager.Close()
+			// Popolate portage map
+			for _, p := range portagePkgs {
+				key := fmt.Sprintf("%s/%s", p.Category, p.Name)
+				if val, present := task.Packages[key]; present {
+					task.Packages[key] = append(val, p)
+				} else {
+					task.Packages[key] = []*gentoo.PortageMetaData{p}
+				}
+			}
 
-			aManager.Setup()
+			// Initialize luet artifact manager
+			task.Manager = installer.NewArtifactsManager(config.LuetCfg)
+			defer task.Manager.Close()
+
+			task.Manager.Setup()
 
 			n := len(portagePkgs)
 
 			for idx, p := range portagePkgs {
-				err := syncPackage(p, aManager, syncOpts, idx, n)
+				err := syncPackage(p, task, idx, n)
 				if err != nil {
 					fmt.Println("ERROR ", err.Error())
 				}
@@ -308,11 +439,12 @@ func newSyncCommand() *cobra.Command {
 	var flags = cmd.Flags()
 	flags.StringP("db-pkgs-dir-path", "p", "/var/db/pkg",
 		"Path of the portage metadata.")
-	cmd.Flags().StringArray("pkg", []string{},
+	flags.StringArray("pkg", []string{},
 		"Specify one or more packages to sync.",
 	)
-	cmd.Flags().Bool("dry-run", false, "Dry run sync operations.")
-	cmd.Flags().Bool("only-new", false, "Sync only new packages not available on luet.")
+	flags.Bool("dry-run", false, "Dry run sync operations.")
+	flags.Bool("force", false, "Skip errors.")
+	flags.Bool("only-new", false, "Sync only new packages not available on luet.")
 
 	return cmd
 }
