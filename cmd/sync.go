@@ -131,6 +131,9 @@ func populateArtifact(p *gentoo.PortageMetaData, a *artifact.PackageArtifact,
 	if p.CBUILD != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CBUILD", p.Category, p.GetPF()))
 	}
+	if p.CC != "" {
+		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CC", p.Category, p.GetPF()))
+	}
 	if p.CFlags != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CFLAGS", p.Category, p.GetPF()))
 	}
@@ -150,7 +153,7 @@ func populateArtifact(p *gentoo.PortageMetaData, a *artifact.PackageArtifact,
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/NEEDED", p.Category, p.GetPF()))
 	}
 	if p.NEEDED_ELF2 != "" {
-		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/NEEDED_ELF2", p.Category, p.GetPF()))
+		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/NEEDED.ELF.2", p.Category, p.GetPF()))
 	}
 	if p.RDEPEND != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/RDEPEND", p.Category, p.GetPF()))
