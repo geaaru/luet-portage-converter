@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/MottainaiCI/lxd-compose v0.26.1
 	github.com/geaaru/luet v0.34.2-geaaru
-	github.com/geaaru/pkgs-checker v0.13.2
+	github.com/geaaru/pkgs-checker v0.13.3
 	github.com/onsi/ginkgo/v2 v2.8.4
 	github.com/onsi/gomega v1.27.2
 	github.com/spf13/cobra v1.6.1

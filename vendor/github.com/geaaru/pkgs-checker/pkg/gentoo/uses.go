@@ -38,6 +38,7 @@ type PortageMetaData struct {
 	CFlags         string   `json:"cflags,omitempty"`
 	LdFlags        string   `json:"ldflags,omitempty"`
 	CHost          string   `json:"chost,omitempty"`
+	CC             string   `json:"cc,omitempty"`
 	BDEPEND        string   `json:"bdepend,omitempty"`
 	RDEPEND        string   `json:"rdepend,omitempty"`
 	PDEPEND        string   `json:"pdepend,omitempty"`
@@ -97,6 +98,7 @@ func NewPortageMetaData(pkg *GentooPackage) *PortageMetaData {
 		RDEPEND:        "",
 		PDEPEND:        "",
 		DEPEND:         "",
+		CC:             "",
 		BUILD_TIME:     "",
 		CBUILD:         "",
 		COUNTER:        "",
@@ -277,6 +279,11 @@ func ParsePackageMetadataDir(dir string, opts *PortageUseParseOpts) (*PortageMet
 	ans = NewPortageMetaData(gp)
 
 	ans.BDEPEND, err = parseMetaFile(filepath.Join(metaDir, "BDEPEND"), true)
+	if err != nil {
+		return nil, err
+	}
+
+	ans.CC, err = parseMetaFile(filepath.Join(metaDir, "CC"), true)
 	if err != nil {
 		return nil, err
 	}
@@ -715,6 +722,16 @@ func (m *PortageMetaData) WriteMetadata2Dir(dir string, opts *PortageUseParseOpt
 	)
 	if err != nil {
 		return err
+	}
+
+	// Write CC file
+	if m.CC != "" {
+		err = os.WriteFile(filepath.Join(metadir, "CC"),
+			[]byte(m.CC+"\n"), 0644,
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Write CFLAGS
