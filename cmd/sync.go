@@ -238,6 +238,7 @@ func syncPackage(p *gentoo.PortageMetaData, task *PortageSyncTask,
 	}
 
 	notFound := true
+	var installedPkg *pkg.DefaultPackage = nil
 	for _, ipkg := range pkgs {
 
 		if ipkg.HasLabel("original.package.version") {
@@ -257,6 +258,7 @@ func syncPackage(p *gentoo.PortageMetaData, task *PortageSyncTask,
 						idx+1, n, p.GetPackageNameWithSlot(),
 						originalPackageVersion,
 						p.GetPVR()))
+					installedPkg = ipkg.(*pkg.DefaultPackage)
 				}
 			} else if originalPackageVersion == p.GetPVR() {
 				notFound = false
@@ -312,16 +314,16 @@ func syncPackage(p *gentoo.PortageMetaData, task *PortageSyncTask,
 			} else {
 
 				// Delete existing package without remove filesystem files.
-				err := task.Manager.Database.RemovePackageFiles(art.Runtime)
+				err := task.Manager.Database.RemovePackageFiles(installedPkg)
 				if err != nil {
 					return err
 				}
 
-				err = task.Manager.Database.RemovePackageFinalizer(art.Runtime)
+				err = task.Manager.Database.RemovePackageFinalizer(installedPkg)
 				if err != nil && !task.Opts.Force {
 					return errors.New("Failed removing package finalizer from database")
 				}
-				err = task.Manager.Database.RemovePackage(art.Runtime)
+				err = task.Manager.Database.RemovePackage(installedPkg)
 				if err != nil && !task.Opts.Force {
 					return errors.New("Failed removing package from database")
 				}
