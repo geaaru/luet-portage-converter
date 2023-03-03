@@ -6,7 +6,7 @@ require (
 	github.com/MottainaiCI/lxd-compose v0.26.1
 	github.com/geaaru/luet v0.34.2-geaaru
 	github.com/geaaru/pkgs-checker v0.13.3
-	github.com/onsi/ginkgo/v2 v2.8.4
+	github.com/onsi/ginkgo/v2 v2.9.0
 	github.com/onsi/gomega v1.27.2
 	github.com/spf13/cobra v1.6.1
 	gopkg.in/yaml.v2 v2.4.0
@@ -67,7 +67,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-containerregistry v0.5.1 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/pprof v0.0.0-20230207041349-798e818bf904 // indirect
+	github.com/google/pprof v0.0.0-20230228050547-1710fef4ab10 // indirect
 	github.com/google/renameio v1.0.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
