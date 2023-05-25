@@ -1,6 +1,6 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
-	See AUTHORS and LICENSE for the license details and contributors.
+Copyright © 2021 Funtoo Macaroni OS Linux
+See AUTHORS and LICENSE for the license details and contributors.
 */
 package converter
 
@@ -498,17 +498,19 @@ func (t *Stage4Tree) AddDependency(p, father *luet_pkg.DefaultPackage) error {
 	DebugC(fmt.Sprintf("[L%d] Adding dep %s/%s with father %s",
 		t.Id, p.GetCategory(), p.GetName(), fatherKey))
 
-	if leaf, ok := t.Map[fmt.Sprintf("%s/%s", p.GetCategory(), p.GetName())]; ok {
-		leaf.AddFather(father)
-		return nil
-	}
+	if fatherKey != "-" {
+		if leaf, ok := t.Map[fmt.Sprintf("%s/%s", p.GetCategory(), p.GetName())]; ok {
+			leaf.AddFather(father)
+			return nil
+		}
 
-	leaf, err := NewStage4Leaf(p, father, len(t.Deps))
-	if err != nil {
-		return err
-	}
+		leaf, err := NewStage4Leaf(p, father, len(t.Deps))
+		if err != nil {
+			return err
+		}
 
-	t.Map[fmt.Sprintf("%s/%s", p.GetCategory(), p.GetName())] = leaf
+		t.Map[fmt.Sprintf("%s/%s", p.GetCategory(), p.GetName())] = leaf
+	}
 	t.Deps = append(t.Deps, p)
 
 	return nil
