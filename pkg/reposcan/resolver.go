@@ -739,9 +739,13 @@ func (r *RepoScanResolver) PackageIsAdmit(target, atom *gentoo.GentooPackage) (b
 				}
 			}
 
+			if !admitted {
+				DebugC(fmt.Sprintf("[%s] Package not admitted by constraints",
+					atom.GetPF()))
+			}
 			valid = admitted
 		} else {
-			DebugC(fmt.Sprintf("[%s] Package not admitted by constraints",
+			DebugC(fmt.Sprintf("[%s] No constraints found.",
 				atom.GetPF()))
 		}
 
