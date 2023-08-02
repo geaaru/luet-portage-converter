@@ -525,15 +525,18 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 			// Check if it's present the build dep on the tree
 			p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
-			if (p == nil && !pc.SkipRDepsGeneration) || pc.CheckUpdate4Deps {
-				dep_str := fmt.Sprintf("%s/%s", rdep.Category, rdep.Name)
-				if rdep.Slot != "0" {
-					dep_str += ":" + rdep.Slot
-				}
-				// Now we use the same treePath.
-				err := pc.createSolution(dep_str, treePath, stack, artefact)
-				if err != nil {
-					return err
+			if p == nil || pc.CheckUpdate4Deps {
+
+				if !pc.SkipRDepsGeneration {
+					dep_str := fmt.Sprintf("%s/%s", rdep.Category, rdep.Name)
+					if rdep.Slot != "0" {
+						dep_str += ":" + rdep.Slot
+					}
+					// Now we use the same treePath.
+					err := pc.createSolution(dep_str, treePath, stack, artefact)
+					if err != nil {
+						return err
+					}
 				}
 
 				rdeps = pc.AppendIfNotPresent(rdeps, rdep)
