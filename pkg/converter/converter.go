@@ -50,6 +50,7 @@ type PortageConverter struct {
 	UsingLayerForRuntime bool
 	ContinueWithError    bool
 	CheckUpdate4Deps     bool
+	SkipRDepsGeneration  bool
 	DisabledUseFlags     []string
 	TreePaths            []string
 	FilteredPackages     []string
@@ -71,6 +72,7 @@ func NewPortageConverter(targetDir, backend string) *PortageConverter {
 		DisableConflicts:     false,
 		CheckUpdate4Deps:     false,
 		UsingLayerForRuntime: false,
+		SkipRDepsGeneration:  false,
 		DisabledUseFlags:     []string{},
 		TreePaths:            []string{},
 		FilteredPackages:     []string{},
@@ -514,7 +516,8 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 					Version:  ">=0",
 					Slot:     "0",
 				}
-				DebugC(GetAurora().Bold(fmt.Sprintf("[%s] For runtime dep %s found layer %s/%s.", pkg,
+				DebugC(GetAurora().Bold(fmt.Sprintf(
+					"[%s] For runtime dep %s found layer %s/%s.", pkg,
 					dep_str, bLayer.Layer.Name, bLayer.Layer.Category)))
 				rdeps = pc.AppendIfNotPresent(rdeps, gp)
 				continue
@@ -522,7 +525,7 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 
 			// Check if it's present the build dep on the tree
 			p, _ := pc.ReciperRuntime.GetDatabase().FindPackages(dep)
-			if pc.CheckUpdate4Deps || p == nil {
+			if (p == nil && !pc.SkipRDepsGeneration) || pc.CheckUpdate4Deps {
 				dep_str := fmt.Sprintf("%s/%s", rdep.Category, rdep.Name)
 				if rdep.Slot != "0" {
 					dep_str += ":" + rdep.Slot

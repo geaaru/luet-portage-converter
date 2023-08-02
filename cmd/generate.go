@@ -1,6 +1,6 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
-	See AUTHORS and LICENSE for the license details and contributors.
+Copyright © 2021 Funtoo Macaroni OS Linux
+See AUTHORS and LICENSE for the license details and contributors.
 */
 package cmd
 
@@ -47,6 +47,7 @@ func newGenerateCommand() *cobra.Command {
 			withPortagePkgs, _ := cmd.Flags().GetBool("with-portage-pkg")
 			disableConflicts, _ := cmd.Flags().GetBool("disable-conflicts")
 			layer4Rdepends, _ := cmd.Flags().GetBool("layer4rdepends")
+			skipRdepsGen, _ := cmd.Flags().GetBool("skip-rdeps-generation")
 
 			converter := converter.NewPortageConverter(to, backend)
 			converter.Override = override
@@ -61,6 +62,7 @@ func newGenerateCommand() *cobra.Command {
 			converter.ContinueWithError = continueWithError
 			converter.IgnoreWrongPackages = ignoreWrongPackages
 			converter.CheckUpdate4Deps = checkUpdate4Deps
+			converter.SkipRDepsGeneration = skipRdepsGen
 
 			if debug {
 				LuetCfg.GetGeneral().Debug = debug
@@ -115,5 +117,7 @@ func newGenerateCommand() *cobra.Command {
 	cmd.Flags().Bool("continue-with-error", false, "Continue processing with errors (for example: no KEYWORDS defined).")
 	cmd.Flags().Bool("ignore-wrong-packages", false, "Continue processing when a package is not resolved.")
 	cmd.Flags().Bool("check-update4deps", false, "Verify if there are update for package dependencies too.")
+	cmd.Flags().Bool("skip-rdeps-generation", false,
+		"Skip the generation of the runtime dependencies specs.")
 	return cmd
 }
