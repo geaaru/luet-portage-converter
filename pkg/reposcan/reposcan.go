@@ -1,6 +1,6 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
-	See AUTHORS and LICENSE for the license details and contributors.
+Copyright © 2021-2023 Macaroni OS Linux
+See AUTHORS and LICENSE for the license details and contributors.
 */
 package reposcan
 
@@ -14,43 +14,48 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	CacheDataVersion = "1.0.6"
+)
+
 type RepoScanSpec struct {
 	CacheDataVersion string                  `json:"cache_data_version" yaml:"cache_data_version"`
 	Atoms            map[string]RepoScanAtom `json:"atoms" yaml:"atoms"`
+	MetadataErrors   map[string]RepoScanAtom `json:"metadata_errors,omitempty" yaml:"metadata_errors,omitempty"`
 
 	File string `json:"-"`
 }
 
 type RepoScanAtom struct {
-	Atom string `json:"atom" yaml:"atom"`
+	Atom string `json:"atom,omitempty" yaml:"atom,omitempty"`
 
-	Category string     `json:"category" yaml:"category"`
-	Package  string     `json:"package" yaml:"package"`
-	Revision string     `json:"revision" yaml:"revision"`
-	CatPkg   string     `json:"catpkg" yaml:"catpkg"`
-	Eclasses [][]string `json:"eclasses" yaml:"eclasses"`
+	Category string     `json:"category,omitempty" yaml:"category,omitempty"`
+	Package  string     `json:"package,omitempty" yaml:"package,omitempty"`
+	Revision string     `json:"revision,omitempty" yaml:"revision,omitempty"`
+	CatPkg   string     `json:"catpkg,omitempty" yaml:"catpkg,omitempty"`
+	Eclasses [][]string `json:"eclasses,omitempty" yaml:"eclasses,omitempty"`
 
 	Kit    string `json:"kit" yaml:"kit"`
 	Branch string `json:"branch" yaml:"branch"`
 
 	// Relations contains the list of the keys defined on
 	// relations_by_kind. The values could be RDEPEND, DEPEND, BDEPEND
-	Relations       []string            `json:"relations" yaml:"relations"`
-	RelationsByKind map[string][]string `json:"relations_by_kind" yaml:"relations_by_kind"`
+	Relations       []string            `json:"relations,omitempty" yaml:"relations,omitempty"`
+	RelationsByKind map[string][]string `json:"relations_by_kind,omitempty" yaml:"relations_by_kind,omitempty"`
 
 	// Metadata contains ebuild variables.
 	// Ex: SLOT, SRC_URI, HOMEPAGE, etc.
-	Metadata    map[string]string `json:"metadata" yaml:"metadata"`
-	MetadataOut string            `json:"metadata_out" yaml:"metadata_out"`
+	Metadata    map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	MetadataOut string            `json:"metadata_out,omitempty" yaml:"metadata_out,omitempty"`
 
-	ManifestMd5 string `json:"manifest_md5" yaml:"manifest_md5"`
-	Md5         string `json:"md5" yaml:"md5"`
+	ManifestMd5 string `json:"manifest_md5,omitempty" yaml:"manifest_md5,omitempty"`
+	Md5         string `json:"md5,omitempty" yaml:"md5,omitempty"`
 
 	// Fields present on failure
 	Status string `json:"status,omitempty" yaml:"status,omitempty"`
 	Output string `json:"output,omitempty" yaml:"output,omitempty"`
 
-	Files []RepoScanFile `json:"files" yaml:"files"`
+	Files []RepoScanFile `json:"files,omitempty" yaml:"files,omitempty"`
 }
 
 type RepoScanFile struct {
