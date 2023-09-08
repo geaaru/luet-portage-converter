@@ -1,4 +1,4 @@
-module github.com/geaaru/luet-portage-converter
+module github.com/macaroni-os/anise-portage-converter
 
 go 1.19
 

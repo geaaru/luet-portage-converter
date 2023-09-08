@@ -1,5 +1,5 @@
 /*
-Copyright © 2021 Funtoo Macaroni OS Linux
+Copyright © 2021-2023 Macaroni OS Linux
 See AUTHORS and LICENSE for the license details and contributors.
 */
 package reposcan
@@ -13,7 +13,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/geaaru/luet-portage-converter/pkg/specs"
+	"github.com/macaroni-os/anise-portage-converter/pkg/specs"
+
 	. "github.com/geaaru/luet/pkg/logger"
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 )

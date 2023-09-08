@@ -1,6 +1,6 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
-	See AUTHORS and LICENSE for the license details and contributors.
+Copyright © 2021-2023 Macaroni OS Linux
+See AUTHORS and LICENSE for the license details and contributors.
 */
 package qdepends
 
@@ -11,9 +11,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/geaaru/luet-portage-converter/pkg/specs"
-	helpers "github.com/MottainaiCI/lxd-compose/pkg/helpers"
+	"github.com/macaroni-os/anise-portage-converter/pkg/specs"
 
+	helpers "github.com/MottainaiCI/lxd-compose/pkg/helpers"
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 )
 

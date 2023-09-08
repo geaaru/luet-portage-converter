@@ -1,6 +1,6 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
-	See AUTHORS and LICENSE for the license details and contributors.
+Copyright © 2021-2023 Macaroni OS Linux
+See AUTHORS and LICENSE for the license details and contributors.
 */
 package reposcan_test
 
@@ -8,11 +8,11 @@ import (
 	"errors"
 	"fmt"
 
-	. "github.com/geaaru/luet-portage-converter/pkg/reposcan"
-	specs "github.com/geaaru/luet-portage-converter/pkg/specs"
+	. "github.com/macaroni-os/anise-portage-converter/pkg/reposcan"
+	specs "github.com/macaroni-os/anise-portage-converter/pkg/specs"
 
-	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 	luet_pkg "github.com/geaaru/luet/pkg/package"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

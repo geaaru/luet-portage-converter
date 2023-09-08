@@ -1,32 +1,34 @@
-# luet-portage-converter
+# anise-portage-converter
+
 Portage/Overlay converter for Luet specs.
+Old name `luet-portage-converter`.
 
 ```
-$ luet portage-converter -- --help
-Copyright (c) 2020-2021 - Daniele Rondina
+$ anise portage-converter -- --help
+Copyright (c) 2020-2023 - Daniele Rondina
 
 Portage/Overlay converter for Luet specs.
 
 Usage:
-  luet-portage-converter -- [flags]
+  anise-portage-converter -- [flags]
 
 Flags:
       --backend string               Select backend resolver: qdepends|reposcan. (default "reposcan")
-  -h, --help                         help for luet-portage-converter
+  -h, --help                         help for anise-portage-converter
       --ignore-missing-deps          Ignore missing deps on resolver.
       --override                     Override existing specs if already present.
       --reposcan-files stringArray   Append additional reposcan files. Only for reposcan backend.
       --rules string                 Rules file.
       --to string                    Targer tree where bump new specs.
   -t, --tree stringArray             Path of the tree to use.
-  -v, --version                      version for luet-portage-converter
+  -v, --version                      version for anise-portage-converter
 
 ```
 
 
-`luet-portage-converter` at the moment has two different backend to generate luet specs:
+`anise-portage-converter` at the moment has two different backend to generate anise specs:
 
-  * `qdepends`: based on Gentoo qdepends tool. This backend requires that the packages must be installed on the system where is executed luet-portage-converter. It doesn't work well with overlays.
+  * `qdepends`: based on Gentoo qdepends tool. This backend requires that the packages must be installed on the system where is executed anise-portage-converter. It doesn't work well with overlays.
      This backend will be soon set as *deprecated*.
 
   * `reposcan`: based on Funtoo `reposcan` generated files. It uses the JSON files generated and doesn't require that the packages must be installed :champagne: and it support Gentoo Overlay and Funtoo Kits.
@@ -34,7 +36,7 @@ Flags:
 
 ## Specifications
 
-`luet-portage-converter` take in input a YAML rules file that is used to generate luet specs.
+`anise-portage-converter` take in input a YAML rules file that is used to generate anise specs.
 
 ### Example
 
@@ -76,9 +78,9 @@ reposcan_disabled_use_flags:
   - test
 ```
 
-## Create luet specs
+## Create anise specs
 
 ```
-$> luet portage-converter -- -t ./luet-packages-tree/ --to ./luet-packages-tree/ --rules config.yaml  --ignore-missing-deps
+$> anise-portage-converter -- -t ./anise-packages-tree/ --to ./anise-packages-tree/ --rules config.yaml  --ignore-missing-deps
 
 ```

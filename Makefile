@@ -2,14 +2,14 @@ UBINDIR ?= /usr/bin
 DESTDIR ?=
 EXTNAME := $(shell basename $(shell pwd))
 
-# go tool nm ./luet | grep Commit
-override LDFLAGS += -X "github.com/geaaru/luet-portage-converter/pkg/converter.BuildTime=$(shell date -u '+%Y-%m-%d %I:%M:%S %Z')"
-override LDFLAGS += -X "github.com/geaaru/luet-portage-converter/pkg/converter.BuildCommit=$(shell git rev-parse HEAD)"
+# go tool nm ./anise | grep Commit
+override LDFLAGS += -X "github.com/geaaru/anise-portage-converter/pkg/converter.BuildTime=$(shell date -u '+%Y-%m-%d %I:%M:%S %Z')"
+override LDFLAGS += -X "github.com/geaaru/anise-portage-converter/pkg/converter.BuildCommit=$(shell git rev-parse HEAD)"
 
 all: build install
 
 build:
-	CGO_ENABLED=0 go build -o luet-portage-converter -ldflags '$(LDFLAGS)'
+	CGO_ENABLED=0 go build -o anise-portage-converter -ldflags '$(LDFLAGS)'
 
 install: build
 	install -d $(DESTDIR)/$(UBINDIR)
@@ -40,7 +40,7 @@ test-coverage:
 
 .PHONY: clean
 clean:
-	-rm luet-portage-converter
+	-rm anise-portage-converter
 	-rm -rf release/ dist/
 
 .PHONY: goreleaser-snapshot

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/geaaru/luet-portage-converter/pkg/specs"
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
+	"github.com/macaroni-os/anise-portage-converter/pkg/specs"
 
 	"gopkg.in/yaml.v2"
 )

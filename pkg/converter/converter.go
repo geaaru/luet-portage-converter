@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
+	Copyright © 2021-2023 Macaroni OS Linux
 	See AUTHORS and LICENSE for the license details and contributors.
 */
 
@@ -12,9 +12,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/geaaru/luet-portage-converter/pkg/qdepends"
-	"github.com/geaaru/luet-portage-converter/pkg/reposcan"
-	"github.com/geaaru/luet-portage-converter/pkg/specs"
+	"github.com/macaroni-os/anise-portage-converter/pkg/qdepends"
+	"github.com/macaroni-os/anise-portage-converter/pkg/reposcan"
+	"github.com/macaroni-os/anise-portage-converter/pkg/specs"
 
 	luet_config "github.com/geaaru/luet/pkg/config"
 	. "github.com/geaaru/luet/pkg/logger"

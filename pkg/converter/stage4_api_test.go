@@ -1,6 +1,6 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
-	See AUTHORS and LICENSE for the license details and contributors.
+Copyright © 2021-2023 Macaroni OS Linux
+See AUTHORS and LICENSE for the license details and contributors.
 */
 package converter_test
 
@@ -8,7 +8,7 @@ import (
 	//"fmt"
 	luet_pkg "github.com/geaaru/luet/pkg/package"
 
-	. "github.com/geaaru/luet-portage-converter/pkg/converter"
+	. "github.com/macaroni-os/anise-portage-converter/pkg/converter"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

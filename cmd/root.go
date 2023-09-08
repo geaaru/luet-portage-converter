@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021-2023 Funtoo Macaroni OS Linux
+	Copyright © 2021-2023 Macaroni OS Linux
 	See AUTHORS and LICENSE for the license details and contributors.
 */
 
@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/geaaru/luet-portage-converter/pkg/converter"
+	"github.com/macaroni-os/anise-portage-converter/pkg/converter"
 
 	. "github.com/geaaru/luet/pkg/config"
 	. "github.com/geaaru/luet/pkg/logger"
@@ -20,9 +20,9 @@ import (
 const (
 	cliName = `Copyright (c) 2020-2023 - Daniele Rondina
 
-Portage/Overlay converter for Luet specs.`
+Portage/Overlay converter for Anise specs.`
 
-	version = "0.12.0"
+	version = "0.13.0"
 )
 
 func initConfig() error {
@@ -48,7 +48,7 @@ func initConfig() error {
 func Execute() {
 
 	var rootCmd = &cobra.Command{
-		Use:     "luet-portage-converter --",
+		Use:     "anise-portage-converter --",
 		Short:   cliName,
 		Version: fmt.Sprintf("%s-g%s %s", version, converter.BuildCommit, converter.BuildTime),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {

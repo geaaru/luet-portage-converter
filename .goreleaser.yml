@@ -15,12 +15,12 @@ builds:
     ldflags:
       - >-
         -s -w
-        -X github.com/geaaru/luet-portage-converter/cmd.BuildTime={{.Date}}
-        -X github.com/geaaru/luet-portage-converter/cmd.BuildCommit={{.Commit}}
+        -X github.com/macaroni-os/anise-portage-converter/cmd.BuildTime={{.Date}}
+        -X github.com/macaroni-os/anise-portage-converter/cmd.BuildCommit={{.Commit}}
 
 archives:
   - format: binary
-    name_template: luet-portage-converter-{{ .Tag }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}
+    name_template: anise-portage-converter-{{ .Tag }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}
 source:
   enabled: true
   name_template: '{{ .ProjectName }}-{{ .Tag }}-source'

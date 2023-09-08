@@ -1,6 +1,6 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
-	See AUTHORS and LICENSE for the license details and contributors.
+Copyright © 2021-2023 Macaroni OS Linux
+See AUTHORS and LICENSE for the license details and contributors.
 */
 package cmd
 
@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/geaaru/luet-portage-converter/pkg/converter"
-	"github.com/geaaru/luet-portage-converter/pkg/specs"
+	"github.com/macaroni-os/anise-portage-converter/pkg/converter"
+	"github.com/macaroni-os/anise-portage-converter/pkg/specs"
 
 	. "github.com/geaaru/luet/pkg/config"
 	. "github.com/geaaru/luet/pkg/logger"

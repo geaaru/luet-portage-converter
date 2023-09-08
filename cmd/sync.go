@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2023 Funtoo Macaroni OS Linux
+Copyright © 2021-2023 Macaroni OS Linux
 See AUTHORS and LICENSE for the license details and contributors.
 */
 package cmd
@@ -9,9 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/geaaru/luet-portage-converter/pkg/reposcan"
-	"github.com/geaaru/luet-portage-converter/pkg/specs"
-	"github.com/pkg/errors"
+	"github.com/macaroni-os/anise-portage-converter/pkg/reposcan"
+	"github.com/macaroni-os/anise-portage-converter/pkg/specs"
 
 	"github.com/geaaru/luet/pkg/config"
 	. "github.com/geaaru/luet/pkg/logger"
@@ -20,6 +19,7 @@ import (
 	artifact "github.com/geaaru/luet/pkg/v2/compiler/types/artifact"
 	installer "github.com/geaaru/luet/pkg/v2/installer"
 	"github.com/geaaru/pkgs-checker/pkg/gentoo"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -247,14 +247,14 @@ func syncPackage(p *gentoo.PortageMetaData, task *PortageSyncTask,
 			if originalPackageVersion != p.GetPVR() {
 				if task.Opts.OnlyNew {
 					Debug(fmt.Sprintf(
-						"[%4d/%4d] [%s] Found version %s on luet and %s on portage. Ignoring.",
+						"[%4d/%4d] [%s] Found version %s on anise and %s on portage. Ignoring.",
 						idx+1, n, p.GetPackageNameWithSlot(),
 						originalPackageVersion,
 						p.GetPVR()))
 					notFound = false
 				} else {
 					Info(fmt.Sprintf(
-						"[%4d/%4d] [%s] Found version %s on luet and %s on portage",
+						"[%4d/%4d] [%s] Found version %s on anise and %s on portage",
 						idx+1, n, p.GetPackageNameWithSlot(),
 						originalPackageVersion,
 						p.GetPVR()))
@@ -281,10 +281,10 @@ func syncPackage(p *gentoo.PortageMetaData, task *PortageSyncTask,
 		}
 
 		if len(pkgs) == 0 {
-			// POST: the package is not available in the luet database.
+			// POST: the package is not available in the anise database.
 
 			InfoC(GetAurora().Bold(fmt.Sprintf(
-				"[%4d/%4d] [%s] Package with version %s not found on luet database.",
+				"[%4d/%4d] [%s] Package with version %s not found on anise database.",
 				idx+1, n, p.GetPackageNameWithSlot(),
 				p.GetPVR())))
 
@@ -308,7 +308,7 @@ func syncPackage(p *gentoo.PortageMetaData, task *PortageSyncTask,
 			// POST: Package to sync
 			if task.Opts.DryRun {
 				InfoC(GetAurora().Bold(fmt.Sprintf(
-					"[%4d/%4d] [%s] %s candidated for align version to luet version :heavy_check_mark:",
+					"[%4d/%4d] [%s] %s candidated for align version to anise version :heavy_check_mark:",
 					idx+1, n, p.GetPackageNameWithSlot(),
 					p.GetPVR())))
 			} else {
@@ -348,7 +348,7 @@ func newSyncCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "sync",
 		Aliases: []string{"rr"},
-		Short:   "Sync portage tree to luet database.",
+		Short:   "Sync portage tree to anise database.",
 		PreRun: func(cmd *cobra.Command, args []string) {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
@@ -422,7 +422,7 @@ func newSyncCommand() *cobra.Command {
 				}
 			}
 
-			// Initialize luet artifact manager
+			// Initialize anise artifact manager
 			task.Manager = installer.NewArtifactsManager(config.LuetCfg)
 			defer task.Manager.Close()
 
@@ -449,7 +449,7 @@ func newSyncCommand() *cobra.Command {
 	)
 	flags.Bool("dry-run", false, "Dry run sync operations.")
 	flags.Bool("force", false, "Skip errors.")
-	flags.Bool("only-new", false, "Sync only new packages not available on luet.")
+	flags.Bool("only-new", false, "Sync only new packages not available on anise.")
 
 	return cmd
 }

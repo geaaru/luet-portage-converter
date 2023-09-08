@@ -1,6 +1,6 @@
 /*
-	Copyright © 2021 Funtoo Macaroni OS Linux
-	See AUTHORS and LICENSE for the license details and contributors.
+Copyright © 2021-2023 Macaroni OS Linux
+See AUTHORS and LICENSE for the license details and contributors.
 */
 package specs
 
@@ -10,8 +10,8 @@ import (
 	"sort"
 	"strings"
 
-	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 	luet_pkg "github.com/geaaru/luet/pkg/package"
+	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
 )
 
 func (s *PortageSolution) SetLabel(k, v string) {
