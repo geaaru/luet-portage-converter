@@ -86,8 +86,9 @@ type PortageConverterArtefact struct {
 }
 
 type Finalizer struct {
-	Shell   []string `json:"shell,omitempty" yaml:"shell,omitempty"`
-	Install []string `json:"install,omitempty" yaml:"install,omitempty"`
+	Shell     []string `json:"shell,omitempty" yaml:"shell,omitempty"`
+	Install   []string `json:"install,omitempty" yaml:"install,omitempty"`
+	Uninstall []string `json:"uninstall,omitempty" yaml:"uninstall,omitempty"`
 }
 
 type PortageConverterMutations struct {

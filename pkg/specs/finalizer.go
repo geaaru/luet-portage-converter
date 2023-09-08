@@ -23,7 +23,7 @@ func (f *Finalizer) WriteFinalize(path string) error {
 }
 
 func (f *Finalizer) IsValid() bool {
-	if len(f.Install) > 0 {
+	if len(f.Install) > 0 || len(f.Uninstall) > 0 {
 		return true
 	}
 	return false
