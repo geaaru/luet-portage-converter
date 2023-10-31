@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017-2021  Daniele Rondina <geaaru@sabayonlinux.org>
+Copyright (C) 2017-2023  Daniele Rondina <geaaru@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ type PortageMetaData struct {
 	Use            []string `json:"use,omitempty"`
 	Eapi           string   `json:"eapi,omitempty"`
 	CxxFlags       string   `json:"cxxflags,omitempty"`
+	Cxx            string   `json:"cxx,omitempty"`
 	CFlags         string   `json:"cflags,omitempty"`
 	LdFlags        string   `json:"ldflags,omitempty"`
 	CHost          string   `json:"chost,omitempty"`
@@ -50,6 +51,7 @@ type PortageMetaData struct {
 	BUILD_TIME     string   `json:"build_time,omitempty"`
 	CBUILD         string   `json:"cbuild,omitempty"`
 	COUNTER        string   `json:"counter,omitempty"`
+	CTARGET        string   `json:"ctarget,omitempty"`
 	DEFINED_PHASES string   `json:"defined_phases,omitempty"`
 	DESCRIPTION    string   `json:"description,omitempty"`
 	FEATURES       string   `json:"features,omitempty"`
@@ -94,6 +96,7 @@ func NewPortageMetaData(pkg *GentooPackage) *PortageMetaData {
 		Use:            make([]string, 0),
 		Eapi:           "",
 		CxxFlags:       "",
+		Cxx:            "",
 		LdFlags:        "",
 		BDEPEND:        "",
 		RDEPEND:        "",
@@ -103,6 +106,7 @@ func NewPortageMetaData(pkg *GentooPackage) *PortageMetaData {
 		BUILD_TIME:     "",
 		CBUILD:         "",
 		COUNTER:        "",
+		CTARGET:        "",
 		DEFINED_PHASES: "",
 		DESCRIPTION:    "",
 		FEATURES:       "",
@@ -325,6 +329,11 @@ func ParsePackageMetadataDir(dir string, opts *PortageUseParseOpts) (*PortageMet
 		return nil, err
 	}
 
+	ans.CTARGET, err = parseMetaFile(filepath.Join(metaDir, "CTARGET"), true)
+	if err != nil {
+		return nil, err
+	}
+
 	ans.DEFINED_PHASES, err = parseMetaFile(filepath.Join(metaDir, "DEFINED_PHASES"), true)
 	if err != nil {
 		return nil, err
@@ -398,6 +407,13 @@ func ParsePackageMetadataDir(dir string, opts *PortageUseParseOpts) (*PortageMet
 
 	ans.CxxFlags, err = parseMetaFile(
 		filepath.Join(metaDir, "CXXFLAGS"), true,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	ans.Cxx, err = parseMetaFile(
+		filepath.Join(metaDir, "CXX"), true,
 	)
 	if err != nil {
 		return nil, err
@@ -782,9 +798,25 @@ func (m *PortageMetaData) WriteMetadata2Dir(dir string, opts *PortageUseParseOpt
 		return err
 	}
 
+	// Write CTARGET
+	err = os.WriteFile(filepath.Join(metadir, "CTARGET"),
+		[]byte(m.CTARGET), 0644,
+	)
+	if err != nil {
+		return err
+	}
+
 	// Write CXXFLAGS
 	err = os.WriteFile(filepath.Join(metadir, "CXXFLAGS"),
 		[]byte(m.CxxFlags+"\n"), 0644,
+	)
+	if err != nil {
+		return err
+	}
+
+	// Write CXX
+	err = os.WriteFile(filepath.Join(metadir, "CXX"),
+		[]byte(m.Cxx+"\n"), 0644,
 	)
 	if err != nil {
 		return err
