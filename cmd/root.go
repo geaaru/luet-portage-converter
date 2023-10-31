@@ -22,7 +22,7 @@ const (
 
 Portage/Overlay converter for Anise specs.`
 
-	version = "0.13.0"
+	version = "0.14.0"
 )
 
 func initConfig() error {
