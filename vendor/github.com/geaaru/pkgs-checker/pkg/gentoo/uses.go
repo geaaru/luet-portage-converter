@@ -57,6 +57,7 @@ type PortageMetaData struct {
 	INHERITED      string   `json:"inherited,omitempty"`
 	NEEDED         string   `json:"needed,omitempty"`
 	NEEDED_ELF2    string   `json:"needed_elf2,omitempty"`
+	QA_PREBUILT    string   `json:"qa_prebuilt,omitempty"`
 	PKGUSE         string   `json:"pkguse,omitempty"`
 	RESTRICT       string   `json:"restrict,omitempty"`
 	BINPKGMD5      string   `json:"binpkgmd5,omitempty"`
@@ -109,6 +110,7 @@ func NewPortageMetaData(pkg *GentooPackage) *PortageMetaData {
 		INHERITED:      "",
 		NEEDED:         "",
 		NEEDED_ELF2:    "",
+		QA_PREBUILT:    "",
 		PKGUSE:         "",
 		RESTRICT:       "",
 		REQUIRES:       "",
@@ -353,7 +355,12 @@ func ParsePackageMetadataDir(dir string, opts *PortageUseParseOpts) (*PortageMet
 		return nil, err
 	}
 
-	ans.NEEDED_ELF2, err = parseMetaFile(filepath.Join(metaDir, "NEEDED_ELF2"), true)
+	ans.NEEDED_ELF2, err = parseMetaFile(filepath.Join(metaDir, "NEEDED.ELF.2"), true)
+	if err != nil {
+		return nil, err
+	}
+
+	ans.QA_PREBUILT, err = parseMetaFile(filepath.Join(metaDir, "QA_PREBUILT"), true)
 	if err != nil {
 		return nil, err
 	}
@@ -899,6 +906,16 @@ func (m *PortageMetaData) WriteMetadata2Dir(dir string, opts *PortageUseParseOpt
 	if m.NEEDED_ELF2 != "" {
 		err = os.WriteFile(filepath.Join(metadir, "NEEDED.ELF.2"),
 			[]byte(m.NEEDED_ELF2+"\n"), 0644,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Write QA_PREBUILT
+	if m.QA_PREBUILT != "" {
+		err = os.WriteFile(filepath.Join(metadir, "QA_PREBUILT"),
+			[]byte(m.QA_PREBUILT+"\n"), 0644,
 		)
 		if err != nil {
 			return err
