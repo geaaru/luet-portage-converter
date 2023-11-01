@@ -140,8 +140,14 @@ func populateArtifact(p *gentoo.PortageMetaData, a *artifact.PackageArtifact,
 	if p.CHost != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CHOST", p.Category, p.GetPF()))
 	}
+	if p.Cxx != "" {
+		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CXX", p.Category, p.GetPF()))
+	}
 	if p.CxxFlags != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CXXFLAGS", p.Category, p.GetPF()))
+	}
+	if p.CTARGET != "" {
+		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CTARGET", p.Category, p.GetPF()))
 	}
 	if p.DEPEND != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/DEPEND", p.Category, p.GetPF()))
