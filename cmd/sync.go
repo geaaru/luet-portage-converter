@@ -7,12 +7,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/macaroni-os/anise-portage-converter/pkg/reposcan"
 	"github.com/macaroni-os/anise-portage-converter/pkg/specs"
 
 	"github.com/geaaru/luet/pkg/config"
+	fhelpers "github.com/geaaru/luet/pkg/helpers/file"
 	. "github.com/geaaru/luet/pkg/logger"
 	luet_pkg "github.com/geaaru/luet/pkg/package"
 	pkg "github.com/geaaru/luet/pkg/package"
@@ -128,70 +130,116 @@ func populateArtifact(p *gentoo.PortageMetaData, a *artifact.PackageArtifact,
 		fmt.Sprintf("var/db/pkg/%s/%s/%s.ebuild", p.Category, p.GetPF(), p.GetPF()),
 	}...)
 
-	if p.CBUILD != "" {
+	// NOTE: the parsing return empty string also when the files exists but is empty.
+	//       We need to check if the file exists.
+
+	f := filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/CBUILD", p.Category, p.GetPF()))
+	if p.CBUILD != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CBUILD", p.Category, p.GetPF()))
 	}
-	if p.CC != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/CC", p.Category, p.GetPF()))
+	if p.CC != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CC", p.Category, p.GetPF()))
 	}
-	if p.CFlags != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/CFLAGS", p.Category, p.GetPF()))
+	if p.CFlags != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CFLAGS", p.Category, p.GetPF()))
 	}
-	if p.CHost != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/CHOST", p.Category, p.GetPF()))
+	if p.CHost != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CHOST", p.Category, p.GetPF()))
 	}
-	if p.Cxx != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/CXX", p.Category, p.GetPF()))
+	if p.Cxx != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CXX", p.Category, p.GetPF()))
 	}
-	if p.CxxFlags != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/CXXFLAGS", p.Category, p.GetPF()))
+	if p.CxxFlags != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CXXFLAGS", p.Category, p.GetPF()))
 	}
-	if p.CTARGET != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/CTARGET", p.Category, p.GetPF()))
+	if p.CTARGET != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/CTARGET", p.Category, p.GetPF()))
 	}
-	if p.DEPEND != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/DEPEND", p.Category, p.GetPF()))
+	if p.DEPEND != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/DEPEND", p.Category, p.GetPF()))
 	}
-	if p.DEBUGBUILD != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/DEBUGBUILD", p.Category, p.GetPF()))
+	if p.DEBUGBUILD != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/DEBUGBUILD", p.Category, p.GetPF()))
 	}
-	if p.LdFlags != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/LDFLAGS", p.Category, p.GetPF()))
+	if p.LdFlags != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/LDFLAGS", p.Category, p.GetPF()))
 	}
-	if p.NEEDED != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/NEEDED", p.Category, p.GetPF()))
+	if p.NEEDED != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/NEEDED", p.Category, p.GetPF()))
 	}
-	if p.NEEDED_ELF2 != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/NEEDED.ELF.2", p.Category, p.GetPF()))
+	if p.NEEDED_ELF2 != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/NEEDED.ELF.2", p.Category, p.GetPF()))
 	}
-	if p.RDEPEND != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/RDEPEND", p.Category, p.GetPF()))
+	if p.RDEPEND != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/RDEPEND", p.Category, p.GetPF()))
 	}
-	if p.REQUIRES != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/REQUIRES", p.Category, p.GetPF()))
+	if p.REQUIRES != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/REQUIRES", p.Category, p.GetPF()))
 	}
-	if p.PKGUSE != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/PKGUSE", p.Category, p.GetPF()))
+	if p.PKGUSE != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/PKGUSE", p.Category, p.GetPF()))
 	}
-	if p.RESTRICT != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/RESTRICT", p.Category, p.GetPF()))
+	if p.RESTRICT != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/RESTRICT", p.Category, p.GetPF()))
 	}
-	if p.PROVIDES != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/PROVIDES", p.Category, p.GetPF()))
+	if p.PROVIDES != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/PROVIDES", p.Category, p.GetPF()))
 	}
-	if p.PROPERTIES != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/PROPERTIES", p.Category, p.GetPF()))
+	if p.PROPERTIES != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/PROPERTIES", p.Category, p.GetPF()))
 	}
-	if p.BDEPEND != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/BDEPEND", p.Category, p.GetPF()))
+	if p.BDEPEND != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/BDEPEND", p.Category, p.GetPF()))
 	}
-	if p.PDEPEND != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/PDEPEND", p.Category, p.GetPF()))
+	if p.PDEPEND != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/PDEPEND", p.Category, p.GetPF()))
 	}
-	if p.BINPKGMD5 != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/BINPKGMD5", p.Category, p.GetPF()))
+	if p.BINPKGMD5 != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/BINPKGMD5", p.Category, p.GetPF()))
 	}
-	if p.QA_PREBUILT != "" {
+
+	f = filepath.Join(task.DbPkgsDir, fmt.Sprintf("/%s/%s/QA_PREBUILT", p.Category, p.GetPF()))
+	if p.QA_PREBUILT != "" || fhelpers.Exists(f) {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/QA_PREBUILT", p.Category, p.GetPF()))
 	}
 
