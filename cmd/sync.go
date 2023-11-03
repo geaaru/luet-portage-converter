@@ -152,6 +152,9 @@ func populateArtifact(p *gentoo.PortageMetaData, a *artifact.PackageArtifact,
 	if p.DEPEND != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/DEPEND", p.Category, p.GetPF()))
 	}
+	if p.DEBUGBUILD != "" {
+		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/DEBUGBUILD", p.Category, p.GetPF()))
+	}
 	if p.LdFlags != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/LDFLAGS", p.Category, p.GetPF()))
 	}
@@ -176,6 +179,9 @@ func populateArtifact(p *gentoo.PortageMetaData, a *artifact.PackageArtifact,
 	if p.PROVIDES != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/PROVIDES", p.Category, p.GetPF()))
 	}
+	if p.PROPERTIES != "" {
+		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/PROPERTIES", p.Category, p.GetPF()))
+	}
 	if p.BDEPEND != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/BDEPEND", p.Category, p.GetPF()))
 	}
@@ -184,6 +190,9 @@ func populateArtifact(p *gentoo.PortageMetaData, a *artifact.PackageArtifact,
 	}
 	if p.BINPKGMD5 != "" {
 		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/BINPKGMD5", p.Category, p.GetPF()))
+	}
+	if p.QA_PREBUILT != "" {
+		files = append(files, fmt.Sprintf("var/db/pkg/%s/%s/QA_PREBUILT", p.Category, p.GetPF()))
 	}
 
 	a.Files = files
