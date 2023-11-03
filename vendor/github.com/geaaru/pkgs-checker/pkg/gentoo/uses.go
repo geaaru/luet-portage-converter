@@ -47,6 +47,7 @@ type PortageMetaData struct {
 	REQUIRES       string   `json:"requires,omitempty"`
 	KEYWORDS       string   `json:"keywords,omitempty"`
 	PROVIDES       string   `json:"provides,omitempty"`
+	PROPERTIES     string   `json:"properties,omitempty"`
 	SIZE           string   `json:"size,omitempty"`
 	BUILD_TIME     string   `json:"build_time,omitempty"`
 	CBUILD         string   `json:"cbuild,omitempty"`
@@ -54,6 +55,7 @@ type PortageMetaData struct {
 	CTARGET        string   `json:"ctarget,omitempty"`
 	DEFINED_PHASES string   `json:"defined_phases,omitempty"`
 	DESCRIPTION    string   `json:"description,omitempty"`
+	DEBUGBUILD     string   `json:"debugbuild,omitempty"`
 	FEATURES       string   `json:"features,omitempty"`
 	HOMEPAGE       string   `json:"homepage,omitempty"`
 	INHERITED      string   `json:"inherited,omitempty"`
@@ -109,6 +111,7 @@ func NewPortageMetaData(pkg *GentooPackage) *PortageMetaData {
 		CTARGET:        "",
 		DEFINED_PHASES: "",
 		DESCRIPTION:    "",
+		DEBUGBUILD:     "",
 		FEATURES:       "",
 		HOMEPAGE:       "",
 		INHERITED:      "",
@@ -116,6 +119,7 @@ func NewPortageMetaData(pkg *GentooPackage) *PortageMetaData {
 		NEEDED_ELF2:    "",
 		QA_PREBUILT:    "",
 		PKGUSE:         "",
+		PROPERTIES:     "",
 		RESTRICT:       "",
 		REQUIRES:       "",
 		BINPKGMD5:      "",
@@ -334,6 +338,11 @@ func ParsePackageMetadataDir(dir string, opts *PortageUseParseOpts) (*PortageMet
 		return nil, err
 	}
 
+	ans.DEBUGBUILD, err = parseMetaFile(filepath.Join(metaDir, "DEBUGBUILD"), true)
+	if err != nil {
+		return nil, err
+	}
+
 	ans.DEFINED_PHASES, err = parseMetaFile(filepath.Join(metaDir, "DEFINED_PHASES"), true)
 	if err != nil {
 		return nil, err
@@ -463,6 +472,13 @@ func ParsePackageMetadataDir(dir string, opts *PortageUseParseOpts) (*PortageMet
 
 	ans.PROVIDES, err = parseMetaFile(
 		filepath.Join(metaDir, "PROVIDES"), true,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	ans.PROPERTIES, err = parseMetaFile(
+		filepath.Join(metaDir, "PROPERTIES"), true,
 	)
 	if err != nil {
 		return nil, err
@@ -830,6 +846,16 @@ func (m *PortageMetaData) WriteMetadata2Dir(dir string, opts *PortageUseParseOpt
 		return err
 	}
 
+	// Write DEBUGBUILD
+	if m.DEBUGBUILD != "" {
+		err = os.WriteFile(filepath.Join(metadir, "DEBUGBUILD"),
+			[]byte(m.DEBUGBUILD+"\n"), 0644,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
 	// Write DEPEND
 	if m.DEPEND != "" {
 		err = os.WriteFile(filepath.Join(metadir, "DEPEND"),
@@ -986,6 +1012,16 @@ func (m *PortageMetaData) WriteMetadata2Dir(dir string, opts *PortageUseParseOpt
 	if m.PROVIDES != "" {
 		err = os.WriteFile(filepath.Join(metadir, "PROVIDES"),
 			[]byte(m.PROVIDES+"\n"), 0644,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Write PROPERTIES
+	if m.PROPERTIES != "" {
+		err = os.WriteFile(filepath.Join(metadir, "PROPERTIES"),
+			[]byte(m.PROPERTIES+"\n"), 0644,
 		)
 		if err != nil {
 			return err
