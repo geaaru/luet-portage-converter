@@ -629,7 +629,12 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 		for idx, atom := range atoms {
 			p, err := atom.ToGentooPackage()
 			if err != nil {
-				return nil, err
+				// If the version is not supported, skip the version
+				Warning(fmt.Sprintf(
+					"[%s/%s-%s] Error on generate Gentoo package: %s. Package skipped.",
+					atom.Category, atom.Package, atom.Revision,
+					err.Error()))
+				continue
 			}
 
 			// TODO: check of handle this in a better way
@@ -644,12 +649,11 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 			if valid {
 				valid, err = r.PackageIsAdmit(gp, p)
 				if err != nil {
-					DebugC(fmt.Sprintf(
-						"[%s/%s-%s] %s/%s:%s@%s: Invalid %s.",
+					Warning(fmt.Sprintf(
+						"[%s/%s-%s] %s/%s:%s@%s: Package invalid: %s.",
 						atom.Category, atom.Package, atom.Revision,
 						p.Category, p.GetPF(), p.Slot, p.Repository, err.Error()))
-
-					return nil, err
+					continue
 				}
 			} else {
 				DebugC(fmt.Sprintf(
