@@ -31,6 +31,19 @@ func (a *PortageConverterArtefact) HasRuntimeMutations() bool {
 	return ans
 }
 
+func (a *PortageConverterArtefact) HasConflict(p *PortageConverterPkg) bool {
+	ans := false
+	if p != nil && len(a.Mutations.Conflicts) > 0 {
+		for _, c := range a.Mutations.Conflicts {
+			if c.Name == p.Name && c.Category == p.Category {
+				ans = true
+				break
+			}
+		}
+	}
+	return ans
+}
+
 func (a *PortageConverterArtefact) HasBuildtimeMutations() bool {
 	if len(a.Mutations.BuildTimeDeps.Packages) > 0 {
 		return true

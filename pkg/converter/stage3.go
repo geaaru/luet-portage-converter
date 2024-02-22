@@ -12,6 +12,7 @@ import (
 	. "github.com/geaaru/luet/pkg/logger"
 	luet_pkg "github.com/geaaru/luet/pkg/package"
 	luet_tree "github.com/geaaru/luet/pkg/tree"
+	"github.com/macaroni-os/anise-portage-converter/pkg/specs"
 )
 
 func (pc *PortageConverter) Stage3() error {
@@ -184,7 +185,24 @@ func (pc *PortageConverter) Stage3() error {
 		conflicts = pReciper.GetConflicts()
 		if len(conflicts) > 0 {
 
+			// Check for artefact replacements
+			art, _ := pc.Specs.GetArtefactByPackage(pkg.Package.GetPackageNameWithSlot())
+
 			for _, dep := range conflicts {
+
+				pcpkg := &specs.PortageConverterPkg{
+					Name:     dep.GetName(),
+					Category: dep.GetCategory(),
+					Version:  dep.GetVersion(),
+				}
+
+				// Check if the conflict is defined at specs level and keep it if
+				// it's present.
+				if art != nil && art.HasRuntimeMutations() && art.HasConflict(pcpkg) {
+					resolvedRuntimeConflicts = append(resolvedRuntimeConflicts, dep)
+					continue
+				}
+
 				pp, _ := pc.ReciperRuntime.GetDatabase().FindPackages(
 					&luet_pkg.DefaultPackage{
 						Name:     dep.GetName(),
