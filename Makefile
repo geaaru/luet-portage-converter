@@ -3,8 +3,8 @@ DESTDIR ?=
 EXTNAME := $(shell basename $(shell pwd))
 
 # go tool nm ./anise | grep Commit
-override LDFLAGS += -X "github.com/geaaru/anise-portage-converter/pkg/converter.BuildTime=$(shell date -u '+%Y-%m-%d %I:%M:%S %Z')"
-override LDFLAGS += -X "github.com/geaaru/anise-portage-converter/pkg/converter.BuildCommit=$(shell git rev-parse HEAD)"
+override LDFLAGS += -X "github.com/macaroni-os/anise-portage-converter/pkg/converter.BuildTime=$(shell date -u '+%Y-%m-%d %I:%M:%S %Z')"
+override LDFLAGS += -X "github.com/macaroni-os/anise-portage-converter/pkg/converter.BuildCommit=$(shell git rev-parse HEAD)"
 
 all: build install
 
@@ -19,7 +19,6 @@ install: build
 deps:
 	go env
 	# Installing dependencies...
-	GO111MODULE=off go get golang.org/x/lint/golint
 	GO111MODULE=on go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
 	GO111MODULE=off go get github.com/onsi/gomega/...
 	ginkgo version
@@ -46,5 +45,5 @@ clean:
 .PHONY: goreleaser-snapshot
 goreleaser-snapshot:
 	rm -rf dist/ || true
-	goreleaser release --debug --skip-publish  --skip-validate --snapshot
+	goreleaser release --skip=validate,publish --snapshot --verbose
 
