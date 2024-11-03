@@ -45,6 +45,7 @@ func newReposcanResolveCommand() *cobra.Command {
 			ignoreMissingDeps, _ := cmd.Flags().GetBool("ignore-missing-deps")
 			continueWithError, _ := cmd.Flags().GetBool("continue-with-error")
 			pkg, _ := cmd.Flags().GetString("pkg")
+			allowEmptyKeywords, _ := cmd.Flags().GetBool("allow-empty-keywords")
 
 			converter := converter.NewPortageConverter(to, backend)
 			converter.Override = override
@@ -73,6 +74,10 @@ func newReposcanResolveCommand() *cobra.Command {
 
 			if len(disableUseFlags) > 0 {
 				converter.Specs.ReposcanDisabledUseFlags = append(converter.Specs.ReposcanDisabledUseFlags, disableUseFlags...)
+			}
+
+			if allowEmptyKeywords {
+				converter.Specs.ReposcanAllowEmpyKeywords = allowEmptyKeywords
 			}
 
 			err = converter.InitConverter(false)
@@ -145,6 +150,7 @@ func newReposcanResolveCommand() *cobra.Command {
 	cmd.Flags().Bool("continue-with-error", false, "Continue processing with errors (for example: no KEYWORDS defined).")
 	cmd.Flags().StringP("pkg", "p", "", "Define the package to analyze.")
 	cmd.PersistentFlags().Bool("with-portage-pkg", false, "Generate portage packages for every required package.")
+	cmd.Flags().Bool("allow-empty-keywords", false, "Override spec option to allow empty KEYWORDS.")
 
 	return cmd
 }
