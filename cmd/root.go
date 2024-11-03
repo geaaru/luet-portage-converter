@@ -18,11 +18,11 @@ import (
 )
 
 const (
-	cliName = `Copyright (c) 2020-2023 - Daniele Rondina
+	cliName = `Copyright (c) 2020-2024 - Daniele Rondina
 
 Portage/Overlay converter for Anise specs.`
 
-	version = "0.14.4"
+	version = "0.15.0"
 )
 
 func initConfig() error {
@@ -75,6 +75,7 @@ func Execute() {
 		newGenerateCommand(),
 		newReposcanResolveCommand(),
 		newSyncCommand(),
+		newPortageCommand(),
 	)
 
 	if err := rootCmd.Execute(); err != nil {
