@@ -47,6 +47,31 @@ func CleanEdbCache(path string) error {
 	return nil
 }
 
+func RebuildEdbCache() error {
+	cmd := exec.Command("emerge", "--metadata")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Env = os.Environ()
+
+	err := cmd.Start()
+	if err != nil {
+		return fmt.Errorf("Error on start emerge command: %s", err.Error())
+	}
+
+	err = cmd.Wait()
+	if err != nil {
+		return fmt.Errorf("Error on waiting emerge command: %s", err.Error())
+	}
+
+	if cmd.ProcessState.ExitCode() != 0 {
+		return fmt.Errorf(
+			"emerge command exiting with %d",
+			cmd.ProcessState.ExitCode())
+	}
+
+	return nil
+}
+
 func GetWorldPackages(worldfile string) ([]string, error) {
 	ans := []string{}
 

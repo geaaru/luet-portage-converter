@@ -4,24 +4,38 @@ Portage/Overlay converter for Luet specs.
 Old name `luet-portage-converter`.
 
 ```
-$ anise portage-converter -- --help
-Copyright (c) 2020-2023 - Daniele Rondina
+$> anise-portage-converter --help
+Copyright (c) 2020-2024 - Daniele Rondina
 
-Portage/Overlay converter for Luet specs.
+Portage/Overlay converter for Anise specs.
 
 Usage:
-  anise-portage-converter -- [flags]
+  anise-portage-converter [command]
+
+Available Commands:
+  completion       Generate the autocompletion script for the specified shell
+  generate         Generate luet specs.
+  help             Help about any command
+  portage          Execute operations related to Portage.
+  reposcan-resolve Resolve a package from reposcan tree.
+  sync             Sync portage tree to anise database.
 
 Flags:
-      --backend string               Select backend resolver: qdepends|reposcan. (default "reposcan")
-  -h, --help                         help for anise-portage-converter
-      --ignore-missing-deps          Ignore missing deps on resolver.
-      --override                     Override existing specs if already present.
-      --reposcan-files stringArray   Append additional reposcan files. Only for reposcan backend.
-      --rules string                 Rules file.
-      --to string                    Targer tree where bump new specs.
-  -t, --tree stringArray             Path of the tree to use.
-  -v, --version                      version for anise-portage-converter
+      --backend string                 Select backend resolver: qdepends|reposcan. (default "reposcan")
+  -d, --debug                          Enable debug verbosity.
+      --disable-stage2                 Disable stage2 phase.
+      --disable-stage3                 Disable stage3 phase.
+      --disable-use-flag stringArray   Append additional use flags to disable.
+      --enable-stage4                  Enable experimental stage4 phase.
+  -h, --help                           help for anise-portage-converter
+      --ignore-missing-deps            Ignore missing deps on resolver.
+      --reposcan-files stringArray     Append additional reposcan files. Only for reposcan backend.
+      --rules string                   Rules file.
+  -t, --tree stringArray               Path of the tree to use.
+  -v, --version                        version for anise-portage-converter
+
+Use "anise-portage-converter [command] --help" for more information about a command.
+
 
 ```
 

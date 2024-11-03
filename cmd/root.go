@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021-2023 Macaroni OS Linux
+	Copyright © 2021-2024 Macaroni OS Linux
 	See AUTHORS and LICENSE for the license details and contributors.
 */
 
@@ -20,7 +20,7 @@ import (
 const (
 	cliName = `Copyright (c) 2020-2024 - Daniele Rondina
 
-Portage/Overlay converter for Anise specs.`
+Portage/Overlay bridge for Macaroni OS Sambuca stack.`
 
 	version = "0.15.0"
 )
@@ -60,9 +60,11 @@ func Execute() {
 		},
 	}
 
+	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Enable debug verbosity.")
+
+	// TODO: move these flags over specific commands
 	rootCmd.PersistentFlags().StringArrayP("tree", "t", []string{}, "Path of the tree to use.")
 	rootCmd.PersistentFlags().String("rules", "", "Rules file.")
-	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Enable debug verbosity.")
 	rootCmd.PersistentFlags().String("backend", "reposcan", "Select backend resolver: qdepends|reposcan.")
 	rootCmd.PersistentFlags().Bool("disable-stage2", false, "Disable stage2 phase.")
 	rootCmd.PersistentFlags().Bool("disable-stage3", false, "Disable stage3 phase.")

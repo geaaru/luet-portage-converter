@@ -18,15 +18,37 @@ func NewPortageCacheCommand() *cobra.Command {
 		Use:     "cache",
 		Aliases: []string{"pc", "c"},
 		Short:   "Purge Portage cache and optional packages from world file.",
+		Long: `This command permits to cleanup Portage edb cache and remove packages from world file.
+
+Only cleanup edb cache:
+$> anise-portage-converter portage cache --purge
+
+Cleanup edb cache and remove a package from world file:
+$> anise-portage-converter portage c --purge --pkg cat/foo
+
+Remove a package from the world file:
+$> anise-portage-converter portage c --pkg cat/foo
+
+Cleanup and rebuild edb cache:
+$> anise-portage-converter portage c --rebuild
+
+
+NOTE: This command needs root permissions.
+		`,
 		Run: func(cmd *cobra.Command, args []string) {
 			debug, _ := cmd.Flags().GetBool("debug")
 			purge, _ := cmd.Flags().GetBool("purge")
+			rebuild, _ := cmd.Flags().GetBool("rebuild")
 			pkgs2remove, _ := cmd.Flags().GetStringArray("pkg")
 
 			jobDone := false
 
 			if debug {
 				LuetCfg.GetGeneral().Debug = debug
+			}
+
+			if rebuild && !purge {
+				purge = true
 			}
 
 			if purge {
@@ -59,6 +81,14 @@ func NewPortageCacheCommand() *cobra.Command {
 				jobDone = true
 			}
 
+			if rebuild {
+				err := portage.RebuildEdbCache()
+				if err != nil {
+					Fatal(err)
+				}
+				jobDone = true
+			}
+
 			if jobDone {
 				Info(":panda: All done!")
 			} else {
@@ -68,6 +98,7 @@ func NewPortageCacheCommand() *cobra.Command {
 	}
 
 	cmd.Flags().Bool("purge", false, "Purge Portage edb cache.")
+	cmd.Flags().Bool("rebuild", false, "Rebuild Portage edb cache.")
 	cmd.Flags().StringArrayP("pkg", "p", []string{},
 		"Define the package to analyze.")
 
