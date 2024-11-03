@@ -48,6 +48,7 @@ func newGenerateCommand() *cobra.Command {
 			disableConflicts, _ := cmd.Flags().GetBool("disable-conflicts")
 			layer4Rdepends, _ := cmd.Flags().GetBool("layer4rdepends")
 			skipRdepsGen, _ := cmd.Flags().GetBool("skip-rdeps-generation")
+			allowEmptyKeywords, _ := cmd.Flags().GetBool("allow-empty-keywords")
 
 			converter := converter.NewPortageConverter(to, backend)
 			converter.Override = override
@@ -98,6 +99,10 @@ func newGenerateCommand() *cobra.Command {
 				converter.Specs.ReposcanDisabledUseFlags = append(converter.Specs.ReposcanDisabledUseFlags, disableUseFlags...)
 			}
 
+			if allowEmptyKeywords {
+				converter.Specs.ReposcanAllowEmpyKeywords = allowEmptyKeywords
+			}
+
 			err = converter.Generate()
 			if err != nil {
 				fmt.Println(err)
@@ -119,5 +124,6 @@ func newGenerateCommand() *cobra.Command {
 	cmd.Flags().Bool("check-update4deps", false, "Verify if there are update for package dependencies too.")
 	cmd.Flags().Bool("skip-rdeps-generation", false,
 		"Skip the generation of the runtime dependencies specs.")
+	cmd.Flags().Bool("allow-empty-keywords", false, "Override spec option to allow empty KEYWORDS.")
 	return cmd
 }

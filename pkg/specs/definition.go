@@ -26,11 +26,12 @@ type PortageConverterSpecs struct {
 	BuildPortageTmplFile string                     `json:"build_portage_template_file,omitempty" yaml:"build_portage_template_file,omitempty"`
 
 	// Reposcan options
-	ReposcanRequiresWithSlot bool                                `json:"reposcan_requires_slot,omitempty" yaml:"reposcan_requires_slot,omitempty"`
-	ReposcanSources          []string                            `json:"reposcan_sources,omitempty" yaml:"reposcan_sources,omitempty"`
-	ReposcanConstraints      PortageConverterReposcanConstraints `json:"reposcan_contraints,omitempty" yaml:"reposcan_contraints,omitempty"`
-	ReposcanDisabledUseFlags []string                            `json:"reposcan_disabled_use_flags,omitempty" yaml:"reposcan_disabled_use_flags,omitempty"`
-	ReposcanDisabledKeywords []string                            `json:"reposcan_disabled_keywords,omitempty" yaml:"reposcan_disabled_keywords,omitempty"`
+	ReposcanRequiresWithSlot  bool                                `json:"reposcan_requires_slot,omitempty" yaml:"reposcan_requires_slot,omitempty"`
+	ReposcanAllowEmpyKeywords bool                                `json:"reposcan_allow_empty_keywords,omitempty" yaml:"reposcan_allow_empty_keywords,omitempty"`
+	ReposcanSources           []string                            `json:"reposcan_sources,omitempty" yaml:"reposcan_sources,omitempty"`
+	ReposcanConstraints       PortageConverterReposcanConstraints `json:"reposcan_contraints,omitempty" yaml:"reposcan_contraints,omitempty"`
+	ReposcanDisabledUseFlags  []string                            `json:"reposcan_disabled_use_flags,omitempty" yaml:"reposcan_disabled_use_flags,omitempty"`
+	ReposcanDisabledKeywords  []string                            `json:"reposcan_disabled_keywords,omitempty" yaml:"reposcan_disabled_keywords,omitempty"`
 
 	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
 

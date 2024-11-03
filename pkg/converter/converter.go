@@ -678,6 +678,7 @@ func (pc *PortageConverter) InitConverter(showBanner bool) error {
 		resolver.SetDisabledUseFlags(pc.Specs.ReposcanDisabledUseFlags)
 		resolver.SetDisabledKeywords(pc.Specs.ReposcanDisabledKeywords)
 		resolver.SetContinueWithError(pc.ContinueWithError)
+		resolver.SetAllowEmptyKeywords(pc.Specs.ReposcanAllowEmpyKeywords)
 		if showBanner {
 			InfoC(fmt.Sprintf("Using dependency with slot on category: %v",
 				resolver.GetDepsWithSlot()))

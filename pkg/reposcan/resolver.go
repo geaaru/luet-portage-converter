@@ -20,28 +20,30 @@ import (
 )
 
 type RepoScanResolver struct {
-	JsonSources       []string
-	Sources           []RepoScanSpec
-	Constraints       []string
-	MapConstraints    map[string]([]gentoo.GentooPackage)
-	Map               map[string]([]RepoScanAtom)
-	IgnoreMissingDeps bool
-	ContinueWithError bool
-	DepsWithSlot      bool
-	DisabledUseFlags  []string
-	DisabledKeywords  []string
+	JsonSources        []string
+	Sources            []RepoScanSpec
+	Constraints        []string
+	MapConstraints     map[string]([]gentoo.GentooPackage)
+	Map                map[string]([]RepoScanAtom)
+	IgnoreMissingDeps  bool
+	ContinueWithError  bool
+	DepsWithSlot       bool
+	AllowEmptyKeywords bool
+	DisabledUseFlags   []string
+	DisabledKeywords   []string
 }
 
 func NewRepoScanResolver() *RepoScanResolver {
 	return &RepoScanResolver{
-		JsonSources:       make([]string, 0),
-		Sources:           make([]RepoScanSpec, 0),
-		Constraints:       make([]string, 0),
-		MapConstraints:    make(map[string][]gentoo.GentooPackage, 0),
-		Map:               make(map[string][]RepoScanAtom, 0),
-		IgnoreMissingDeps: false,
-		DepsWithSlot:      true,
-		ContinueWithError: true,
+		JsonSources:        make([]string, 0),
+		Sources:            make([]RepoScanSpec, 0),
+		Constraints:        make([]string, 0),
+		MapConstraints:     make(map[string][]gentoo.GentooPackage, 0),
+		Map:                make(map[string][]RepoScanAtom, 0),
+		IgnoreMissingDeps:  false,
+		DepsWithSlot:       true,
+		ContinueWithError:  true,
+		AllowEmptyKeywords: false,
 	}
 }
 
@@ -56,6 +58,8 @@ func (r *RepoScanResolver) SetDisabledUseFlags(u []string) { r.DisabledUseFlags 
 func (r *RepoScanResolver) GetDisabledUseFlags() []string  { return r.DisabledUseFlags }
 func (r *RepoScanResolver) SetDisabledKeywords(k []string) { r.DisabledKeywords = k }
 func (r *RepoScanResolver) GetDisabledKeywords() []string  { return r.DisabledKeywords }
+func (r *RepoScanResolver) SetAllowEmptyKeywords(v bool)   { r.AllowEmptyKeywords = v }
+func (r *RepoScanResolver) GetAllowEmptyKeywords() bool    { return r.AllowEmptyKeywords }
 func (r *RepoScanResolver) IsDisableUseFlag(u string) bool {
 	ans := false
 
@@ -763,7 +767,7 @@ func (r *RepoScanResolver) KeywordsIsAdmit(atom *RepoScanAtom, p *gentoo.GentooP
 	ans := true
 
 	keywords := atom.GetMetadataValue("KEYWORDS")
-	if keywords == "" {
+	if keywords == "" && !r.AllowEmptyKeywords {
 		if r.ContinueWithError {
 			Warning(fmt.Sprintf(
 				"[%s] Continue also if KEYWORDS is empty.", atom.Atom))
