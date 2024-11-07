@@ -214,7 +214,7 @@ func (r *RepoScanResolver) Resolve(pkg string, opts specs.PortageResolverOpts) (
 
 	ans.Description = atom.GetMetadataValue("DESCRIPTION")
 	if atom.HasMetadataKey("HOMEPAGE") {
-		ans.Uri = append(ans.Uri, atom.GetMetadataValue("HOMEPAGE"))
+		ans.Uri = append(ans.Uri, strings.Split(atom.GetMetadataValue("HOMEPAGE"), " ")...)
 	}
 	if atom.HasMetadataKey("IUSE") {
 		ans.SetLabel("IUSE", atom.GetMetadataValue("IUSE"))
