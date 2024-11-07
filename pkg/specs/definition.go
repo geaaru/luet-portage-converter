@@ -18,7 +18,11 @@ import (
 )
 
 type PortageConverterSpecs struct {
+	File string `json:"-" yaml:"-"`
+
 	SkippedResolutions PortageConverterSkips `json:"skipped_resolutions,omitempty" yaml:"skipped_resolutions,omitempty"`
+
+	TreePaths []string `json:"trees,omitempty" yaml:"trees,omitempty"`
 
 	IncludeFiles         []string                   `json:"include_files,omitempty" yaml:"include_files,omitempty"`
 	Artefacts            []PortageConverterArtefact `json:"artefacts,omitempty" yaml:"artefacts,omitempty"`
@@ -171,6 +175,8 @@ func LoadSpecsFile(file string) (*PortageConverterSpecs, error) {
 		return nil, errors.New(fmt.Sprintf("Error on parse file %s: %s",
 			file, err.Error()))
 	}
+
+	ans.File = file
 
 	absPath, err := filepath.Abs(path.Dir(file))
 	if err != nil {

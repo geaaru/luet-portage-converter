@@ -9,12 +9,14 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/macaroni-os/anise-portage-converter/pkg/qdepends"
 	"github.com/macaroni-os/anise-portage-converter/pkg/reposcan"
 	"github.com/macaroni-os/anise-portage-converter/pkg/specs"
+	"github.com/macaroni-os/anise-portage-converter/pkg/utils"
 
 	luet_config "github.com/geaaru/luet/pkg/config"
 	. "github.com/geaaru/luet/pkg/logger"
@@ -118,8 +120,39 @@ func (pc *PortageConverter) IsFilteredPackage(pkg string) (bool, error) {
 
 func (pc *PortageConverter) LoadTrees(treePath []string) error {
 
+	if len(pc.Specs.TreePaths) > 0 {
+		// Review path of the tree from the specs
+		// in order to use the basedir of the spec
+		// file as start point for the tree to load.
+		absPath, err := filepath.Abs(path.Dir(pc.Specs.File))
+		if err != nil {
+			return fmt.Errorf("error on retrieve abs path of sepcs file %s: %s",
+				pc.Specs.File, err.Error())
+		}
+
+		for _, t := range pc.Specs.TreePaths {
+			tpath := filepath.Join(absPath, t)
+			err := pc.loadTree(tpath)
+			if err != nil {
+				return err
+			}
+		}
+
+	}
+
 	// Load trees
 	for _, t := range treePath {
+		err := pc.loadTree(t)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (pc *PortageConverter) loadTree(t string) error {
+	if utils.Exists(t) {
 		InfoC(fmt.Sprintf(":evergreen_tree: Loading tree %s...", t))
 		err := pc.ReciperBuild.Load(t)
 		if err != nil {
@@ -129,6 +162,8 @@ func (pc *PortageConverter) LoadTrees(treePath []string) error {
 		if err != nil {
 			return errors.New("Error on load tree" + err.Error())
 		}
+	} else {
+		Warning(fmt.Sprintf(":warning: Ignoring tree %s not available.", t))
 	}
 
 	return nil
