@@ -78,6 +78,9 @@ type PortageConverterArtefact struct {
 	Packages        []string                 `json:"packages" yaml:"packages"`
 	OverrideVersion string                   `json:"override_version,omitempty" yaml:"override_version,omitempty"`
 
+	CustomPath string   `json:"custom_path,omitempty" yaml:"custom_path,omitempty"`
+	Conditions []string `json:"conditions,omitempty" yaml:"conditions,omitempty"`
+
 	Replacements PortageConverterReplacements `json:"replacements,omitempty" yaml:"replacements,omitempty"`
 	Mutations    PortageConverterMutations    `json:"mutations,omitempty" yaml:"mutations,omitempty"`
 
@@ -449,12 +452,13 @@ func (s *PortageConverterSpecs) GetGlobalAnnotations() *map[string]interface{} {
 }
 
 type PortageResolver interface {
-	Resolve(pkg string, opts PortageResolverOpts) (*PortageSolution, error)
+	Resolve(pkg string, opts *PortageResolverOpts) (*PortageSolution, error)
 }
 
 type PortageResolverOpts struct {
 	EnableUseFlags   []string
 	DisabledUseFlags []string
+	Conditions       []string
 }
 
 type PortageSolution struct {

@@ -244,9 +244,27 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		artefact = *art
 	}
 
-	opts := specs.PortageResolverOpts{
+	// In order to identify a specific artefact of a package
+	// with a specific version we need to have a way to describe
+	// the package with an additional label that will be used
+	// in the MapArtefacts field.
+	// The idea is to use a <string> after the comma.
+	// For example:
+	// dev-libs/nodejs,nodejs20
+	// This is needed to permit having multiple versions in the same
+	// repo of a specific package and slot. Packages with different
+	// slots doesn't suffer of this needed.
+
+	pkgOriginalStr := pkg
+
+	if strings.Index(pkg, ",") > 0 {
+		pkg = strings.Split(pkg, ",")[0]
+	}
+
+	opts := &specs.PortageResolverOpts{
 		EnableUseFlags:   artefact.Uses.Enabled,
 		DisabledUseFlags: artefact.Uses.Disabled,
+		Conditions:       artefact.Conditions,
 	}
 
 	if IsInStack(stack, pkg) {
@@ -297,12 +315,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		return nil
 	}
 
-	InfoC(GetAurora().Bold(fmt.Sprintf(":pizza: [%s] (%s) Creating solution ...", pkg, treePath)))
+	InfoC(GetAurora().Bold(fmt.Sprintf(":pizza: [%s] (%s) Creating solution ...", pkgOriginalStr, treePath)))
 
 	pkgDir := fmt.Sprintf("%s/%s/%s/",
 		filepath.Join(pc.TargetDir, treePath),
 		solution.Package.Category, solution.Package.Name)
-
 	if solution.Package.Slot != "0" {
 		slot := solution.Package.Slot
 		// Ignore sub-slot
@@ -313,6 +330,11 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 		pkgDir = fmt.Sprintf("%s/%s-%s/%s",
 			filepath.Join(pc.TargetDir, treePath),
 			solution.Package.Category, slot, solution.Package.Name)
+	}
+
+	if artefact.CustomPath != "" {
+		pkgDir = filepath.Join(pc.TargetDir, treePath,
+			artefact.CustomPath)
 	}
 
 	// Check if specs is already present. I don't check definition.yaml
@@ -338,6 +360,19 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			if err != nil {
 				Error(fmt.Sprintf("[%s] Error parse existing pkg in tree: %s", pkg, err.Error()))
 				return err
+			}
+
+			// If the artefact contains a custom path I need to check if the
+			// path is the same
+			if artefact.CustomPath != "" {
+				if luetPkgTree.GetPath() != pkgDir {
+					DebugC(fmt.Sprintf("[%s-%s] package %s skipped because doesn't match with custom path.",
+						solution.Package.GetPackageName(),
+						solution.Package.GetPVR(),
+						luetPkgTree.HumanReadableString(),
+					))
+					continue
+				}
 			}
 
 			gt, err := solution.Package.GreaterThanOrEqual(gpTree)
@@ -374,18 +409,23 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			originPackage = luetPkgTree
 		}
 
-		solution.PackageUpgraded = originPackage.(*luet_pkg.DefaultPackage)
+		if originPackage != nil {
+			solution.PackageUpgraded = originPackage.(*luet_pkg.DefaultPackage)
 
-		if !newVersion && !pc.Override {
-			if !pc.CheckUpdate4Deps || len(stack) > 1 {
-				// Nothing to do
-				InfoC(fmt.Sprintf("Package %s already in tree and updated.", pkg))
-				return nil
+			if !newVersion && !pc.Override {
+				if !pc.CheckUpdate4Deps || len(stack) > 1 {
+					// Nothing to do
+					InfoC(fmt.Sprintf("Package %s already in tree and updated.", pkg))
+					return nil
+				}
 			}
-		}
 
-		solution.Upgrade = true
-		solution.PackageDir = pkgDir
+			solution.Upgrade = true
+			solution.PackageDir = pkgDir
+		} else {
+			newVersion = true
+			solution.PackageDir = pkgDir
+		}
 
 	} else {
 		newVersion = true
@@ -869,7 +909,8 @@ func (pc *PortageConverter) Generate() error {
 		} else {
 			err := os.MkdirAll(pkg.PackageDir, 0755)
 			if err != nil {
-				return err
+				return fmt.Errorf("error on create dir %s for package %s: %s",
+					pkg.PackageDir, pkg.Package.GetPackageNameWithSlot(), err.Error())
 			}
 
 			// Write definition.yaml

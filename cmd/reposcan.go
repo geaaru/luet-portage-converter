@@ -100,9 +100,10 @@ func newReposcanResolveCommand() *cobra.Command {
 			opts := specs.PortageResolverOpts{
 				EnableUseFlags:   artefact.Uses.Enabled,
 				DisabledUseFlags: artefact.Uses.Disabled,
+				Conditions:       artefact.Conditions,
 			}
 
-			solution, err := converter.Resolver.Resolve(pkg, opts)
+			solution, err := converter.Resolver.Resolve(pkg, &opts)
 			if err != nil {
 				Error(fmt.Sprintf("Error on resolve %s: %s", pkg, err.Error()))
 				os.Exit(1)

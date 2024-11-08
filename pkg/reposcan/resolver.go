@@ -183,7 +183,7 @@ func (r *RepoScanResolver) IsPresentPackage(pkg string) bool {
 	return ok
 }
 
-func (r *RepoScanResolver) Resolve(pkg string, opts specs.PortageResolverOpts) (*specs.PortageSolution, error) {
+func (r *RepoScanResolver) Resolve(pkg string, opts *specs.PortageResolverOpts) (*specs.PortageSolution, error) {
 
 	if pkg == "" {
 		return nil, errors.New("Invalid pkg to resolve")
@@ -200,7 +200,7 @@ func (r *RepoScanResolver) Resolve(pkg string, opts specs.PortageResolverOpts) (
 	}
 
 	// Retrive last version
-	atom, err := r.GetLastPackage(pkg)
+	atom, err := r.GetLastPackage(pkg, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -221,13 +221,13 @@ func (r *RepoScanResolver) Resolve(pkg string, opts specs.PortageResolverOpts) (
 	}
 
 	DebugC(fmt.Sprintf("[%s] Retrieve Runtime Dependencies...", atom.Atom))
-	err = r.retrieveRuntimeDeps(atom, last, ans, &opts)
+	err = r.retrieveRuntimeDeps(atom, last, ans, opts)
 	if err != nil {
 		return nil, err
 	}
 
 	DebugC(fmt.Sprintf("[%s] Retrieve Buildtime Dependencies...", atom.Atom))
-	err = r.retrieveBuildtimeDeps(atom, last, ans, &opts)
+	err = r.retrieveBuildtimeDeps(atom, last, ans, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +235,10 @@ func (r *RepoScanResolver) Resolve(pkg string, opts specs.PortageResolverOpts) (
 	return ans, nil
 }
 
-func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.GentooPackage, solution *specs.PortageSolution, opts *specs.PortageResolverOpts) error {
+func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom,
+	last *gentoo.GentooPackage, solution *specs.PortageSolution,
+	opts *specs.PortageResolverOpts) error {
+
 	var err error
 	var rdeps []gentoo.GentooPackage
 	var conflicts []gentoo.GentooPackage
@@ -271,7 +274,7 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 	}
 
 	if len(conflicts) > 0 {
-		conflicts, err = r.elaborateConflicts(last, conflicts)
+		conflicts, err = r.elaborateConflicts(last, conflicts, opts)
 		if err != nil {
 			return err
 		}
@@ -280,7 +283,7 @@ func (r *RepoScanResolver) retrieveRuntimeDeps(atom *RepoScanAtom, last *gentoo.
 
 	if len(rdeps) > 0 {
 
-		rdeps, err = r.elaborateDeps(last, rdeps)
+		rdeps, err = r.elaborateDeps(last, rdeps, opts)
 		if err != nil {
 			return err
 		}
@@ -364,7 +367,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 	}
 
 	if len(conflicts) > 0 {
-		conflicts, err = r.elaborateConflicts(last, conflicts)
+		conflicts, err = r.elaborateConflicts(last, conflicts, opts)
 		if err != nil {
 			return err
 		}
@@ -373,7 +376,7 @@ func (r *RepoScanResolver) retrieveBuildtimeDeps(atom *RepoScanAtom, last *gento
 
 	if len(bdeps) > 0 {
 
-		bdeps, err = r.elaborateDeps(last, bdeps)
+		bdeps, err = r.elaborateDeps(last, bdeps, opts)
 		if err != nil {
 			return err
 		}
@@ -477,7 +480,7 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 				continue
 			}
 
-			atom, err := r.GetLastPackage(sdep.Dep.GetPackageNameWithSlot())
+			atom, err := r.GetLastPackage(sdep.Dep.GetPackageNameWithSlot(), opts)
 			if err == nil {
 
 				gp, err := atom.ToGentooPackage()
@@ -505,7 +508,7 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 	if gdep.Dep != nil {
 
 		// Check if current deps is available.
-		atom, err := r.GetLastPackage(gdep.Dep.GetPackageNameWithSlot())
+		atom, err := r.GetLastPackage(gdep.Dep.GetPackageNameWithSlot(), opts)
 		if err == nil {
 
 			gp, err := atom.ToGentooPackage()
@@ -532,7 +535,8 @@ func (r *RepoScanResolver) elaborateGentooDependency(gdep *GentooDependency, opt
 	return deps, conflicts, nil
 }
 
-func (r *RepoScanResolver) elaborateDeps(pkg *gentoo.GentooPackage, deps []gentoo.GentooPackage) ([]gentoo.GentooPackage, error) {
+func (r *RepoScanResolver) elaborateDeps(pkg *gentoo.GentooPackage,
+	deps []gentoo.GentooPackage, opts *specs.PortageResolverOpts) ([]gentoo.GentooPackage, error) {
 	ans := []gentoo.GentooPackage{}
 
 	for idx, _ := range deps {
@@ -542,7 +546,7 @@ func (r *RepoScanResolver) elaborateDeps(pkg *gentoo.GentooPackage, deps []gento
 			p += ":" + deps[idx].Slot
 		}
 
-		atom, err := r.GetLastPackage(p)
+		atom, err := r.GetLastPackage(p, opts)
 		if err != nil {
 			if r.IsIgnoreMissingDeps() {
 				Warning(
@@ -570,7 +574,8 @@ func (r *RepoScanResolver) elaborateDeps(pkg *gentoo.GentooPackage, deps []gento
 	return ans, nil
 }
 
-func (r *RepoScanResolver) elaborateConflicts(pkg *gentoo.GentooPackage, deps []gentoo.GentooPackage) ([]gentoo.GentooPackage, error) {
+func (r *RepoScanResolver) elaborateConflicts(pkg *gentoo.GentooPackage,
+	deps []gentoo.GentooPackage, opts *specs.PortageResolverOpts) ([]gentoo.GentooPackage, error) {
 	ans := []gentoo.GentooPackage{}
 
 	for idx, d := range deps {
@@ -580,7 +585,7 @@ func (r *RepoScanResolver) elaborateConflicts(pkg *gentoo.GentooPackage, deps []
 			p += ":" + deps[idx].Slot
 		}
 
-		_, err := r.GetLastPackage(p)
+		_, err := r.GetLastPackage(p, opts)
 		if err != nil {
 			if r.IsIgnoreMissingDeps() {
 				Warning(
@@ -604,7 +609,7 @@ func (r *RepoScanResolver) elaborateConflicts(pkg *gentoo.GentooPackage, deps []
 	return ans, nil
 }
 
-func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
+func (r *RepoScanResolver) GetLastPackage(pkg string, opts *specs.PortageResolverOpts) (*RepoScanAtom, error) {
 	var last *gentoo.GentooPackage
 	var ans *RepoScanAtom
 	mAtoms := make(map[string]*RepoScanAtom, 0)
@@ -651,7 +656,7 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 			}
 
 			if valid {
-				valid, err = r.PackageIsAdmit(gp, p)
+				valid, err = r.PackageIsAdmit(gp, p, opts)
 				if err != nil {
 					Warning(fmt.Sprintf(
 						"[%s/%s-%s] %s/%s:%s@%s: Package invalid: %s.",
@@ -702,7 +707,7 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 		}
 
 		if valid {
-			valid, err = r.PackageIsAdmit(gp, availableGp)
+			valid, err = r.PackageIsAdmit(gp, availableGp, opts)
 			if err != nil {
 				return nil, err
 			}
@@ -721,7 +726,8 @@ func (r *RepoScanResolver) GetLastPackage(pkg string) (*RepoScanAtom, error) {
 	return ans, nil
 }
 
-func (r *RepoScanResolver) PackageIsAdmit(target, atom *gentoo.GentooPackage) (bool, error) {
+func (r *RepoScanResolver) PackageIsAdmit(target, atom *gentoo.GentooPackage,
+	opts *specs.PortageResolverOpts) (bool, error) {
 	valid, err := target.Admit(atom)
 	if err != nil {
 		return false, err
@@ -756,6 +762,29 @@ func (r *RepoScanResolver) PackageIsAdmit(target, atom *gentoo.GentooPackage) (b
 		} else {
 			DebugC(fmt.Sprintf("[%s] No constraints found.",
 				atom.GetPF()))
+		}
+
+	}
+
+	if len(opts.Conditions) > 0 && valid {
+		for _, cond := range opts.Conditions {
+			p, err := gentoo.ParsePackageStr(cond)
+			if err != nil {
+				return valid, fmt.Errorf("Package %s has invalid condition %s: %s",
+					atom.GetPackageName(), cond, err.Error())
+			}
+
+			ok, err := p.Admit(atom)
+			if err != nil {
+				return valid, fmt.Errorf("Package %s fail on check condition %s: %s",
+					atom.GetPackageName(), cond, err.Error())
+			}
+			if !ok {
+				valid = false
+				DebugC(fmt.Sprintf("[%s] Package not admitted by condition %s",
+					atom.GetPF(), cond))
+				break
+			}
 		}
 
 	}

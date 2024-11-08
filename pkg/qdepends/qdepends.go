@@ -192,7 +192,7 @@ func runQdepends(solution *specs.PortageSolution, runtime bool) error {
 	return nil
 }
 
-func (r *QDependsResolver) Resolve(pkg string, opts specs.PortageResolverOpts) (*specs.PortageSolution, error) {
+func (r *QDependsResolver) Resolve(pkg string, opts *specs.PortageResolverOpts) (*specs.PortageSolution, error) {
 	ans := &specs.PortageSolution{
 		BuildDeps:        make([]gentoo.GentooPackage, 0),
 		RuntimeDeps:      make([]gentoo.GentooPackage, 0),
