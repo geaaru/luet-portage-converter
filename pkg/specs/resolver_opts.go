@@ -4,10 +4,11 @@ See AUTHORS and LICENSE for the license details and contributors.
 */
 package specs
 
-func NewPortageResolverOpts() PortageResolverOpts {
-	return PortageResolverOpts{
+func NewPortageResolverOpts() *PortageResolverOpts {
+	return &PortageResolverOpts{
 		EnableUseFlags:   []string{},
 		DisabledUseFlags: []string{},
+		Conditions:       []string{},
 	}
 }
 
