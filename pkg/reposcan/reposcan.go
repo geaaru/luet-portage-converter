@@ -5,6 +5,7 @@ See AUTHORS and LICENSE for the license details and contributors.
 package reposcan
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -35,8 +36,8 @@ type RepoScanAtom struct {
 	CatPkg   string     `json:"catpkg,omitempty" yaml:"catpkg,omitempty"`
 	Eclasses [][]string `json:"eclasses,omitempty" yaml:"eclasses,omitempty"`
 
-	Kit    string `json:"kit" yaml:"kit"`
-	Branch string `json:"branch" yaml:"branch"`
+	Kit    string `json:"kit,omitempty" yaml:"kit,omitempty"`
+	Branch string `json:"branch,omitempty" yaml:"branch,omitempty"`
 
 	// Relations contains the list of the keys defined on
 	// relations_by_kind. The values could be RDEPEND, DEPEND, BDEPEND
@@ -73,6 +74,14 @@ func (r *RepoScanSpec) Yaml() (string, error) {
 	return string(data), nil
 }
 
+func (r *RepoScanSpec) Json() (string, error) {
+	data, err := json.Marshal(r)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
 func (r *RepoScanAtom) GetPackageName() string {
 	return fmt.Sprintf("%s/%s", r.GetCategory(), r.Package)
 }
@@ -90,6 +99,22 @@ func (r *RepoScanAtom) GetCategory() string {
 	}
 
 	return specs.SanitizeCategory(r.Category, slot)
+}
+
+func (r *RepoScanAtom) Yaml() (string, error) {
+	data, err := yaml.Marshal(r)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func (r *RepoScanAtom) Json() (string, error) {
+	data, err := json.Marshal(r)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
 
 func (r *RepoScanAtom) HasMetadataKey(k string) bool {
@@ -124,6 +149,40 @@ func (r *RepoScanAtom) ToGentooPackage() (*gentoo.GentooPackage, error) {
 	ans.Repository = r.Kit
 
 	return ans, nil
+}
+
+func (r *RepoScanAtom) AddRelations(pkgname string) {
+	isPresent := false
+	for idx := range r.Relations {
+		if r.Relations[idx] == pkgname {
+			isPresent = true
+			break
+		}
+	}
+
+	if !isPresent {
+		r.Relations = append(r.Relations, pkgname)
+	}
+}
+
+func (r *RepoScanAtom) AddRelationsByKind(kind, pkgname string) {
+	isPresent := false
+	list, kindPresent := r.RelationsByKind[kind]
+
+	if kindPresent {
+		for idx := range list {
+			if list[idx] == pkgname {
+				isPresent = true
+				break
+			}
+		}
+	} else {
+		r.RelationsByKind[kind] = []string{}
+	}
+
+	if !isPresent {
+		r.RelationsByKind[kind] = append(r.RelationsByKind[kind], pkgname)
+	}
 }
 
 func (r *RepoScanAtom) GetRuntimeDeps() ([]gentoo.GentooPackage, error) {
