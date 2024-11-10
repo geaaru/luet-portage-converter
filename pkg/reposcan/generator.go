@@ -566,16 +566,16 @@ func (r *RepoScanGenerator) addAtom(spec *RepoScanSpec, atom *RepoScanAtom) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
-	specs.Atoms[atom.Atom] = *atom
+	spec.Atoms[atom.Atom] = *atom
 	r.Counter++
 }
 
-func (r *RepoScanGenerator) addAtomError(specs *RepoScanSpec,
+func (r *RepoScanGenerator) addAtomError(spec *RepoScanSpec,
 	atom *RepoScanAtom, astr string) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
-	specs.MetadataErrors[astr] = *atom
+	spec.MetadataErrors[astr] = *atom
 	r.Errors++
 }
 
