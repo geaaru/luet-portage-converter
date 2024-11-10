@@ -76,6 +76,7 @@ func Execute() {
 	rootCmd.AddCommand(
 		newGenerateCommand(),
 		newReposcanResolveCommand(),
+		newReposcanMetadataCommand(),
 		newSyncCommand(),
 		newPortageCommand(),
 	)
