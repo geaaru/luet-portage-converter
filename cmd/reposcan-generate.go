@@ -74,7 +74,8 @@ func newReposcanGenerateCommand() *cobra.Command {
 			if output == "yaml" || output == "json" {
 				fmt.Println(out)
 			} else {
-				fmt.Println(fmt.Sprintf("File %s written with %d packages.", file, generator.Counter))
+				fmt.Println(fmt.Sprintf("File %s written with %d packages and %d errors.",
+					file, generator.Counter, generator.Errors))
 			}
 		},
 	}

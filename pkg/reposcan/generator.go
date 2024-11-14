@@ -199,6 +199,7 @@ func (r *RepoScanGenerator) ProcessKit(kit, branch, path string) (*RepoScanSpec,
 	ans := &RepoScanSpec{
 		CacheDataVersion: CacheDataVersion,
 		Atoms:            make(map[string]RepoScanAtom, 0),
+		MetadataErrors:   make(map[string]RepoScanAtom, 0),
 		File:             "",
 	}
 
@@ -573,14 +574,12 @@ func (r *RepoScanGenerator) GetEbuildMetadata(
 
 	err = cmd.Start()
 	if err != nil {
-		fmt.Println("Error on start command: " + err.Error())
-		return ans, err
+		return ans, fmt.Errorf("error on start command: %s", err.Error())
 	}
 
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Println("Error on waiting command: " + err.Error())
-		return ans, err
+		return ans, fmt.Errorf("%s: %s", err.Error(), errBuffer.String())
 	}
 
 	res := cmd.ProcessState.ExitCode()
