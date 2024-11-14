@@ -7,6 +7,7 @@ package reposcan
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
@@ -80,6 +81,17 @@ func (r *RepoScanSpec) Json() (string, error) {
 		return "", err
 	}
 	return string(data), nil
+}
+
+func (r *RepoScanSpec) WriteJsonFile(f string) error {
+	// TODO: Check if using writer from json marshal
+	//       could be better
+	data, err := json.Marshal(r)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(f, data, 0644)
 }
 
 func (r *RepoScanAtom) GetPackageName() string {

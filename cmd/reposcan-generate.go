@@ -7,8 +7,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
+	"runtime"
 
 	"github.com/macaroni-os/anise-portage-converter/pkg/reposcan"
 
@@ -17,20 +16,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newReposcanMetadataCommand() *cobra.Command {
+func newReposcanGenerateCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "reposcan-metadata [ebuild]",
-		Aliases: []string{"rm"},
-		Short:   "Parse an ebuild and get metadata in reposcan mode.",
+		Use:     "reposcan-generate [kit-path]",
+		Aliases: []string{"rg"},
+		Short:   "Generate the reposcan JSON file of a specific kit.",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if len(args) != 1 {
-				fmt.Println("Invalid argument. Only one ebuild admitted.")
-				os.Exit(1)
-			}
-
-			ebuildFile := args[0]
-			if filepath.Ext(ebuildFile) != ".ebuild" {
-				fmt.Println("File hasn't .ebuild extension:", filepath.Ext(ebuildFile))
+				fmt.Println("Invalid argument. Only one kit admitted.")
 				os.Exit(1)
 			}
 		},
@@ -40,29 +33,26 @@ func newReposcanMetadataCommand() *cobra.Command {
 			output, _ := cmd.Flags().GetString("output")
 			kit, _ := cmd.Flags().GetString("kit")
 			branch, _ := cmd.Flags().GetString("branch")
+			file, _ := cmd.Flags().GetString("file")
+			concurrency, _ := cmd.Flags().GetInt("concurrency")
+
+			if concurrency < 1 {
+				concurrency = 1
+			}
+			if file == "" {
+				file = fmt.Sprintf("%s-%s", kit, branch)
+			}
 
 			generator := reposcan.NewRepoScanGenerator(portageBinPath)
+			generator.SetConcurrency(concurrency)
 
-			ebuildFile := args[0]
+			kitPath := args[0]
 
 			for _, ed := range eclassDirs {
 				generator.AddEclassesPath(ed)
 			}
 
-			// Retrieve category and package name
-			basedir := filepath.Dir(ebuildFile)
-			fragDir := strings.Split(basedir, "/")
-			if len(fragDir) < 3 {
-				fmt.Println("The supplied path doesn't respect Portage tree!")
-				os.Exit(1)
-			}
-
-			ans, err := generator.ParseAtom(ebuildFile,
-				fragDir[len(fragDir)-2],
-				fragDir[len(fragDir)-1],
-				kit,    // kit
-				branch, // branch
-			)
+			ans, err := generator.ProcessKit(kit, branch, kitPath)
 			if err != nil {
 				Fatal(err.Error())
 			}
@@ -75,13 +65,17 @@ func newReposcanMetadataCommand() *cobra.Command {
 			case "json":
 				out, err = ans.Json()
 			default:
-				out = fmt.Sprintf("%v", ans)
+				err = ans.WriteJsonFile(file)
 			}
 
 			if err != nil {
 				Fatal(err.Error())
 			}
-			fmt.Println(out)
+			if output == "yaml" || output == "json" {
+				fmt.Println(out)
+			} else {
+				fmt.Println(fmt.Sprintf("File %s written with %d packages.", file, generator.Counter))
+			}
 		},
 	}
 
@@ -89,9 +83,11 @@ func newReposcanMetadataCommand() *cobra.Command {
 		"Set the eclass directories to use (The path is without eclass/ subdirectory).")
 	cmd.Flags().String("portage-binpath", "/usr/lib/portage/python3.9",
 		"Override default portage path and python version.")
-	cmd.Flags().StringP("output", "o", "json", "Output mode: yaml|json|terminal")
+	cmd.Flags().StringP("output", "o", "json", "Output mode: json|yaml|file")
+	cmd.Flags().StringP("file", "f", "", "Write kit cache file.")
 	cmd.Flags().String("branch", "", "Define optionally the branch of the kit used.")
 	cmd.Flags().String("kit", "", "Define optionally the name of the kit used.")
+	cmd.Flags().Int("concurrency", runtime.NumCPU(), "Override concurrency elaboration option.")
 
 	return cmd
 }

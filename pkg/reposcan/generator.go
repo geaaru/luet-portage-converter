@@ -6,6 +6,7 @@ package reposcan
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"fmt"
 	"os"
@@ -17,6 +18,8 @@ import (
 	helpers "github.com/MottainaiCI/lxd-compose/pkg/helpers"
 	. "github.com/geaaru/luet/pkg/logger"
 	gentoo "github.com/geaaru/pkgs-checker/pkg/gentoo"
+
+	"golang.org/x/sync/semaphore"
 )
 
 var (
@@ -55,8 +58,18 @@ type RepoScanGenerator struct {
 	Counter int `json:"counter" yaml:"counter"`
 	Errors  int `json:"errors" yaml:"errors"`
 
-	EclassesHashMap map[string]string `json:"-" yaml:"-"`
-	mutex           sync.Mutex        `json:"-" yaml:"-"`
+	Concurrency int `json:"-" yaml:"-"`
+
+	EclassesHashMap map[string]string   `json:"-" yaml:"-"`
+	mutex           sync.Mutex          `json:"-" yaml:"-"`
+	semaphore       *semaphore.Weighted `json:"-" yaml:"-"`
+	waitGroup       *sync.WaitGroup     `json:"-" yaml:"-"`
+	ctx             context.Context     `json:"-" yaml:"-"`
+}
+
+type ChannelGenerateRes struct {
+	Pkgdir string
+	Error  error
 }
 
 func NewRepoScanGenerator(portage_bpath string) *RepoScanGenerator {
@@ -75,6 +88,9 @@ func NewRepoScanGenerator(portage_bpath string) *RepoScanGenerator {
 		},
 	}
 }
+
+func (r *RepoScanGenerator) SetConcurrency(c int) { r.Concurrency = c }
+func (r *RepoScanGenerator) GetConcurrency() int  { return r.Concurrency }
 
 func (r *RepoScanGenerator) GetEclassHash(fpath string) string {
 	ans := ""
@@ -98,7 +114,6 @@ func (r *RepoScanGenerator) loadEclassesMap(eclassDir string) error {
 
 	for _, file := range files {
 		if !strings.HasSuffix(file.Name(), ".eclass") {
-			// TODO: Process Manifest
 			continue
 		}
 
@@ -178,7 +193,6 @@ func (r *RepoScanGenerator) getUsedEclass(ebuildPath, eclassName string) (string
 	}
 
 	return ans, nil
-
 }
 
 func (r *RepoScanGenerator) ProcessKit(kit, branch, path string) (*RepoScanSpec, error) {
@@ -187,6 +201,15 @@ func (r *RepoScanGenerator) ProcessKit(kit, branch, path string) (*RepoScanSpec,
 		Atoms:            make(map[string]RepoScanAtom, 0),
 		File:             "",
 	}
+
+	r.semaphore = semaphore.NewWeighted(int64(r.Concurrency))
+	r.waitGroup = &sync.WaitGroup{}
+	r.ctx = context.TODO()
+
+	var ch chan ChannelGenerateRes = make(
+		chan ChannelGenerateRes,
+		r.Concurrency,
+	)
 
 	dirEntries, err := os.ReadDir(path)
 	if err != nil {
@@ -199,13 +222,17 @@ func (r *RepoScanGenerator) ProcessKit(kit, branch, path string) (*RepoScanSpec,
 		r.AddEclassesPath(path)
 	}
 
-	// TODO: Execute this in parallel
-
+	nPkgs := 0
 	// Iterate over every category directory
 	for _, cat := range dirEntries {
 
 		if !cat.IsDir() || cat.Name() == "eclass" ||
 			cat.Name() == "profiles" || cat.Name() == "licenses" {
+			continue
+		}
+
+		// Ignoring git directory
+		if strings.HasPrefix(cat.Name(), ".") {
 			continue
 		}
 
@@ -221,8 +248,11 @@ func (r *RepoScanGenerator) ProcessKit(kit, branch, path string) (*RepoScanSpec,
 				continue
 			}
 
-			err = r.processPackageDir(filepath.Join(path, cat.Name(), pkg.Name()),
-				cat.Name(), pkg.Name(), ans, kit, branch)
+			r.waitGroup.Add(1)
+			nPkgs++
+
+			go r.processPackageDir(filepath.Join(path, cat.Name(), pkg.Name()),
+				cat.Name(), pkg.Name(), ans, kit, branch, ch)
 			if err != nil {
 				return ans, fmt.Errorf("Error on process package %s: %s", pkg, err.Error())
 			}
@@ -230,195 +260,70 @@ func (r *RepoScanGenerator) ProcessKit(kit, branch, path string) (*RepoScanSpec,
 
 	}
 
-	return ans, nil
-}
+	//fmt.Println("Elaborating", nPkgs, "...")
 
-func (r *RepoScanGenerator) ParseAtom(ebuildFile, cat, pkg, kit, branch string) (*RepoScanAtom, error) {
-	ans := &RepoScanAtom{}
-
-	var manifest *ManifestFile
-	var err error
-	mfile := filepath.Join(filepath.Dir(ebuildFile), "Manifest")
-
-	// The data available on Manifest file are needed to
-	// popolate the RepoScanAtom, so I need to parse it before
-	// the other if the file exists.
-	if helpers.Exists(mfile) {
-		manifest, err = ParseManifest(mfile)
-		if err != nil {
-			return ans, fmt.Errorf("error on parse manifest file %s: %s",
-				mfile, err.Error())
-		}
-	}
-
-	fileName := filepath.Base(ebuildFile)
-	pnpv := strings.ReplaceAll(fileName, ".ebuild", "")
-	m, err := r.GetEbuildMetadata(ebuildFile, manifest)
-	if err != nil {
-		return ans, fmt.Errorf("error on parse ebuild file %s: %s",
-			ebuildFile, err.Error())
-	}
-
-	// Retrieve ebuild md5
-	content, err := os.ReadFile(ebuildFile)
-	if err != nil {
-		return ans, fmt.Errorf("error on parse file %s: %s",
-			ebuildFile, err.Error())
-	}
-
-	ans.Kit = kit
-	ans.Branch = branch
-	ans.Atom = fmt.Sprintf("%s/%s", cat, pnpv)
-	ans.CatPkg = fmt.Sprintf("%s/%s", cat, pkg)
-	ans.Package = pkg
-	ans.Category = cat
-	ans.Metadata = m
-	if manifest != nil {
-		ans.ManifestMd5 = manifest.Md5
-	}
-	ans.Md5 = fmt.Sprintf("%x", md5.Sum(content))
-
-	g, err := gentoo.ParsePackageStr(ans.Atom)
-	if err != nil {
-		return ans, fmt.Errorf("error on parse package string %s: %s",
-			ans.Atom, err.Error())
-	}
-	if strings.HasPrefix(g.VersionSuffix, "-r") {
-		ans.Revision = g.VersionSuffix[2:]
-	} else {
-		ans.Revision = "0"
-	}
-
-	val, _ := m["INHERITED"]
-	if val != "" {
-		eclasses := strings.Split(val, " ")
-		for _, e := range eclasses {
-
-			eclassPath, err := r.getUsedEclass(ebuildFile, e)
-			if err != nil {
-				Warning(fmt.Sprintf("[%s] Error on resolve eclass %s: %s",
-					ans.Atom, e, err.Error()))
-				continue
-			}
-
-			hash := r.GetEclassHash(eclassPath)
-
-			// For now I ignoring eclass hashes
-			ans.Eclasses = append(ans.Eclasses,
-				[]string{e, hash})
-
-		}
-	}
-
-	ans.MetadataOut = m["METADATA_OUT"]
-	delete(ans.Metadata, "METADATA_OUT")
-
-	ans.Files, err = manifest.GetFiles(m["SRC_URI"])
-	if err != nil {
-		Warning(fmt.Sprintf("[%s] error on package manifest files: %s",
-			ans.Atom, err.Error()))
-	}
-
-	ans.Relations = []string{}
-	ans.RelationsByKind = make(map[string][]string, 0)
-
-	// Try to populate relations and relations_by_kind
-	if depsStr, present := m["BDEPEND"]; present {
-		if strings.TrimSpace(depsStr) != "" {
-			err := r.retrieveRelations("BDEPEND", depsStr, ans)
-			if err != nil {
-				Warning(fmt.Sprintf("[%s] error on parse dependendies %s: %s",
-					ans.Atom, "BDEPEND", err.Error()))
+	if nPkgs > 0 {
+		for i := 0; i < nPkgs; i++ {
+			resp := <-ch
+			if resp.Error != nil {
+				Error(fmt.Sprintf(
+					"On package dir %s: %s", resp.Pkgdir, resp.Error))
 			}
 		}
-	}
-
-	if depsStr, present := m["RDEPEND"]; present {
-		if strings.TrimSpace(depsStr) != "" {
-			err := r.retrieveRelations("RDEPEND", depsStr, ans)
-			if err != nil {
-				Warning(fmt.Sprintf("[%s] error on parse dependendies %s: %s",
-					ans.Atom, "RDEPEND", err.Error()))
-			}
-		}
-	}
-
-	if depsStr, present := m["DEPEND"]; present {
-		if strings.TrimSpace(depsStr) != "" {
-			err := r.retrieveRelations("DEPEND", depsStr, ans)
-			if err != nil {
-				Warning(fmt.Sprintf("[%s] error on parse dependendies %s: %s",
-					ans.Atom, "DEPEND", err.Error()))
-			}
-		}
-	}
-
-	if depsStr, present := m["PDEPEND"]; present {
-		if strings.TrimSpace(depsStr) != "" {
-			err := r.retrieveRelations("PDEPEND", depsStr, ans)
-			if err != nil {
-				Warning(fmt.Sprintf("[%s] error on parse dependendies %s: %s",
-					ans.Atom, "PDEPEND", err.Error()))
-			}
-		}
+		r.waitGroup.Wait()
 	}
 
 	return ans, nil
-}
-
-func (r *RepoScanGenerator) retrieveRelations(rtype string, depsStr string, atom *RepoScanAtom) error {
-
-	deps, err := ParseDependencies(depsStr)
-	if err != nil {
-		return err
-	}
-
-	for _, du := range deps.Dependencies {
-
-		if du.Dep != nil {
-			if du.Dep.Condition == gentoo.PkgCondNot {
-				continue
-			}
-
-			atom.AddRelations(du.Dep.GetPackageName())
-			atom.AddRelationsByKind(rtype, du.Dep.GetPackageName())
-		}
-
-		depsList := du.GetDepsList()
-		for _, d := range depsList {
-			if d.Dep.Condition == gentoo.PkgCondNot {
-				continue
-			}
-
-			atom.AddRelations(d.Dep.GetPackageName())
-			atom.AddRelationsByKind(rtype, d.Dep.GetPackageName())
-		}
-	}
-
-	return nil
 }
 
 func (r *RepoScanGenerator) processPackageDir(path, cat, pkg string,
-	spec *RepoScanSpec, kit, branch string) error {
+	spec *RepoScanSpec, kit, branch string, ch chan ChannelGenerateRes) {
 
 	var manifest *ManifestFile
 	var err error
 	mfile := filepath.Join(path, "Manifest")
 
+	//fmt.Println("Elaborating package dir", path)
+
+	defer r.waitGroup.Done()
+	err = r.semaphore.Acquire(r.ctx, 1)
+	if err != nil {
+		ch <- ChannelGenerateRes{
+			Error:  err,
+			Pkgdir: path,
+		}
+		return
+	}
+	defer r.semaphore.Release(1)
+
+	//fmt.Println("Elaborating package ", pkg)
+
 	// The data available on Manifest file are needed to
 	// popolate the RepoScanAtom, so I need to parse it before
 	// the other if the file exists.
 	if helpers.Exists(mfile) {
 		manifest, err = ParseManifest(mfile)
 		if err != nil {
-			return err
+			ch <- ChannelGenerateRes{
+				Error:  err,
+				Pkgdir: path,
+			}
+			return
 		}
 	}
 
 	files, err := os.ReadDir(path)
+	if err != nil {
+		ch <- ChannelGenerateRes{
+			Error:  err,
+			Pkgdir: path,
+		}
+		return
+	}
+
 	for _, file := range files {
 		if file.Name() == "Manifest" {
-			// TODO: Process Manifest
+			// Manifest is already been processed.
 			continue
 		}
 
@@ -559,6 +464,42 @@ func (r *RepoScanGenerator) processPackageDir(path, cat, pkg string,
 		}
 	}
 
+	ch <- ChannelGenerateRes{
+		Error:  nil,
+		Pkgdir: path,
+	}
+	return
+}
+
+func (r *RepoScanGenerator) retrieveRelations(rtype string, depsStr string, atom *RepoScanAtom) error {
+
+	deps, err := ParseDependencies(depsStr)
+	if err != nil {
+		return err
+	}
+
+	for _, du := range deps.Dependencies {
+
+		if du.Dep != nil {
+			if du.Dep.Condition == gentoo.PkgCondNot {
+				continue
+			}
+
+			atom.AddRelations(du.Dep.GetPackageName())
+			atom.AddRelationsByKind(rtype, du.Dep.GetPackageName())
+		}
+
+		depsList := du.GetDepsList()
+		for _, d := range depsList {
+			if d.Dep.Condition == gentoo.PkgCondNot {
+				continue
+			}
+
+			atom.AddRelations(d.Dep.GetPackageName())
+			atom.AddRelationsByKind(rtype, d.Dep.GetPackageName())
+		}
+	}
+
 	return nil
 }
 
@@ -659,6 +600,139 @@ func (r *RepoScanGenerator) GetEbuildMetadata(
 		ans[k] = lines[idx]
 	}
 	ans["METADATA_OUT"] = outBuffer.String()
+
+	return ans, nil
+}
+
+func (r *RepoScanGenerator) ParseAtom(ebuildFile, cat, pkg, kit, branch string) (*RepoScanAtom, error) {
+	ans := &RepoScanAtom{}
+
+	var manifest *ManifestFile
+	var err error
+	mfile := filepath.Join(filepath.Dir(ebuildFile), "Manifest")
+
+	// The data available on Manifest file are needed to
+	// popolate the RepoScanAtom, so I need to parse it before
+	// the other if the file exists.
+	if helpers.Exists(mfile) {
+		manifest, err = ParseManifest(mfile)
+		if err != nil {
+			return ans, fmt.Errorf("error on parse manifest file %s: %s",
+				mfile, err.Error())
+		}
+	}
+
+	fileName := filepath.Base(ebuildFile)
+	pnpv := strings.ReplaceAll(fileName, ".ebuild", "")
+	m, err := r.GetEbuildMetadata(ebuildFile, manifest)
+	if err != nil {
+		return ans, fmt.Errorf("error on parse ebuild file %s: %s",
+			ebuildFile, err.Error())
+	}
+
+	// Retrieve ebuild md5
+	content, err := os.ReadFile(ebuildFile)
+	if err != nil {
+		return ans, fmt.Errorf("error on parse file %s: %s",
+			ebuildFile, err.Error())
+	}
+
+	ans.Kit = kit
+	ans.Branch = branch
+	ans.Atom = fmt.Sprintf("%s/%s", cat, pnpv)
+	ans.CatPkg = fmt.Sprintf("%s/%s", cat, pkg)
+	ans.Package = pkg
+	ans.Category = cat
+	ans.Metadata = m
+	if manifest != nil {
+		ans.ManifestMd5 = manifest.Md5
+	}
+	ans.Md5 = fmt.Sprintf("%x", md5.Sum(content))
+
+	g, err := gentoo.ParsePackageStr(ans.Atom)
+	if err != nil {
+		return ans, fmt.Errorf("error on parse package string %s: %s",
+			ans.Atom, err.Error())
+	}
+	if strings.HasPrefix(g.VersionSuffix, "-r") {
+		ans.Revision = g.VersionSuffix[2:]
+	} else {
+		ans.Revision = "0"
+	}
+
+	val, _ := m["INHERITED"]
+	if val != "" {
+		eclasses := strings.Split(val, " ")
+		for _, e := range eclasses {
+
+			eclassPath, err := r.getUsedEclass(ebuildFile, e)
+			if err != nil {
+				Warning(fmt.Sprintf("[%s] Error on resolve eclass %s: %s",
+					ans.Atom, e, err.Error()))
+				continue
+			}
+
+			hash := r.GetEclassHash(eclassPath)
+
+			// For now I ignoring eclass hashes
+			ans.Eclasses = append(ans.Eclasses,
+				[]string{e, hash})
+
+		}
+	}
+
+	ans.MetadataOut = m["METADATA_OUT"]
+	delete(ans.Metadata, "METADATA_OUT")
+
+	ans.Files, err = manifest.GetFiles(m["SRC_URI"])
+	if err != nil {
+		Warning(fmt.Sprintf("[%s] error on package manifest files: %s",
+			ans.Atom, err.Error()))
+	}
+
+	ans.Relations = []string{}
+	ans.RelationsByKind = make(map[string][]string, 0)
+
+	// Try to populate relations and relations_by_kind
+	if depsStr, present := m["BDEPEND"]; present {
+		if strings.TrimSpace(depsStr) != "" {
+			err := r.retrieveRelations("BDEPEND", depsStr, ans)
+			if err != nil {
+				Warning(fmt.Sprintf("[%s] error on parse dependendies %s: %s",
+					ans.Atom, "BDEPEND", err.Error()))
+			}
+		}
+	}
+
+	if depsStr, present := m["RDEPEND"]; present {
+		if strings.TrimSpace(depsStr) != "" {
+			err := r.retrieveRelations("RDEPEND", depsStr, ans)
+			if err != nil {
+				Warning(fmt.Sprintf("[%s] error on parse dependendies %s: %s",
+					ans.Atom, "RDEPEND", err.Error()))
+			}
+		}
+	}
+
+	if depsStr, present := m["DEPEND"]; present {
+		if strings.TrimSpace(depsStr) != "" {
+			err := r.retrieveRelations("DEPEND", depsStr, ans)
+			if err != nil {
+				Warning(fmt.Sprintf("[%s] error on parse dependendies %s: %s",
+					ans.Atom, "DEPEND", err.Error()))
+			}
+		}
+	}
+
+	if depsStr, present := m["PDEPEND"]; present {
+		if strings.TrimSpace(depsStr) != "" {
+			err := r.retrieveRelations("PDEPEND", depsStr, ans)
+			if err != nil {
+				Warning(fmt.Sprintf("[%s] error on parse dependendies %s: %s",
+					ans.Atom, "PDEPEND", err.Error()))
+			}
+		}
+	}
 
 	return ans, nil
 }
