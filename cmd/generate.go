@@ -125,5 +125,15 @@ func newGenerateCommand() *cobra.Command {
 	cmd.Flags().Bool("skip-rdeps-generation", false,
 		"Skip the generation of the runtime dependencies specs.")
 	cmd.Flags().Bool("allow-empty-keywords", false, "Override spec option to allow empty KEYWORDS.")
+
+	cmd.Flags().StringArrayP("tree", "t", []string{}, "Path of the tree to use.")
+	cmd.Flags().String("rules", "", "Rules file.")
+	cmd.Flags().String("backend", "reposcan", "Select backend resolver: qdepends|reposcan.")
+	cmd.Flags().Bool("disable-stage2", false, "Disable stage2 phase.")
+	cmd.Flags().Bool("disable-stage3", false, "Disable stage3 phase.")
+	cmd.Flags().Bool("enable-stage4", false, "Enable experimental stage4 phase.")
+	cmd.Flags().StringArray("reposcan-files", []string{}, "Append additional reposcan files. Only for reposcan backend.")
+	cmd.Flags().StringArray("disable-use-flag", []string{}, "Append additional use flags to disable.")
+	cmd.Flags().Bool("ignore-missing-deps", false, "Ignore missing deps on resolver.")
 	return cmd
 }

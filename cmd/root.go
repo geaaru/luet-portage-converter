@@ -62,17 +62,6 @@ func Execute() {
 
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Enable debug verbosity.")
 
-	// TODO: move these flags over specific commands
-	rootCmd.PersistentFlags().StringArrayP("tree", "t", []string{}, "Path of the tree to use.")
-	rootCmd.PersistentFlags().String("rules", "", "Rules file.")
-	rootCmd.PersistentFlags().String("backend", "reposcan", "Select backend resolver: qdepends|reposcan.")
-	rootCmd.PersistentFlags().Bool("disable-stage2", false, "Disable stage2 phase.")
-	rootCmd.PersistentFlags().Bool("disable-stage3", false, "Disable stage3 phase.")
-	rootCmd.PersistentFlags().Bool("enable-stage4", false, "Enable experimental stage4 phase.")
-	rootCmd.PersistentFlags().StringArray("reposcan-files", []string{}, "Append additional reposcan files. Only for reposcan backend.")
-	rootCmd.PersistentFlags().StringArray("disable-use-flag", []string{}, "Append additional use flags to disable.")
-	rootCmd.PersistentFlags().Bool("ignore-missing-deps", false, "Ignore missing deps on resolver.")
-
 	rootCmd.AddCommand(
 		newGenerateCommand(),
 		newReposcanResolveCommand(),
