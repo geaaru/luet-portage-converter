@@ -410,10 +410,12 @@ func (r *RepoScanGenerator) processPackageDir(path, cat, pkg string,
 			ra.MetadataOut = m["METADATA_OUT"]
 			delete(ra.Metadata, "METADATA_OUT")
 
-			ra.Files, err = manifest.GetFiles(m["SRC_URI"])
-			if err != nil {
-				Warning(fmt.Sprintf("[%s] error on package manifest files: %s",
-					ra.Atom, err.Error()))
+			if manifest != nil {
+				ra.Files, err = manifest.GetFiles(m["SRC_URI"])
+				if err != nil {
+					Warning(fmt.Sprintf("[%s] error on package manifest files: %s",
+						ra.Atom, err.Error()))
+				}
 			}
 
 			// Try to populate relations and relations_by_kind
