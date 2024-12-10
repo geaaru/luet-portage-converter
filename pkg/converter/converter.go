@@ -365,11 +365,13 @@ func (pc *PortageConverter) createSolution(pkg, treePath string, stack []string,
 			// If the artefact contains a custom path I need to check if the
 			// path is the same
 			if artefact.CustomPath != "" {
-				if luetPkgTree.GetPath() != pkgDir {
-					DebugC(fmt.Sprintf("[%s-%s] package %s skipped because doesn't match with custom path.",
+				pkgDirAbs, _ := filepath.Abs(pkgDir)
+				if luetPkgTree.GetPath() != pkgDirAbs {
+					DebugC(fmt.Sprintf("[%s-%s] package %s skipped because doesn't match with custom path (%s != %s).",
 						solution.Package.GetPackageName(),
 						solution.Package.GetPVR(),
 						luetPkgTree.HumanReadableString(),
+						luetPkgTree.GetPath(), pkgDirAbs,
 					))
 					continue
 				}
