@@ -22,7 +22,7 @@ const (
 
 Portage/Overlay bridge for Macaroni OS Sambuca stack.`
 
-	version = "0.16.1"
+	version = "0.16.2"
 )
 
 func initConfig() error {
