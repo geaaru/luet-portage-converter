@@ -7,9 +7,9 @@ toolchain go1.22.5
 require (
 	github.com/MottainaiCI/lxd-compose v0.26.1
 	github.com/geaaru/luet v0.34.2-geaaru
-	github.com/geaaru/pkgs-checker v0.14.3
+	github.com/geaaru/pkgs-checker v0.14.4
 	github.com/onsi/ginkgo/v2 v2.22.1
-	github.com/onsi/gomega v1.36.1
+	github.com/onsi/gomega v1.36.2
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/sync v0.10.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -167,7 +167,7 @@ require (
 	google.golang.org/genproto v0.0.0-20240213162025-012b6fc9bca9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240314234333-6e1732d8331c // indirect
 	google.golang.org/grpc v1.62.1 // indirect
-	google.golang.org/protobuf v1.35.1 // indirect
+	google.golang.org/protobuf v1.36.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

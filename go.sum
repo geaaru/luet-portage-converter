@@ -406,6 +406,8 @@ github.com/geaaru/pkgs-checker v0.14.2 h1:VHBB7K/Xkgt2GI99s/2akmS0kRjhm/Sn63Xzaq
 github.com/geaaru/pkgs-checker v0.14.2/go.mod h1:ljH87nt3uAbFDvWFlUO6us5+1E2W3K+x3gfdfVSbbu4=
 github.com/geaaru/pkgs-checker v0.14.3 h1:hTdc0wm8e40Raq/SC667oUPm6XFtyq6FB0ioBwm5Lyw=
 github.com/geaaru/pkgs-checker v0.14.3/go.mod h1:mhr3OMZvp6nI9vOvttkUhvD+VviTNIh3BKesJMw0nns=
+github.com/geaaru/pkgs-checker v0.14.4 h1:OhVWgU6m9z9fgLEygoz8bqfr1EH6N95KffRNBrO78lQ=
+github.com/geaaru/pkgs-checker v0.14.4/go.mod h1:UlA+LHWdqH03ZXiSGMS15GU79tbEINFZ3JJDakuSkbM=
 github.com/geaaru/tar-formers v0.8.0 h1:TyT0314fkZayTlG1D+w6Ir3WgPAwZDP4ETglmF2XKPU=
 github.com/geaaru/tar-formers v0.8.0/go.mod h1:bVs94+J3CxqheTcMNCyfBcpfG2CF5sO991ZHL/J6B7E=
 github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
@@ -887,6 +889,8 @@ github.com/onsi/gomega v1.35.1 h1:Cwbd75ZBPxFSuZ6T+rN/WCb/gOc6YgFBXLlZLhC7Ds4=
 github.com/onsi/gomega v1.35.1/go.mod h1:PvZbdDc8J6XJEpDK4HCuRBm8a6Fzp9/DmhC9C7yFlog=
 github.com/onsi/gomega v1.36.1 h1:bJDPBO7ibjxcbHMgSCoo4Yj18UWbKDlLwX1x9sybDcw=
 github.com/onsi/gomega v1.36.1/go.mod h1:PvZbdDc8J6XJEpDK4HCuRBm8a6Fzp9/DmhC9C7yFlog=
+github.com/onsi/gomega v1.36.2 h1:koNYke6TVk6ZmnyHrCXba/T/MoLBXFjeC1PtvYgw0A8=
+github.com/onsi/gomega v1.36.2/go.mod h1:DdwyADRjrc825LhMEkD76cHR5+pUnjhUN8GlHlRPHzY=
 github.com/openSUSE/umoci v0.1.1-0.20191030112807-c0dd46ae078f h1:G9hyzNrFbTgp9KEoGRcNYxAT41lo7hDy9oxXT1Y7WHI=
 github.com/openSUSE/umoci v0.1.1-0.20191030112807-c0dd46ae078f/go.mod h1:3p4KA5nwyY65lVmQZxv7tm0YEylJ+t1fY91ORsVXv58=
 github.com/opencontainers/go-digest v0.0.0-20170106003457-a6d0ee40d420/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=
@@ -1822,6 +1826,8 @@ google.golang.org/protobuf v1.34.1 h1:9ddQBjfCyZPOHPUiPxpYESBLc+T8P3E+Vo4IbKZgFW
 google.golang.org/protobuf v1.34.1/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
 google.golang.org/protobuf v1.35.1 h1:m3LfL6/Ca+fqnjnlqQXNpFPABW1UD7mjh8KO2mKFytA=
 google.golang.org/protobuf v1.35.1/go.mod h1:9fA7Ob0pmnwhb644+1+CVWFRbNajQ6iRojtC/QF5bRE=
+google.golang.org/protobuf v1.36.1 h1:yBPeRvTftaleIgM3PZ/WBIZ7XM/eEYAaEyCwvyjq/gk=
+google.golang.org/protobuf v1.36.1/go.mod h1:9fA7Ob0pmnwhb644+1+CVWFRbNajQ6iRojtC/QF5bRE=
 gopkg.in/airbrake/gobrake.v2 v2.0.9/go.mod h1:/h5ZAUhDkGaJfjzjKLSjv6zCL6O0LLBxU4K+aSYdM/U=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
 gopkg.in/cenkalti/backoff.v2 v2.2.1 h1:eJ9UAg01/HIHG987TwxvnzK2MgxXq97YY6rYDpY9aII=

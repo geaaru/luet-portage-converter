@@ -193,7 +193,7 @@ func (p *GentooPackage) GetPV() (ans string) {
 	// Basically, everything but -r1, -r2 etc. are in ${PV}.
 
 	if p.VersionSuffix != "" {
-		if strings.Index(p.VersionSuffix, "-r") > 0 {
+		if strings.Index(p.VersionSuffix, "-r") >= 0 {
 			ans = fmt.Sprintf("%s%s", p.Version, strings.Split(p.VersionSuffix, "-r")[0])
 		} else {
 			ans = fmt.Sprintf("%s%s", p.Version, p.VersionSuffix)
