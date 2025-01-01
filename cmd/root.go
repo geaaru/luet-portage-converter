@@ -18,11 +18,11 @@ import (
 )
 
 const (
-	cliName = `Copyright (c) 2020-2024 - Daniele Rondina
+	cliName = `Copyright (c) 2020-2025 - Daniele Rondina
 
 Portage/Overlay bridge for Macaroni OS Sambuca stack.`
 
-	version = "0.16.2"
+	version = "0.16.3"
 )
 
 func initConfig() error {
